@@ -1,0 +1,9 @@
+# Test data
+data/*
+notes/*
+
+# Intellij
+.idea/
+*.iml
+*.iws
+out/*
