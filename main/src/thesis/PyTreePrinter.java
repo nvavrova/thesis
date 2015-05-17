@@ -1,13 +1,15 @@
+package thesis;
+
 import org.python.antlr.PythonTree;
 
 /**
  * Created by Nik on 08-05-2015
  */
-public class PythonTreePrinter {
+public class PyTreePrinter {
 
 	private final PythonTree tree;
 
-	public PythonTreePrinter(PythonTree tree) {
+	public PyTreePrinter(PythonTree tree) {
 		this.tree = tree;
 	}
 
@@ -17,16 +19,16 @@ public class PythonTreePrinter {
 
 	private String getPrettyString(PythonTree treeNode, int indent) {
 		StringBuilder sb = new StringBuilder();
-		for (int i=0; i <= indent; i++) {
+		for (int i = 0; i < indent; i++) {
 			sb.append("\t");
 		}
 		sb.append(treeNode.getText());
 		sb.append(": ");
-		sb.append(treeNode);
+		sb.append(treeNode.toString());
 		sb.append("\n");
 
 		if (treeNode.getChildCount() > 0) {
-			int childIndent = indent+1;
+			int childIndent = indent + 1;
 			for (PythonTree child : treeNode.getChildren()) {
 				sb.append(this.getPrettyString(child, childIndent));
 			}
