@@ -54,16 +54,16 @@ public class DependencyGraph implements Iterable<String> {
 
 		currentPath.push(className);
 
+		if (unresolved.contains(className)) {
+			unresolved.remove(className);
+			resolved.add(className);
+		}
+
 		for (String dependency : dependencies) {
 			if (currentPath.contains(dependency)) {
 				return true;
 			}
 			this.classContainsCycles(dependency, currentPath, resolved, unresolved);
-		}
-
-		if (unresolved.contains(className)) {
-			unresolved.remove(className);
-			resolved.add(className);
 		}
 
 		currentPath.pop();

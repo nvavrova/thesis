@@ -9,11 +9,11 @@ import java.util.Collection;
 /**
  * Created by Nik on 08-05-2015
  */
-public class DependencyGraphBuilder extends DataCollector {
+public class DependencyCollector extends DataCollector {
 
 	private final DependencyVisitor dependencyVisitor;
 
-	public DependencyGraphBuilder(Collection<PythonTree> trees, PyVisitorExceptionHandler exceptionHandler, Classes pyClasses) {
+	public DependencyCollector(Collection<PythonTree> trees, PyVisitorExceptionHandler exceptionHandler, Classes pyClasses) {
 		super(trees, exceptionHandler);
 
 		this.dependencyVisitor = new DependencyVisitor(pyClasses, this.trees, this.exceptionHandler);
@@ -25,7 +25,7 @@ public class DependencyGraphBuilder extends DataCollector {
 	}
 
 
-	private class DependencyVisitor extends PyTreeVisitor {
+	private class DependencyVisitor extends PyTreeVisitor<Void> {
 
 		private final DependencyGraph dependencyGraph;
 
@@ -60,7 +60,6 @@ public class DependencyGraphBuilder extends DataCollector {
 		public Void visitCall(Call node) throws Exception {
 
 			String className = node.getText();
-
 			if (this.amIInClass() && this.isValidClass(className) && this.isNotMe(className)) {
 				this.dependencyGraph.add(this.currentClass, className);
 			}
