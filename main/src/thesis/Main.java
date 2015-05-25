@@ -40,11 +40,13 @@ public class Main {
 		long startTime = System.nanoTime();
 		for (String filePath : filePaths) {
 			try {
-				parse3(filePath);
-//				PythonTree tree = parse(filePath);
-//				trees.put(filePath, tree);
-//				PyTreePrinter p = new PyTreePrinter(tree);
-//				p.prettyPrint();
+                System.out.println("----------------------------- Parse 3 -----------------------------");
+                parse3(filePath);
+                System.out.println("----------------------------- Parse 2 -----------------------------");
+				PythonTree tree = parse(filePath);
+				trees.put(filePath, tree);
+				PyTreePrinter p = new PyTreePrinter(tree);
+				p.prettyPrint();
 			}
 			catch (Exception e) {
 				e.printStackTrace();

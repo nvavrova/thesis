@@ -6,31 +6,22 @@ package ast;
 public class LocInfo {
 	private final Integer startLine;
 	private final Integer endLine;
-	private final Integer locSpan;
 
 	public LocInfo(Integer startLine, Integer endLine) {
 		assert (startLine <= endLine);
 		this.startLine = startLine;
 		this.endLine = endLine;
-		this.locSpan = endLine - startLine;
-	}
-
-	public LocInfo(Integer startLine, Integer endLine, Integer locSpan) {
-		assert (startLine <= endLine);
-		this.startLine = startLine;
-		this.endLine = endLine;
-		this.locSpan = locSpan;
 	}
 
 	public Integer getStartLine() {
-		return startLine;
+		return this.startLine;
 	}
 
 	public Integer getEndLine() {
-		return endLine;
+		return this.endLine;
 	}
 
 	public Integer getLocSpan() {
-		return locSpan;
+		return this.endLine - this.startLine;
 	}
 }

@@ -7,6 +7,8 @@ import java.util.List;
  */
 public class ClassDef extends Py3Node {
 
+    //TODO: arguments
+
 	private final List<Py3Node> body;
 	private final String name;
 
@@ -15,4 +17,6 @@ public class ClassDef extends Py3Node {
 		this.name = name;
 		this.body = body;
 	}
+
+    
 }

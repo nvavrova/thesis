@@ -1129,7 +1129,7 @@ public class AstBuilder implements Python3Visitor<Py3Node> {
 		}
 		ctx.suite().accept(this);
 		indent--;
-		LocInfo li = new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine(), 0);
+		LocInfo li = new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine());
 		indent--;
 		return new ClassDef(li, ctx.NAME().toString(), args);
 	}
