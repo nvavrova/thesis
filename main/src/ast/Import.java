@@ -1,13 +1,14 @@
 package ast;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by Nik on 25-5-15.
+ * Created by Nik on 25-05-15
  */
 public class Import extends Py3Node {
+
+    //TODO: change to use Identifier
 
     private Map<String, String> modules;
 

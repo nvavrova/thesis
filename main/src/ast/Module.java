@@ -3,7 +3,7 @@ package ast;
 import java.util.List;
 
 /**
- * Created by Nik on 25-5-15.
+ * Created by Nik on 25-05-15
  */
 public class Module extends Py3Node {
 
@@ -13,7 +13,6 @@ public class Module extends Py3Node {
         super(locInfo);
         this.body = body;
     }
-
 
     public List<Py3Node> getBody() {
         return body;

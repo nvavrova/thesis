@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.python.antlr.*;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +41,18 @@ public class Main {
 		long startTime = System.nanoTime();
 		for (String filePath : filePaths) {
 			try {
+				System.out.println("FILE: " + filePath);
                 System.out.println("----------------------------- Parse 3 -----------------------------");
                 parse3(filePath);
                 System.out.println("----------------------------- Parse 2 -----------------------------");
 				PythonTree tree = parse(filePath);
 				trees.put(filePath, tree);
 				PyTreePrinter p = new PyTreePrinter(tree);
+				PyVisitorExceptionHandler pve = new PyVisitorExceptionHandler();
+				List<PythonTree> pytrees = new ArrayList<>();
+				pytrees.add(tree);
+				ClassCollector cc = new ClassCollector(pytrees, pve);
+				cc.getClasses();
 				p.prettyPrint();
 			}
 			catch (Exception e) {

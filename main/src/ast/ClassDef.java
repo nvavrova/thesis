@@ -9,8 +9,8 @@ public class ClassDef extends Py3Node {
 
     //TODO: arguments
 
-	private final List<Py3Node> body;
 	private final String name;
+	private final List<Py3Node> body;
 
 	public ClassDef(LocInfo locInfo, String name, List<Py3Node> body) {
 		super(locInfo);
@@ -18,5 +18,12 @@ public class ClassDef extends Py3Node {
 		this.body = body;
 	}
 
-    
+	public String getName() {
+		return name;
+	}
+
+	public List<Py3Node> getBody() {
+		return body;
+	}
+
 }

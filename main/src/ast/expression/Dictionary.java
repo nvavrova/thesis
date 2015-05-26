@@ -5,14 +5,14 @@ import ast.LocInfo;
 import java.util.Map;
 
 /**
- * Created by Nik on 25-5-15.
+ * Created by Nik on 25-5-15
  */
-public class Dictionary extends Expr{
+public class Dictionary extends SequenceContainer {
 
-    private final Map<Expr, Expr> body;
+	private final Map<Expr, Expr> body;
 
-    public Dictionary(LocInfo locInfo, Map<Expr, Expr> body) {
-        super(locInfo);
-        this.body = body;
-    }
+	public Dictionary(LocInfo locInfo, Map<Expr, Expr> body) {
+		super(locInfo);
+		this.body = body;
+	}
 }
