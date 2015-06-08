@@ -73,9 +73,8 @@ public class Main {
 		Python3Parser parser = new Python3Parser(new org.antlr.v4.runtime.CommonTokenStream(lexer));
 
 		ParserRuleContext context = parser.file_input();
-		AstBuilder astBuilder = new AstBuilder();
-		Py3Node ast = context.accept(astBuilder);
-//		Python3Tree py3Tree = (Python3Tree)astBuilder.visit(context);
+		AstBuilder astBuilder = new AstBuilder(context);
+		Py3Node py3Tree = astBuilder.build();
 	}
 
 	public static PythonTree parse(String fileName) throws Exception {

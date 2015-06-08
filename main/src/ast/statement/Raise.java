@@ -7,7 +7,8 @@ import ast.LocInfo;
  */
 public class Raise extends Statement {
 
-
+	//type
+	//from
 
 	public Raise(LocInfo locInfo) {
 		super(locInfo);
