@@ -1,6 +1,7 @@
 package ast.expression;
 
 import ast.LocInfo;
+import ast.expression.atom.Numeric;
 
 /**
  * Created by Nik on 08-06-2015

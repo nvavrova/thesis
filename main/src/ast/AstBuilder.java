@@ -1,5 +1,8 @@
 package ast;
 
+import ast.expression.Comparison;
+import ast.expression.Expr;
+import ast.expression.Not;
 import gen.Python3Parser;
 import gen.Python3Visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -11,6 +14,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 19-05-2015
@@ -37,16 +41,17 @@ public class AstBuilder {
 		public Py3Node visitSingle_input(@NotNull Python3Parser.Single_inputContext ctx) {
 			indent++;
 			print("visitSingle_input");
+			indent--;
 			//NEWLINE | simple_stmt | compound_stmt NEWLINE
 			if (ctx.simple_stmt() != null) {
-				indent--;
 				return ctx.compound_stmt().accept(this);
 			}
 			if (ctx.compound_stmt() != null) {
-				indent--;
 				return ctx.compound_stmt().accept(this);
 			}
-			indent--;
+			if (ctx.NEWLINE() != null) {
+				return null;
+			}
 			throw new IllegalArgumentException("Unknown context");
 		}
 
@@ -814,29 +819,30 @@ public class AstBuilder {
 			indent++;
 			print("visitAnd_test");
 			//not_test ( AND not_test )*
-			if (ctx.not_test() != null) {
-				for (Python3Parser.Not_testContext c : ctx.not_test()) {
-					c.accept(this);
-				}
-			}
+
+			List<Expr> children = ctx.not_test().stream()
+					.map(c -> (Expr) c.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+
+			if (children.size() == 1) {
+				return children.get(0);
+			}
+			return new And(this.getLocInfo(ctx), children);
 		}
 
 		@Override
 		public Py3Node visitNot_test(@NotNull Python3Parser.Not_testContext ctx) {
 			indent++;
 			print("visitNot_test");
+			indent--;
 			// NOT not_test | comparison
 			if (ctx.not_test() != null) {
-				indent--;
-				return ctx.not_test().accept(this);
+				return new Not(this.getLocInfo(ctx), (Expr) ctx.not_test().accept(this));
 			}
 			if (ctx.comparison() != null) {
-				indent--;
-				return ctx.comparison().accept(this);
+				return new Not(this.getLocInfo(ctx), (Expr) ctx.comparison().accept(this));
 			}
-			indent--;
 			throw new IllegalArgumentException("Unknown context");
 		}
 
@@ -845,16 +851,21 @@ public class AstBuilder {
 			indent++;
 			print("visitComparison");
 			//star_expr ( comp_op star_expr )*
-			for (Python3Parser.Star_exprContext c : ctx.star_expr()) {
-				c.accept(this);
-			}
+			List<Expr> operands = ctx.star_expr().stream()
+					.map(c -> (Expr) c.accept(this))
+					.collect(Collectors.toList());
 			if (ctx.comp_op() != null) {
-				for (Python3Parser.Comp_opContext c : ctx.comp_op()) {
-					c.accept(this);
-				}
+				List<Expr> operators = ctx.comp_op().stream()
+						.map(c -> (Expr) c.accept(this))
+						.collect(Collectors.toList());
+				indent--;
+				return new Comparison(this.getLocInfo(ctx), operands); //TODO: add operators
 			}
 			indent--;
-			return null;
+			if (operands.size() == 1) {
+				return operands.get(0);
+			}
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -880,11 +891,13 @@ public class AstBuilder {
 			indent++;
 			print("visitExpr");
 			//xor_expr ( '|' xor_expr )*
-			for (Python3Parser.Xor_exprContext c : ctx.xor_expr()) {
-				c.accept(this);
-			}
+			List<Py3Node> children = new ArrayList<>();
+			ctx.xor_expr().forEach(c -> children.add(c.accept(this)));
 			indent--;
-			return null;
+			if (children.size() == 1) {
+				return children.get(0);
+			}
+			return new
 		}
 
 		@Override
@@ -1326,6 +1339,10 @@ public class AstBuilder {
 			print("visitErrorNode");
 			indent--;
 			return null;
+		}
+
+		private LocInfo getLocInfo(ParserRuleContext ctx) {
+			return new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine());
 		}
 
 		private void print(String s) {

@@ -1,6 +1,7 @@
 package ast.expression;
 
 import ast.LocInfo;
+import ast.expression.Expr;
 
 import java.util.List;
 
@@ -9,25 +10,26 @@ import java.util.List;
  */
 public class Comparison extends Expr {
 
+	//TODO: fix operators somehow
 	private final List<Expr> operands;
-	private final List<String> operators; //TODO: enum?
+//	private final List<String> operators;
 
-	public Comparison(LocInfo locInfo, List<Expr> operands, List<String> operators) {
+	public Comparison(LocInfo locInfo, List<Expr> operands) {
 		super(locInfo);
 
-		assert operands.size() - 1 == operators.size();
+//		assert operands.size() - 1 == operators.size();
 
 		this.operands = operands;
-		this.operators = operators;
+//		this.operators = operators;
 	}
 
 	public List<Expr> getOperands() {
 		return operands;
 	}
 
-	public List<String> getOperators() {
-		return operators;
-	}
+//	public List<String> getOperators() {
+//		return operators;
+//	}
 
 	public Integer getArity() {
 		return operands.size();

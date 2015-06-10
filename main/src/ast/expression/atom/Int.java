@@ -1,4 +1,4 @@
-package ast.expression;
+package ast.expression.atom;
 
 import ast.LocInfo;
 
