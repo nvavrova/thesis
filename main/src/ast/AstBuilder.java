@@ -1349,7 +1349,7 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitString_literal(@NotNull Python3Parser.String_literalContext ctx) {
-			//STRING_PREFIX ( SHORT_STRING | LONG_STRING )
+			//STRING_LITERAL_PREFIX value=( SHORT_STRING | LONG_STRING )
 			print("visitString_literal");
 			if (ctx.SHORT_STRING() != null) {
 				return new Str(this.getLocInfo(ctx), ctx.SHORT_STRING().getText());
@@ -1362,7 +1362,7 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitBytes_literal(@NotNull Python3Parser.Bytes_literalContext ctx) {
-			//BYTES_PREFIX ( SHORT_BYTES | LONG_BYTES )
+			//BYTES_LITERAL_PREFIX value=( SHORT_BYTES | LONG_BYTES )
 			print("visitBytes_literal");
 			//TODO
 //			if (ctx.SHORT_BYTES() != null) {
@@ -1379,23 +1379,21 @@ public class AstBuilder {
 		public Py3Node visitOct_integer(@NotNull Python3Parser.Oct_integerContext ctx) {
 			//OCT_INTEGER_PREFIX OCT_INTEGER_UNPREFIXED
 			print("visitOct_integer");
-			String s = ctx.OCT_INTEGER_UNPREFIXED().getText();
-			return new Int(this.getLocInfo(ctx), new BigInteger(s, 8));
+			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 8));
 		}
 
 		@Override
 		public Py3Node visitHex_integer(@NotNull Python3Parser.Hex_integerContext ctx) {
 			//HEX_INTEGER_PREFIX HEX_INTEGER_UNPREFIXED
-			String s = ctx.HEX_INTEGER_UNPREFIXED().getText();
-			return new Int(this.getLocInfo(ctx), new BigInteger(s, 16));
+			print("visitHex_integer");
+			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 16));
 		}
 
 		@Override
 		public Py3Node visitBin_integer(@NotNull Python3Parser.Bin_integerContext ctx) {
 			//BIN_INTEGER_PREFIX BIN_INTEGER_UNPREFIXED
 			print("visitBin_integer");
-			String s = ctx.BIN_INTEGER_UNPREFIXED().getText();
-			return new Int(this.getLocInfo(ctx), new BigInteger(s, 2));
+			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 2));
 		}
 
 		public Py3Node visitComment(@NotNull Python3Parser.CommentContext ctx) {

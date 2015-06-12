@@ -510,18 +510,6 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitString(@NotNull Python3Parser.StringContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Python3Parser#number}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitNumber(@NotNull Python3Parser.NumberContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Python3Parser#integer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitInteger(@NotNull Python3Parser.IntegerContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Python3Parser#string_literal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -533,6 +521,18 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBytes_literal(@NotNull Python3Parser.Bytes_literalContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Python3Parser#number}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNumber(@NotNull Python3Parser.NumberContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Python3Parser#integer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInteger(@NotNull Python3Parser.IntegerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Python3Parser#oct_integer}.
 	 * @param ctx the parse tree

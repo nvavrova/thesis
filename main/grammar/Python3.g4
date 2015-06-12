@@ -679,6 +679,18 @@ string
  | bytes_literal
  ;
 
+/// stringliteral   ::=  [stringprefix](shortstring | longstring)
+/// stringprefix    ::=  "r" | "R"
+string_literal
+ : STRING_LITERAL_PREFIX value=( SHORT_STRING | LONG_STRING )
+ ;
+
+/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
+/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
+bytes_literal
+ : BYTES_LITERAL_PREFIX value=( SHORT_BYTES | LONG_BYTES )
+ ;
+
 number
  : integer
  | FLOAT_NUMBER
@@ -693,31 +705,19 @@ integer
  | bin_integer
  ;
 
-/// stringliteral   ::=  [stringprefix](shortstring | longstring)
-/// stringprefix    ::=  "r" | "R"
-string_literal
- : STRING_PREFIX ( SHORT_STRING | LONG_STRING )
- ;
-
-/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
-/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
-bytes_literal
- : BYTES_PREFIX ( SHORT_BYTES | LONG_BYTES )
- ;
-
 /// octinteger     ::=  "0" ("o" | "O") octdigit+
 oct_integer
- : OCT_INTEGER_PREFIX OCT_INTEGER_UNPREFIXED
+ : OCT_INT_PREFIX value=OCT_DIGIT+
  ;
 
 /// hexinteger     ::=  "0" ("x" | "X") hexdigit+
 hex_integer
- : HEX_INTEGER_PREFIX HEX_INTEGER_UNPREFIXED
+ : HEX_INT_PREFIX value=HEX_DIGIT+
  ;
 
 /// bininteger     ::=  "0" ("b" | "B") bindigit+
 bin_integer
- : BIN_INTEGER_PREFIX BIN_INTEGER_UNPREFIXED
+ : BIN_INT_PREFIX value=BIN_DIGIT+
  ;
 
 /*
@@ -802,42 +802,10 @@ NAME
  : ID_START ID_CONTINUE*
  ;
 
-fragment STRING_PREFIX
- : [uU]? [rR]?
- ;
-
-fragment BYTES_PREFIX
- : [bB] [rR]?
- ;
-
 /// decimalinteger ::=  nonzerodigit digit* | "0"+
 DECIMAL_INTEGER
  : NON_ZERO_DIGIT DIGIT*
  | '0'+
- ;
-
-OCT_INTEGER_PREFIX
- : '0' [oO]
- ;
-
-HEX_INTEGER_PREFIX
- : '0' [xX]
- ;
-
-BIN_INTEGER_PREFIX
- : '0' [bB]
- ;
-
-OCT_INTEGER_UNPREFIXED
- : OCT_DIGIT+
- ;
-
-HEX_INTEGER_UNPREFIXED
- : HEX_DIGIT+
- ;
-
-BIN_INTEGER_UNPREFIXED
- : BIN_DIGIT+
  ;
 
 /// floatnumber   ::=  pointfloat | exponentfloat
@@ -910,6 +878,27 @@ UNKNOWN_CHAR
 /*
  * fragments
  */
+
+
+fragment STRING_LITERAL_PREFIX
+ : [uU]? [rR]?
+ ;
+
+fragment BYTES_LITERAL_PREFIX
+ : [bB] [rR]?
+ ;
+
+fragment OCT_INT_PREFIX
+ : '0' [oO]
+ ;
+
+fragment HEX_INT_PREFIX
+ : '0' [xX]
+ ;
+
+fragment BIN_INT_PREFIX
+ : '0' [bB]
+ ;
 
 /// shortstring     ::=  "'" shortstringitem* "'" | '"' shortstringitem* '"'
 /// shortstringitem ::=  shortstringchar | stringescapeseq
