@@ -1290,15 +1290,14 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitString(@NotNull Python3Parser.StringContext ctx) {
-			indent++;
 			print("visitString");
-			//string_literal | bytes_literal
-			indent--;
-			if (ctx.string_literal() != null) {
-				return ctx.string_literal().accept(this);
+			//STRING_LITERAL | BYTES_LITERAL
+			//TODO: strip out prefix + quotes?
+			if (ctx.STRING_LITERAL() != null) {
+				return new Str(this.getLocInfo(ctx), ctx.STRING_LITERAL().getText());
 			}
-			else if (ctx.bytes_literal() != null) {
-				return ctx.bytes_literal().accept(this);
+			else if (ctx.BYTES_LITERAL() != null) {
+				return new Str(this.getLocInfo(ctx), ctx.BYTES_LITERAL().getText());
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1317,10 +1316,10 @@ public class AstBuilder {
 				return new ast.expression.atom.Float(this.getLocInfo(ctx), nr);
 			}
 			else if (ctx.IMAG_NUMBER() != null) {
-				//strip out "j" at the end
+				//strip out the "j" at the end
 				String s = ctx.IMAG_NUMBER().getText();
-				Double nr = Double.parseDouble(s.substring(0, s.length() - 1));
-				return new Imaginary(this.getLocInfo(ctx), nr);
+				s = s.substring(0, s.length() - 1);
+				return new Imaginary(this.getLocInfo(ctx), Double.parseDouble(s));
 			}
 			return null;
 		}
@@ -1329,72 +1328,31 @@ public class AstBuilder {
 		public Py3Node visitInteger(@NotNull Python3Parser.IntegerContext ctx) {
 			indent++;
 			print("visitInteger");
-			//DECIMAL_INTEGER | oct_integer | hex_integer | bin_integer
+			//DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
 			indent--;
 			if (ctx.DECIMAL_INTEGER() != null) {
 				BigInteger bi = new BigInteger(ctx.DECIMAL_INTEGER().getText());
 				return new Int(this.getLocInfo(ctx), bi);
 			}
-			else if (ctx.oct_integer() != null) {
-				return ctx.oct_integer().accept(this);
+			else if (ctx.OCT_INTEGER() != null) {
+				//strip out the "0O" prefix
+				String s = ctx.OCT_INTEGER().getText();
+				s = s.substring(2);
+				return new Int(this.getLocInfo(ctx), new BigInteger(s, 8));
 			}
-			else if (ctx.hex_integer() != null) {
-				return ctx.hex_integer().accept(this);
+			else if (ctx.HEX_INTEGER() != null) {
+				//strip out the "0X" prefix
+				String s = ctx.HEX_INTEGER().getText();
+				s = s.substring(2);
+				return new Int(this.getLocInfo(ctx), new BigInteger(s, 16));
 			}
-			else if (ctx.bin_integer() != null) {
-				return ctx.bin_integer().accept(this);
-			}
-			throw new IllegalArgumentException("Unknown context");
-		}
-
-		@Override
-		public Py3Node visitString_literal(@NotNull Python3Parser.String_literalContext ctx) {
-			//STRING_LITERAL_PREFIX value=( SHORT_STRING | LONG_STRING )
-			print("visitString_literal");
-			//TODO: strip quotes
-			if (ctx.SHORT_STRING() != null) {
-				return new Str(this.getLocInfo(ctx), ctx.SHORT_STRING().getText());
-			}
-			else if (ctx.LONG_STRING() != null) {
-				return new Str(this.getLocInfo(ctx), ctx.LONG_STRING().getText());
+			else if (ctx.BIN_INTEGER() != null) {
+				//strip out the "0B" prefix
+				String s = ctx.HEX_INTEGER().getText();
+				s = s.substring(2);
+				return new Int(this.getLocInfo(ctx), new BigInteger(s, 2));
 			}
 			throw new IllegalArgumentException("Unknown context");
-		}
-
-		@Override
-		public Py3Node visitBytes_literal(@NotNull Python3Parser.Bytes_literalContext ctx) {
-			//BYTES_LITERAL_PREFIX value=( SHORT_BYTES | LONG_BYTES )
-			print("visitBytes_literal");
-			//TODO
-//			if (ctx.SHORT_BYTES() != null) {
-//				return new Str(this.getLocInfo(ctx), );
-//			}
-//			else if (ctx.LONG_BYTES() != null) {
-//				return new Str(this.getLocInfo(ctx), );
-//			}
-//			throw new IllegalArgumentException("Unknown context");
-			return null;
-		}
-
-		@Override
-		public Py3Node visitOct_integer(@NotNull Python3Parser.Oct_integerContext ctx) {
-			//OCT_INTEGER_PREFIX OCT_INTEGER_UNPREFIXED
-			print("visitOct_integer");
-			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 8));
-		}
-
-		@Override
-		public Py3Node visitHex_integer(@NotNull Python3Parser.Hex_integerContext ctx) {
-			//HEX_INTEGER_PREFIX HEX_INTEGER_UNPREFIXED
-			print("visitHex_integer");
-			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 16));
-		}
-
-		@Override
-		public Py3Node visitBin_integer(@NotNull Python3Parser.Bin_integerContext ctx) {
-			//BIN_INTEGER_PREFIX BIN_INTEGER_UNPREFIXED
-			print("visitBin_integer");
-			return new Int(this.getLocInfo(ctx), new BigInteger(ctx.value.getText(), 2));
 		}
 
 		public Py3Node visitComment(@NotNull Python3Parser.CommentContext ctx) {

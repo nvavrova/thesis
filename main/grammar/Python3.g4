@@ -250,7 +250,7 @@ expr_stmt
 testlist_star_expr
  : ( test | star_expr ) ( ',' ( test |  star_expr ) )* ','?
  ;
-comment: COMMENT;
+
 /// augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
 ///             '<<=' | '>>=' | '**=' | '//=')
 augassign
@@ -675,20 +675,8 @@ yield_arg
  ;
 
 string
- : string_literal
- | bytes_literal
- ;
-
-/// stringliteral   ::=  [stringprefix](shortstring | longstring)
-/// stringprefix    ::=  "r" | "R"
-string_literal
- : ('u' | 'U')? ('r' | 'R')? value=( SHORT_STRING | LONG_STRING )
- ;
-
-/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
-/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
-bytes_literal
- : ('b' | 'B') ('r' | 'R')? value=( SHORT_BYTES | LONG_BYTES )
+ : STRING_LITERAL
+ | BYTES_LITERAL
  ;
 
 number
@@ -700,24 +688,13 @@ number
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
  : DECIMAL_INTEGER
- | oct_integer
- | hex_integer
- | bin_integer
+ | OCT_INTEGER
+ | HEX_INTEGER
+ | BIN_INTEGER
  ;
 
-/// octinteger     ::=  "0" ("o" | "O") octdigit+
-oct_integer
- : '0' ('o' | 'O') value=OCT_DIGIT+
- ;
-
-/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
-hex_integer
- : '0' ('x' | 'X') value=HEX_DIGIT+
- ;
-
-/// bininteger     ::=  "0" ("b" | "B") bindigit+
-bin_integer
- : '0' ('b' | 'B') value=BIN_DIGIT+
+comment
+ : COMMENT
  ;
 
 /*
@@ -802,10 +779,37 @@ NAME
  : ID_START ID_CONTINUE*
  ;
 
+/// stringliteral   ::=  [stringprefix](shortstring | longstring)
+/// stringprefix    ::=  "r" | "R"
+STRING_LITERAL
+ : [uU]? [rR]? ( SHORT_STRING | LONG_STRING )
+ ;
+
+/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
+/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
+BYTES_LITERAL
+ : [bB] [rR]? ( SHORT_BYTES | LONG_BYTES )
+ ;
+
 /// decimalinteger ::=  nonzerodigit digit* | "0"+
 DECIMAL_INTEGER
  : NON_ZERO_DIGIT DIGIT*
  | '0'+
+ ;
+
+/// octinteger     ::=  "0" ("o" | "O") octdigit+
+OCT_INTEGER
+ : '0' [oO] OCT_DIGIT+
+ ;
+
+/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
+HEX_INTEGER
+ : '0' [xX] HEX_DIGIT+
+ ;
+
+/// bininteger     ::=  "0" ("b" | "B") bindigit+
+BIN_INTEGER
+ : '0' [bB] BIN_DIGIT+
  ;
 
 /// floatnumber   ::=  pointfloat | exponentfloat
@@ -869,6 +873,10 @@ IDIV_ASSIGN : '//=';
 
 SKIP
  : ( SPACES | LINE_JOINING ) -> skip
+ ;
+
+COMMENT
+ : '#' ~[\r\n]*
  ;
 
 UNKNOWN_CHAR
@@ -1009,10 +1017,6 @@ fragment BYTES_ESCAPE_SEQ
 
 fragment SPACES
  : [ \t]+
- ;
-
-fragment COMMENT
- : '#' ~[\r\n]*
  ;
 
 fragment LINE_JOINING

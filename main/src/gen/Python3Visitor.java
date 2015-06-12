@@ -114,12 +114,6 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTestlist_star_expr(@NotNull Python3Parser.Testlist_star_exprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Python3Parser#comment}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComment(@NotNull Python3Parser.CommentContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Python3Parser#augassign}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -510,18 +504,6 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitString(@NotNull Python3Parser.StringContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Python3Parser#string_literal}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitString_literal(@NotNull Python3Parser.String_literalContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Python3Parser#bytes_literal}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBytes_literal(@NotNull Python3Parser.Bytes_literalContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Python3Parser#number}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -534,21 +516,9 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInteger(@NotNull Python3Parser.IntegerContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Python3Parser#oct_integer}.
+	 * Visit a parse tree produced by {@link Python3Parser#comment}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitOct_integer(@NotNull Python3Parser.Oct_integerContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Python3Parser#hex_integer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitHex_integer(@NotNull Python3Parser.Hex_integerContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Python3Parser#bin_integer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitBin_integer(@NotNull Python3Parser.Bin_integerContext ctx);
+	T visitComment(@NotNull Python3Parser.CommentContext ctx);
 }
