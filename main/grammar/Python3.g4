@@ -682,13 +682,13 @@ string
 /// stringliteral   ::=  [stringprefix](shortstring | longstring)
 /// stringprefix    ::=  "r" | "R"
 string_literal
- : STRING_LITERAL_PREFIX value=( SHORT_STRING | LONG_STRING )
+ : ('u' | 'U')? ('r' | 'R')? value=( SHORT_STRING | LONG_STRING )
  ;
 
 /// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
 /// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
 bytes_literal
- : BYTES_LITERAL_PREFIX value=( SHORT_BYTES | LONG_BYTES )
+ : ('b' | 'B') ('r' | 'R')? value=( SHORT_BYTES | LONG_BYTES )
  ;
 
 number
@@ -707,17 +707,17 @@ integer
 
 /// octinteger     ::=  "0" ("o" | "O") octdigit+
 oct_integer
- : OCT_INT_PREFIX value=OCT_DIGIT+
+ : '0' ('o' | 'O') value=OCT_DIGIT+
  ;
 
 /// hexinteger     ::=  "0" ("x" | "X") hexdigit+
 hex_integer
- : HEX_INT_PREFIX value=HEX_DIGIT+
+ : '0' ('x' | 'X') value=HEX_DIGIT+
  ;
 
 /// bininteger     ::=  "0" ("b" | "B") bindigit+
 bin_integer
- : BIN_INT_PREFIX value=BIN_DIGIT+
+ : '0' ('b' | 'B') value=BIN_DIGIT+
  ;
 
 /*
@@ -878,27 +878,6 @@ UNKNOWN_CHAR
 /*
  * fragments
  */
-
-
-fragment STRING_LITERAL_PREFIX
- : [uU]? [rR]?
- ;
-
-fragment BYTES_LITERAL_PREFIX
- : [bB] [rR]?
- ;
-
-fragment OCT_INT_PREFIX
- : '0' [oO]
- ;
-
-fragment HEX_INT_PREFIX
- : '0' [xX]
- ;
-
-fragment BIN_INT_PREFIX
- : '0' [bB]
- ;
 
 /// shortstring     ::=  "'" shortstringitem* "'" | '"' shortstringitem* '"'
 /// shortstringitem ::=  shortstringchar | stringescapeseq

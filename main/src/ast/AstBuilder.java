@@ -1351,6 +1351,7 @@ public class AstBuilder {
 		public Py3Node visitString_literal(@NotNull Python3Parser.String_literalContext ctx) {
 			//STRING_LITERAL_PREFIX value=( SHORT_STRING | LONG_STRING )
 			print("visitString_literal");
+			//TODO: strip quotes
 			if (ctx.SHORT_STRING() != null) {
 				return new Str(this.getLocInfo(ctx), ctx.SHORT_STRING().getText());
 			}
