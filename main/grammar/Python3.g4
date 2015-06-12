@@ -675,8 +675,8 @@ yield_arg
  ;
 
 string
- : STRING_LITERAL
- | BYTES_LITERAL
+ : string_literal
+ | bytes_literal
  ;
 
 number
@@ -688,9 +688,36 @@ number
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
  : DECIMAL_INTEGER
- | OCT_INTEGER
- | HEX_INTEGER
- | BIN_INTEGER
+ | oct_integer
+ | hex_integer
+ | bin_integer
+ ;
+
+/// stringliteral   ::=  [stringprefix](shortstring | longstring)
+/// stringprefix    ::=  "r" | "R"
+string_literal
+ : STRING_PREFIX ( SHORT_STRING | LONG_STRING )
+ ;
+
+/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
+/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
+bytes_literal
+ : BYTES_PREFIX ( SHORT_BYTES | LONG_BYTES )
+ ;
+
+/// octinteger     ::=  "0" ("o" | "O") octdigit+
+oct_integer
+ : OCT_INTEGER_PREFIX OCT_INTEGER_UNPREFIXED
+ ;
+
+/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
+hex_integer
+ : HEX_INTEGER_PREFIX HEX_INTEGER_UNPREFIXED
+ ;
+
+/// bininteger     ::=  "0" ("b" | "B") bindigit+
+bin_integer
+ : BIN_INTEGER_PREFIX BIN_INTEGER_UNPREFIXED
  ;
 
 /*
@@ -775,16 +802,12 @@ NAME
  : ID_START ID_CONTINUE*
  ;
 
-/// stringliteral   ::=  [stringprefix](shortstring | longstring)
-/// stringprefix    ::=  "r" | "R"
-STRING_LITERAL
- : [uU]? [rR]? ( SHORT_STRING | LONG_STRING )
+fragment STRING_PREFIX
+ : [uU]? [rR]?
  ;
 
-/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
-/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
-BYTES_LITERAL
- : [bB] [rR]? ( SHORT_BYTES | LONG_BYTES )
+fragment BYTES_PREFIX
+ : [bB] [rR]?
  ;
 
 /// decimalinteger ::=  nonzerodigit digit* | "0"+
@@ -793,19 +816,28 @@ DECIMAL_INTEGER
  | '0'+
  ;
 
-/// octinteger     ::=  "0" ("o" | "O") octdigit+
-OCT_INTEGER
- : '0' [oO] OCT_DIGIT+
+OCT_INTEGER_PREFIX
+ : '0' [oO]
  ;
 
-/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
-HEX_INTEGER
- : '0' [xX] HEX_DIGIT+
+HEX_INTEGER_PREFIX
+ : '0' [xX]
  ;
 
-/// bininteger     ::=  "0" ("b" | "B") bindigit+
-BIN_INTEGER
- : '0' [bB] BIN_DIGIT+
+BIN_INTEGER_PREFIX
+ : '0' [bB]
+ ;
+
+OCT_INTEGER_UNPREFIXED
+ : OCT_DIGIT+
+ ;
+
+HEX_INTEGER_UNPREFIXED
+ : HEX_DIGIT+
+ ;
+
+BIN_INTEGER_UNPREFIXED
+ : BIN_DIGIT+
  ;
 
 /// floatnumber   ::=  pointfloat | exponentfloat

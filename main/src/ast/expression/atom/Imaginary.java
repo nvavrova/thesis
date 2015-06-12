@@ -1,0 +1,20 @@
+package ast.expression.atom;
+
+import ast.LocInfo;
+
+/**
+ * Created by Nik on 12-06-2015
+ */
+public class Imaginary extends Numeric {
+
+	private final Double value;
+
+	public Imaginary(LocInfo locInfo, Double value) {
+		super(locInfo);
+		this.value = value;
+	}
+
+	public Double getValue() {
+		return value;
+	}
+}

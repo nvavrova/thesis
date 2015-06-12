@@ -3,6 +3,12 @@ package ast;
 import ast.expression.Comparison;
 import ast.expression.Expr;
 import ast.expression.Not;
+import ast.expression.Shift;
+import ast.expression.atom.Comment;
+import ast.expression.atom.Imaginary;
+import ast.expression.atom.Int;
+import ast.expression.atom.Str;
+import ast.expression.bitwise.Xor;
 import gen.Python3Parser;
 import gen.Python3Visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -12,6 +18,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -897,7 +904,7 @@ public class AstBuilder {
 			if (children.size() == 1) {
 				return children.get(0);
 			}
-			return new
+			return null;
 		}
 
 		@Override
@@ -905,11 +912,14 @@ public class AstBuilder {
 			indent++;
 			print("visitXor_expr");
 			//and_expr ( '^' and_expr )*
-			for (Python3Parser.And_exprContext c : ctx.and_expr()) {
-				c.accept(this);
-			}
+			List<Expr> children = ctx.and_expr().stream()
+					.map(c -> (Expr) c.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			if (children.size() == 1) {
+				return children.get(0);
+			}
+			return new Xor(this.getLocInfo(ctx), children);
 		}
 
 		@Override
@@ -917,23 +927,31 @@ public class AstBuilder {
 			indent++;
 			print("visitAnd_expr");
 			//shift_expr ( '&' shift_expr )*
-			for (Python3Parser.Shift_exprContext c : ctx.shift_expr()) {
-				c.accept(this);
-			}
+			List<Expr> children = ctx.shift_expr().stream()
+					.map(c -> (Expr) c.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			if (children.size() == 1) {
+				return children.get(0);
+			}
+			return new ast.expression.bitwise.And(this.getLocInfo(ctx), children);
 		}
 
 		@Override
 		public Py3Node visitShift_expr(@NotNull Python3Parser.Shift_exprContext ctx) {
 			indent++;
 			print("visitShift_expr");
+			//TODO: divide to left and right shift?
+
 			//arith_expr ( '<<' arith_expr | '>>' arith_expr )*
-			for (Python3Parser.Arith_exprContext c : ctx.arith_expr()) {
-				c.accept(this);
-			}
+			List<Expr> children = ctx.arith_expr().stream()
+					.map(c -> (Expr) c.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			if (children.size() == 1) {
+				return children.get(0);
+			}
+			return new Shift(this.getLocInfo(ctx), children);
 		}
 
 		@Override
@@ -1274,9 +1292,15 @@ public class AstBuilder {
 		public Py3Node visitString(@NotNull Python3Parser.StringContext ctx) {
 			indent++;
 			print("visitString");
-			//STRING_LITERAL | BYTES_LITERAL
+			//string_literal | bytes_literal
 			indent--;
-			return null;
+			if (ctx.string_literal() != null) {
+				return ctx.string_literal().accept(this);
+			}
+			else if (ctx.bytes_literal() != null) {
+				return ctx.bytes_literal().accept(this);
+			}
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -1284,11 +1308,20 @@ public class AstBuilder {
 			indent++;
 			print("visitNumber");
 			//integer | FLOAT_NUMBER | IMAG_NUMBER
+			indent--;
 			if (ctx.integer() != null) {
-				indent--;
 				return ctx.integer().accept(this);
 			}
-			indent--;
+			else if (ctx.FLOAT_NUMBER() != null) {
+				Double nr = Double.parseDouble(ctx.FLOAT_NUMBER().getText());
+				return new ast.expression.atom.Float(this.getLocInfo(ctx), nr);
+			}
+			else if (ctx.IMAG_NUMBER() != null) {
+				//strip out "j" at the end
+				String s = ctx.IMAG_NUMBER().getText();
+				Double nr = Double.parseDouble(s.substring(0, s.length() - 1));
+				return new Imaginary(this.getLocInfo(ctx), nr);
+			}
 			return null;
 		}
 
@@ -1296,23 +1329,85 @@ public class AstBuilder {
 		public Py3Node visitInteger(@NotNull Python3Parser.IntegerContext ctx) {
 			indent++;
 			print("visitInteger");
-			//DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
+			//DECIMAL_INTEGER | oct_integer | hex_integer | bin_integer
 			indent--;
+			if (ctx.DECIMAL_INTEGER() != null) {
+				BigInteger bi = new BigInteger(ctx.DECIMAL_INTEGER().getText());
+				return new Int(this.getLocInfo(ctx), bi);
+			}
+			else if (ctx.oct_integer() != null) {
+				return ctx.oct_integer().accept(this);
+			}
+			else if (ctx.hex_integer() != null) {
+				return ctx.hex_integer().accept(this);
+			}
+			else if (ctx.bin_integer() != null) {
+				return ctx.bin_integer().accept(this);
+			}
+			throw new IllegalArgumentException("Unknown context");
+		}
+
+		@Override
+		public Py3Node visitString_literal(@NotNull Python3Parser.String_literalContext ctx) {
+			//STRING_PREFIX ( SHORT_STRING | LONG_STRING )
+			print("visitString_literal");
+			if (ctx.SHORT_STRING() != null) {
+				return new Str(this.getLocInfo(ctx), ctx.SHORT_STRING().getText());
+			}
+			else if (ctx.LONG_STRING() != null) {
+				return new Str(this.getLocInfo(ctx), ctx.LONG_STRING().getText());
+			}
+			throw new IllegalArgumentException("Unknown context");
+		}
+
+		@Override
+		public Py3Node visitBytes_literal(@NotNull Python3Parser.Bytes_literalContext ctx) {
+			//BYTES_PREFIX ( SHORT_BYTES | LONG_BYTES )
+			print("visitBytes_literal");
+			//TODO
+//			if (ctx.SHORT_BYTES() != null) {
+//				return new Str(this.getLocInfo(ctx), );
+//			}
+//			else if (ctx.LONG_BYTES() != null) {
+//				return new Str(this.getLocInfo(ctx), );
+//			}
+//			throw new IllegalArgumentException("Unknown context");
 			return null;
 		}
 
+		@Override
+		public Py3Node visitOct_integer(@NotNull Python3Parser.Oct_integerContext ctx) {
+			//OCT_INTEGER_PREFIX OCT_INTEGER_UNPREFIXED
+			print("visitOct_integer");
+			String s = ctx.OCT_INTEGER_UNPREFIXED().getText();
+			return new Int(this.getLocInfo(ctx), new BigInteger(s, 8));
+		}
+
+		@Override
+		public Py3Node visitHex_integer(@NotNull Python3Parser.Hex_integerContext ctx) {
+			//HEX_INTEGER_PREFIX HEX_INTEGER_UNPREFIXED
+			String s = ctx.HEX_INTEGER_UNPREFIXED().getText();
+			return new Int(this.getLocInfo(ctx), new BigInteger(s, 16));
+		}
+
+		@Override
+		public Py3Node visitBin_integer(@NotNull Python3Parser.Bin_integerContext ctx) {
+			//BIN_INTEGER_PREFIX BIN_INTEGER_UNPREFIXED
+			print("visitBin_integer");
+			String s = ctx.BIN_INTEGER_UNPREFIXED().getText();
+			return new Int(this.getLocInfo(ctx), new BigInteger(s, 2));
+		}
+
 		public Py3Node visitComment(@NotNull Python3Parser.CommentContext ctx) {
-			indent++;
-			print("comment");
-			System.out.println(ctx.COMMENT().getText());
-			indent--;
-			return null;
+			print("visitComment");
+			return new Comment(this.getLocInfo(ctx), ctx.COMMENT().getText());
 		}
 
 		@Override
 		public Py3Node visit(@NotNull ParseTree parseTree) {
 			indent++;
 			print("visit");
+			//TODO
 			indent--;
 			return null;
 		}
@@ -1321,6 +1416,7 @@ public class AstBuilder {
 		public Py3Node visitChildren(@NotNull RuleNode ruleNode) {
 			indent++;
 			print("visitChildren");
+			//TODO
 			indent--;
 			return null;
 		}
@@ -1329,6 +1425,7 @@ public class AstBuilder {
 		public Py3Node visitTerminal(@NotNull TerminalNode terminalNode) {
 			indent++;
 			print("visitTerminal");
+			//TODO
 			indent--;
 			return null;
 		}
@@ -1337,6 +1434,7 @@ public class AstBuilder {
 		public Py3Node visitErrorNode(@NotNull ErrorNode errorNode) {
 			indent++;
 			print("visitErrorNode");
+			//TODO
 			indent--;
 			return null;
 		}

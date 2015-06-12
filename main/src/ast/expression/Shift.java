@@ -1,19 +1,19 @@
-package ast.expression.shift;
+package ast.expression;
 
 import ast.LocInfo;
-import ast.expression.Expr;
 
 import java.util.List;
 
 /**
  * Created by Nik on 10-06-2015
  */
-public abstract class Shift extends Expr {
+public class Shift extends Expr {
 
-	//TODO: add type of shift / operator!
+	private final List<Expr> operands;
 
 	public Shift(LocInfo locInfo, List<Expr> operands) {
 		super(locInfo);
+		this.operands = operands;
 	}
 
 }
