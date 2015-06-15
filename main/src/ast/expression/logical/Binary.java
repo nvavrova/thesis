@@ -16,4 +16,6 @@ public class Binary extends Logical {
 		super(locInfo);
 		this.operands = operands;
 	}
+
+
 }

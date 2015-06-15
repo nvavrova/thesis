@@ -70,7 +70,7 @@ public class Main {
 		Python3Lexer lexer = new Python3Lexer(input);
 
 		org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-		Python3Parser parser = new Python3Parser(new org.antlr.v4.runtime.CommonTokenStream(lexer));
+		Python3Parser parser = new Python3Parser(tokens);
 
 		ParserRuleContext context = parser.file_input();
 		AstBuilder astBuilder = new AstBuilder(context);

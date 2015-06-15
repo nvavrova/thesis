@@ -35,6 +35,15 @@ grammar Python3;
 
 tokens { INDENT, DEDENT }
 
+
+@header
+{
+    import java.util.List;
+    import java.util.ArrayList;
+    import java.util.Map;
+    import java.util.HashMap;
+}
+
 @lexer::members {
 
   // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
@@ -441,7 +450,7 @@ suite
 
 /// test: or_test ['if' or_test 'else' test] | lambdef
 test
- : or_test ( IF or_test ELSE test )?
+ : value=or_test ( IF condition=or_test ELSE test )?
  | lambdef
  ;
 
@@ -462,13 +471,21 @@ lambdef_nocond
  ;
 
 /// or_test: and_test ('or' and_test)*
-or_test
- : and_test ( OR and_test )*
+or_test returns [List<String> operators, List<TermContext> operands]
+@init {
+    operators = new ArrayList<>();
+    operands = new ArrayList<>();
+}
+ : left=and_test { operands.add(left) } ( op=OR right=and_test { operators.add(op); operands.add(right); } )*
  ;
 
 /// and_test: not_test ('and' not_test)*
-and_test
- : not_test ( AND not_test )*
+and_test returns [List<String> operators, List<TermContext> operands]
+@init {
+    operators = new ArrayList<>();
+    operands = new ArrayList<>();
+}
+ : left=not_test { operands.add(left) } ( op=AND right=not_test { operators.add(op); operands.add(right); } )*
  ;
 
 /// not_test: 'not' not_test | comparison
@@ -478,8 +495,12 @@ not_test
  ;
 
 /// comparison: star_expr (comp_op star_expr)*
-comparison
- : star_expr ( comp_op star_expr )*
+comparison returns [List<String> operators, List<TermContext> operands]
+@init {
+    operators = new ArrayList<>();
+    operands = new ArrayList<>();
+}
+ : left=star_expr { operands.add(left) } ( op=comp_op right=star_expr { operators.add(op); operands.add(right); } )*
  ;
 
 /// # <> isn't actually a valid comparison operator in Python. It's here for the
@@ -520,34 +541,43 @@ and_expr
  ;
 
 /// shift_expr: arith_expr (('<<'|'>>') arith_expr)*
-shift_expr
- : arith_expr ( '<<' arith_expr
-              | '>>' arith_expr
+shift_expr returns [List<String> operators]
+@init {
+    operators = new ArrayList<>();
+}
+ : arith_expr ( op='<<' arith_expr { operators.add(op) }
+              | op='>>' arith_expr { operators.add(op) }
               )*
  ;
 
 /// arith_expr: term (('+'|'-') term)*
-arith_expr
- : term ( '+' term
-        | '-' term
+arith_expr returns [List<String> operators]
+@init {
+    operators = new ArrayList<>();
+}
+ : term ( op='+' term { operators.add(op) }
+        | op='-' term { operators.add(op) }
         )*
  ;
 
 /// term: factor (('*'|'/'|'%'|'//') factor)*
-term
- : factor ( '*' factor
-          | '/' factor
-          | '%' factor
-          | '//' factor
-          | '@' factor // PEP 465
+term returns [List<String> operators]
+@init {
+    operators = new ArrayList<>();
+}
+ : factor ( op='*' factor { operators.add(op) }
+          | op='/' factor { operators.add(op) }
+          | op='%' factor { operators.add(op) }
+          | op='//' factor { operators.add(op) }
+          | op='@' factor { operators.add(op) } // PEP 465
           )*
  ;
 
 /// factor: ('+'|'-'|'~') factor | power
 factor
- : '+' factor
- | '-' factor
- | '~' factor
+ : op='+' factor
+ | op='-' factor
+ | op='~' factor
  | power
  ;
 
@@ -574,9 +604,12 @@ atom
  ;
 
 /// testlist_comp: test ( comp_for | (',' test)* [','] )
-testlist_comp
+testlist_comp returns [List<TestContext> values]
+@init{
+    values = new ArrayList<>();
+}
  : test ( comp_for
-        | ( ',' test )* ','?
+        | ( ',' val=test { values.add(val) } )* ','?
         )
  ;
 
@@ -615,12 +648,16 @@ testlist
 
 /// dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |
 ///                   (test (comp_for | (',' test)* [','])) )
-dictorsetmaker
- : test ':' test ( comp_for
-                 | ( ',' test ':' test )* ','?
+dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContext> dictValues]
+@init{
+    dictValues = new HashMap<>();
+    setValues = new ArrayList<>();
+}
+ : dictVar=test ':' dictExpr=test ( comp_for
+                 | ( ',' dictKey=test ':' dictVal=test { dictValues.put(dictKey, dictVal) } )* ','?
                  )
- | test ( comp_for
-        | ( ',' test )* ','?
+ | setVar=test ( comp_for
+        | ( ',' setVal=test { setValues.add(setVal} )* ','?
         )
  ;
 
