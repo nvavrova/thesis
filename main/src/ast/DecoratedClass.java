@@ -1,5 +1,8 @@
 package ast;
 
+import ast.expression.atom.Identifier;
+import ast.statement.Statement;
+
 import java.util.List;
 
 /**
@@ -9,7 +12,7 @@ public class DecoratedClass extends ClassDef {
 
 	private final List<Decorator> decorators;
 
-	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, String name, List<Py3Node> body) {
+	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, Identifier name, List<Statement> body) {
 		super(locInfo, name, body);
 		this.decorators = decorators;
 	}

@@ -4,6 +4,9 @@ import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
 import ast.expression.bitwise.Xor;
+import ast.expression.display.CompFor;
+import ast.expression.display.CompIf;
+import ast.expression.display.CompIter;
 import ast.expression.logical.And;
 import ast.expression.logical.Logical;
 import ast.expression.logical.Not;
@@ -141,7 +144,7 @@ public class AstBuilder {
 			print("visitDecorated");
 			//decorators ( classdef | funcdef )
 
-			CollectionWrapper<Decorator> decorators = (CollectionWrapper<Decorator>)ctx.decorators().accept(this);
+			CollectionWrapper<Decorator> decorators = (CollectionWrapper<Decorator>) ctx.decorators().accept(this);
 
 			if (ctx.classdef() != null) {
 				ClassDef cd = (ClassDef) ctx.classdef().accept(this);
@@ -167,7 +170,7 @@ public class AstBuilder {
 			Expr returnType = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
 			CollectionWrapper<Statement> wrap = this.getResultWrapper(ctx.suite());
 			indent--;
-			return new Function(this.getLocInfo(ctx), new Identifier(this.getLocInfo(ctx.NAME()), ctx.NAME().getText()), wrap.getItems());
+			return new Function(this.getLocInfo(ctx), this.getIdentifier(ctx.NAME()), wrap.getItems());
 		}
 
 		@Override
@@ -248,7 +251,7 @@ public class AstBuilder {
 			print("visitVfpdef");
 			//NAME
 			indent--;
-			return new Identifier(this.getLocInfo(ctx), ctx.NAME().getText());
+			return this.getIdentifier(ctx.NAME());
 		}
 
 		@Override
@@ -383,7 +386,7 @@ public class AstBuilder {
 			indent++;
 			print("visitDel_stmt");
 			//DEL exprlist
-			CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>)ctx.exprlist().accept(this);
+			CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
 			indent--;
 			return new Delete(this.getLocInfo(ctx), expressions.getItems());
 		}
@@ -468,7 +471,7 @@ public class AstBuilder {
 			indent++;
 			print("visitRaise_stmt");
 			//RAISE ( test ( FROM test )? )?
-			Expr type = (Expr) ctx.exception.accept(this);
+			Expr type = (Expr) ctx.except.accept(this);
 			Expr source = (Expr) ctx.source.accept(this);
 			indent--;
 			return new Raise(this.getLocInfo(ctx), type, source);
@@ -1095,7 +1098,7 @@ public class AstBuilder {
 				return ctx.dictorsetmaker().accept(this);
 			}
 			if (ctx.NAME() != null) {
-				return new Identifier(this.getLocInfo(ctx.NAME()), ctx.NAME().getText());
+				return this.getIdentifier(ctx.NAME());
 			}
 			if (ctx.number() != null) {
 				return ctx.number().accept(this);
@@ -1217,7 +1220,6 @@ public class AstBuilder {
 			indent++;
 			print("visitTestlist");
 			//test ( ',' test )* ','?
-
 			List<Expr> expressions = ctx.test().stream()
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
@@ -1235,18 +1237,16 @@ public class AstBuilder {
 
 			if (ctx.dictVar != null) {
 				if (ctx.comp_for() != null) {
-					//TODO
-					return null;
+					return new DictMaker(this.getLocInfo(ctx), (CompFor) ctx.comp_for().accept(this));
 				}
 				Map<Expr, Expr> values = ctx.dictValues.keySet().stream()
-						.collect(Collectors.toMap(k -> (Expr) k.accept(this), k -> (Expr) ctx.dictValues.get(k).accept(this)));
+						.collect(Collectors.toMap(k -> (Expr) k.accept(this), v -> (Expr) v.accept(this)));
 				return new DictMaker(this.getLocInfo(ctx), values);
 			}
 
 			if (ctx.setVar != null) {
 				if (ctx.comp_for() != null) {
-					//TODO
-					return null;
+					return new SetMaker(this.getLocInfo(ctx), (CompFor) ctx.comp_for().accept(this));
 				}
 				List<Expr> values = ctx.setValues.stream()
 						.map(e -> (Expr) e.accept(this))
@@ -1260,14 +1260,14 @@ public class AstBuilder {
 		public Py3Node visitClassdef(@NotNull Python3Parser.ClassdefContext ctx) {
 			indent++;
 			print("visitClassdef");
-			//TODO: fix args
-			List<Py3Node> args = new ArrayList<>();
+			//TODO: fix inheritance
+			List<Py3Node> inheritance = new ArrayList<>();
 			if (ctx.arglist() != null) {
-				args.add(ctx.arglist().accept(this));
+				inheritance.add(ctx.arglist().accept(this));
 			}
-			ctx.suite().accept(this);
+			CollectionWrapper<Statement> suite = (CollectionWrapper<Statement>) ctx.suite().accept(this);
 			indent--;
-			return new ClassDef(this.getLocInfo(ctx), ctx.NAME().toString(), args);
+			return new ClassDef(this.getLocInfo(ctx), this.getIdentifier(ctx.NAME()), suite.getItems());
 		}
 
 		@Override
@@ -1277,12 +1277,10 @@ public class AstBuilder {
 			print("visitArglist");
 			//( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
 
-			ctx.params.stream();
-			if (ctx.args != null ) {
-
+			ctx.positionalArgs.stream();
+			if (ctx.args != null) {
 			}
 			if (ctx.kwargs != null) {
-
 			}
 
 			indent--;
@@ -1307,7 +1305,6 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitComp_iter(@NotNull Python3Parser.Comp_iterContext ctx) {
-			//TODO
 			indent++;
 			print("visitComp_iter");
 			//comp_for | comp_if
@@ -1325,31 +1322,27 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitComp_for(@NotNull Python3Parser.Comp_forContext ctx) {
-			//TODO
 			indent++;
 			print("visitComp_for");
 			//FOR exprlist IN or_test comp_iter?
-			ctx.exprlist().accept(this);
-			ctx.or_test().accept(this);
-			if (ctx.comp_iter() != null) {
-				ctx.comp_iter().accept(this);
-			}
+			CollectionWrapper<Expr> targets = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
+			Logical source = (Logical) ctx.or_test().accept(this);
+			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
+
 			indent--;
-			return null;
+			return new CompFor(this.getLocInfo(ctx), iter, targets.getItems(), source);
 		}
 
 		@Override
 		public Py3Node visitComp_if(@NotNull Python3Parser.Comp_ifContext ctx) {
-			//TODO
 			indent++;
 			print("visitComp_if");
 			//IF test_nocond comp_iter?
+			//TODO: add the test_nocond
 			ctx.test_nocond().accept(this);
-			if (ctx.comp_iter() != null) {
-				ctx.comp_iter().accept(this);
-			}
+			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
 			indent--;
-			return null;
+			return new CompIf(this.getLocInfo(ctx), iter);
 		}
 
 		@Override
@@ -1500,13 +1493,17 @@ public class AstBuilder {
 			return null;
 		}
 
-		private LocInfo getLocInfo (TerminalNode node) {
+		private LocInfo getLocInfo(TerminalNode node) {
 			//TODO: check this
 			return new LocInfo(node.getSymbol().getStartIndex(), node.getSymbol().getStopIndex());
 		}
 
 		private LocInfo getLocInfo(ParserRuleContext ctx) {
 			return new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine());
+		}
+
+		private Identifier getIdentifier(TerminalNode name) {
+			return new Identifier(this.getLocInfo(name), name.toString());
 		}
 
 		private void print(String s) {

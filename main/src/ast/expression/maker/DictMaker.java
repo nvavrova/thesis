@@ -2,8 +2,10 @@ package ast.expression.maker;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.expression.display.CompFor;
 import thesis.Py3TreeVisitor;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -11,11 +13,22 @@ import java.util.Map;
  */
 public class DictMaker extends Maker {
 
+	private final CompFor compFor;
 	private final Map<Expr, Expr> values;
 
+	public DictMaker(LocInfo locInfo, CompFor compFor) {
+		super(locInfo);
+		this.compFor = compFor;
+		this.values = Collections.emptyMap();
+	}
 	public DictMaker(LocInfo locInfo, Map<Expr, Expr> values) {
 		super(locInfo);
 		this.values = values;
+		this.compFor = null;
+	}
+
+	public CompFor getCompFor() {
+		return compFor;
 	}
 
 	public Map<Expr, Expr> getValues() {

@@ -6,7 +6,8 @@ import ast.expression.Expr;
 /**
  * Created by Nik on 10-06-2015
  */
-public class Unary extends Expr {
+//TODO: extend Logical?
+public abstract class Unary extends Expr {
 
 	protected final Expr value;
 

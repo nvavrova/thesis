@@ -2358,7 +2358,7 @@ public class Python3Parser extends Parser {
 	}
 
 	public static class Raise_stmtContext extends ParserRuleContext {
-		public TestContext exception;
+		public TestContext except;
 		public TestContext source;
 		public TerminalNode RAISE() { return getToken(Python3Parser.RAISE, 0); }
 		public List<TestContext> test() {
@@ -2393,7 +2393,7 @@ public class Python3Parser extends Parser {
 			if (((((_la - 20)) & ~0x3f) == 0 && ((1L << (_la - 20)) & ((1L << (LAMBDA - 20)) | (1L << (NOT - 20)) | (1L << (NONE - 20)) | (1L << (TRUE - 20)) | (1L << (FALSE - 20)) | (1L << (NAME - 20)) | (1L << (STRING_LITERAL - 20)) | (1L << (BYTES_LITERAL - 20)) | (1L << (DECIMAL_INTEGER - 20)) | (1L << (OCT_INTEGER - 20)) | (1L << (HEX_INTEGER - 20)) | (1L << (BIN_INTEGER - 20)) | (1L << (FLOAT_NUMBER - 20)) | (1L << (IMAG_NUMBER - 20)) | (1L << (ELLIPSIS - 20)) | (1L << (STAR - 20)) | (1L << (OPEN_PAREN - 20)) | (1L << (OPEN_BRACK - 20)) | (1L << (ADD - 20)) | (1L << (MINUS - 20)) | (1L << (NOT_OP - 20)) | (1L << (OPEN_BRACE - 20)))) != 0)) {
 				{
 				setState(517); 
-				((Raise_stmtContext)_localctx).exception = test();
+				((Raise_stmtContext)_localctx).except = test();
 				setState(520);
 				_la = _input.LA(1);
 				if (_la==FROM) {
@@ -6140,7 +6140,7 @@ public class Python3Parser extends Parser {
 	}
 
 	public static class ArglistContext extends ParserRuleContext {
-		public List<ArgumentContext> params;
+		public List<ArgumentContext> positionalArgs;
 		public ArgumentContext optArg;
 		public ArgumentContext arg;
 		public TestContext args;
@@ -6173,7 +6173,7 @@ public class Python3Parser extends Parser {
 		ArglistContext _localctx = new ArglistContext(_ctx, getState());
 		enterRule(_localctx, 148, RULE_arglist);
 
-		    ((ArglistContext)_localctx).params =  new ArrayList<>();
+		    ((ArglistContext)_localctx).positionalArgs =  new ArrayList<>();
 
 		int _la;
 		try {
@@ -6191,7 +6191,7 @@ public class Python3Parser extends Parser {
 					((ArglistContext)_localctx).optArg = argument();
 					setState(1079); 
 					match(COMMA);
-					 _localctx.params.add(((ArglistContext)_localctx).optArg); 
+					 _localctx.positionalArgs.add(((ArglistContext)_localctx).optArg); 
 					}
 					} 
 				}
@@ -6205,7 +6205,7 @@ public class Python3Parser extends Parser {
 				{
 				setState(1087); 
 				((ArglistContext)_localctx).arg = argument();
-				 _localctx.params.add(((ArglistContext)_localctx).arg); 
+				 _localctx.positionalArgs.add(((ArglistContext)_localctx).arg); 
 				setState(1090);
 				_la = _input.LA(1);
 				if (_la==COMMA) {
@@ -6234,7 +6234,7 @@ public class Python3Parser extends Parser {
 						match(COMMA);
 						setState(1095); 
 						((ArglistContext)_localctx).optArg2 = argument();
-						 _localctx.params.add(((ArglistContext)_localctx).optArg2); 
+						 _localctx.positionalArgs.add(((ArglistContext)_localctx).optArg2); 
 						}
 						} 
 					}

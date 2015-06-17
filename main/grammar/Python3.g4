@@ -327,7 +327,7 @@ yield_stmt
 
 /// raise_stmt: 'raise' [test ['from' test]]
 raise_stmt
- : RAISE ( exception=test ( FROM source=test )? )?
+ : RAISE ( except=test ( FROM source=test )? )?
  ;
 
 /// import_stmt: import_name | import_from
@@ -692,13 +692,13 @@ classdef
 /// arglist: (argument ',')* (argument [',']
 ///                          |'*' test (',' argument)* [',' '**' test]
 ///                          |'**' test)
-arglist returns [List<ArgumentContext> params]
+arglist returns [List<ArgumentContext> positionalArgs]
 @init{
-    $params = new ArrayList<>();
+    $positionalArgs = new ArrayList<>();
 }
- : ( optArg=argument ',' { $params.add($optArg.ctx); } )*
- ( arg=argument { $params.add($arg.ctx); } ','?
-     | '*' args=test ( ',' optArg2=argument { $params.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
+ : ( optArg=argument ',' { $positionalArgs.add($optArg.ctx); } )*
+ ( arg=argument { $positionalArgs.add($arg.ctx); } ','?
+     | '*' args=test ( ',' optArg2=argument { $positionalArgs.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
      | '**' kwargs=test
  )
  ;
