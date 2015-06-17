@@ -650,8 +650,8 @@ subscriptlist
 
 /// subscript: test | [test] ':' [test] [sliceop]
 subscript
- : test
- | test? ':' test? sliceop?
+ : index=test
+ | lowerBound=test? colon=':' upperBound=test? stride=sliceop?
  ;
 
 /// sliceop: ':' [test]
@@ -692,11 +692,15 @@ classdef
 /// arglist: (argument ',')* (argument [',']
 ///                          |'*' test (',' argument)* [',' '**' test]
 ///                          |'**' test)
-arglist
- : ( argument ',' )* ( argument ','?
-                     | '*' test ( ',' argument )* ( ',' '**' test )?
-                     | '**' test
-                     )
+arglist returns [List<ArgumentContext> params]
+@init{
+    $params = new ArrayList<>();
+}
+ : ( optArg=argument ',' { $params.add($optArg.ctx); } )*
+ ( arg=argument { $params.add($arg.ctx); } ','?
+     | '*' args=test ( ',' optArg2=argument { $params.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
+     | '**' kwargs=test
+ )
  ;
 
 /// # The reason that keywords are test nodes instead of NAME is that using NAME

@@ -1,6 +1,7 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.expression.atom.Identifier;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
@@ -13,16 +14,16 @@ public class Function extends Statement {
 
     //TODO: arguments
 
-    private final String name;
+    private final Identifier name;
     private final List<Statement> body;
 
-    public Function(LocInfo locInfo, String name, List<Statement> body) {
+    public Function(LocInfo locInfo, Identifier name, List<Statement> body) {
         super(locInfo);
         this.name = name;
         this.body = body;
     }
 
-	public String getName() {
+	public Identifier getName() {
 		return name;
 	}
 

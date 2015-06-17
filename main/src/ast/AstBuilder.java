@@ -10,6 +10,9 @@ import ast.expression.logical.Not;
 import ast.expression.logical.Or;
 import ast.expression.maker.DictMaker;
 import ast.expression.maker.SetMaker;
+import ast.expression.primary.Subscript;
+import ast.expression.primary.SubscriptIndex;
+import ast.expression.primary.SubscriptSlice;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -161,12 +164,10 @@ public class AstBuilder {
 			//DEF NAME parameters ( '->' test )? ':' suite
 			//TODO: params
 			ctx.parameters().accept(this);
-			if (ctx.test() != null) {
-				ctx.test().accept(this);
-			}
+			Expr returnType = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
 			CollectionWrapper<Statement> wrap = this.getResultWrapper(ctx.suite());
 			indent--;
-			return new Function(this.getLocInfo(ctx), ctx.NAME().getText(), wrap.getItems());
+			return new Function(this.getLocInfo(ctx), new Identifier(this.getLocInfo(ctx.NAME()), ctx.NAME().getText()), wrap.getItems());
 		}
 
 		@Override
@@ -247,7 +248,6 @@ public class AstBuilder {
 			print("visitVfpdef");
 			//NAME
 			indent--;
-			//TODO: strip out unnecessary chars
 			return new Identifier(this.getLocInfo(ctx), ctx.NAME().getText());
 		}
 
@@ -323,6 +323,7 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitExpr_stmt(@NotNull Python3Parser.Expr_stmtContext ctx) {
+			//TODO
 			indent++;
 			print("visitExpr_stmt");
 			//testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr | testlist_star_expr ) )* )
@@ -413,9 +414,9 @@ public class AstBuilder {
 				indent--;
 				return ctx.return_stmt().accept(this);
 			}
-			if (ctx.return_stmt() != null) {
+			if (ctx.raise_stmt() != null) {
 				indent--;
-				return ctx.return_stmt().accept(this);
+				return ctx.raise_stmt().accept(this);
 			}
 			if (ctx.yield_stmt() != null) {
 				indent--;
@@ -1150,7 +1151,7 @@ public class AstBuilder {
 				ctx.arglist().accept(this);
 			}
 			if (ctx.subscriptlist() != null) {
-				ctx.subscriptlist().accept(this);
+				CollectionWrapper<Subscript> wrap = (CollectionWrapper<Subscript>) ctx.subscriptlist().accept(this);
 			}
 			indent--;
 			return null;
@@ -1158,33 +1159,33 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitSubscriptlist(@NotNull Python3Parser.SubscriptlistContext ctx) {
-			//TODO
 			indent++;
 			print("visitSubscriptlist");
 			//subscript ( ',' subscript )* ','?
-			for (Python3Parser.SubscriptContext c : ctx.subscript()) {
-				c.accept(this);
-			}
+			List<Subscript> subscripts = ctx.subscript().stream()
+					.map(e -> (Subscript) e.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			return new CollectionWrapper<>(this.getLocInfo(ctx), subscripts);
 		}
 
 		@Override
 		public Py3Node visitSubscript(@NotNull Python3Parser.SubscriptContext ctx) {
-			//TODO
 			indent++;
 			print("visitSubscript");
-			// test | test? ':' test? sliceop?
-			if (ctx.test() != null) {
-				for (Python3Parser.TestContext c : ctx.test()) {
-					c.accept(this);
-				}
+			// index=test | start=test? colon=':' end=test? step=sliceop?
+			if (ctx.index != null) {
+				indent--;
+				return new SubscriptIndex(this.getLocInfo(ctx), (Expr) ctx.index.accept(this));
 			}
-			if (ctx.sliceop() != null) {
-				ctx.sliceop().accept(this);
+			if (ctx.colon != null) {
+				Expr startIndex = ctx.lowerBound == null ? null : (Expr) ctx.lowerBound.accept(this);
+				Expr endIndex = ctx.upperBound == null ? null : (Expr) ctx.upperBound.accept(this);
+				Expr step = ctx.stride == null ? null : (Expr) ctx.stride.accept(this);
+				indent--;
+				return new SubscriptSlice(this.getLocInfo(ctx), startIndex, endIndex, step);
 			}
-			indent--;
-			return null;
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -1274,17 +1275,16 @@ public class AstBuilder {
 			//TODO
 			indent++;
 			print("visitArglist");
-			//		( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
-			if (ctx.argument() != null) {
-				for (Python3Parser.ArgumentContext c : ctx.argument()) {
-					c.accept(this);
-				}
+			//( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
+
+			ctx.params.stream();
+			if (ctx.args != null ) {
+
 			}
-			if (ctx.test() != null) {
-				for (Python3Parser.TestContext c : ctx.test()) {
-					c.accept(this);
-				}
+			if (ctx.kwargs != null) {
+
 			}
+
 			indent--;
 			return null;
 		}
@@ -1356,11 +1356,12 @@ public class AstBuilder {
 		public Py3Node visitYield_expr(@NotNull Python3Parser.Yield_exprContext ctx) {
 			indent++;
 			print("visitYield_expr");
-			indent--;
 			//: YIELD yield_arg?
 			if (ctx.yield_arg() != null) {
+				indent--;
 				return ctx.yield_arg().accept(this);
 			}
+			indent--;
 			return new Yield(this.getLocInfo(ctx));
 		}
 
@@ -1368,13 +1369,14 @@ public class AstBuilder {
 		public Py3Node visitYield_arg(@NotNull Python3Parser.Yield_argContext ctx) {
 			indent++;
 			print("visitYield_arg");
-			indent--;
 			//FROM test | testlist
 			if (ctx.test() != null) {
+				indent--;
 				return new YieldFrom(this.getLocInfo(ctx), (Expr) ctx.test().accept(this));
 			}
 			if (ctx.testlist() != null) {
 				CollectionWrapper<Expr> wrap = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
+				indent--;
 				return new Yield(this.getLocInfo(ctx), wrap.getItems());
 			}
 			throw new IllegalArgumentException("Unknown context");
@@ -1401,19 +1403,21 @@ public class AstBuilder {
 		public Py3Node visitNumber(@NotNull Python3Parser.NumberContext ctx) {
 			indent++;
 			print("visitNumber");
-			indent--;
 			//integer | FLOAT_NUMBER | IMAG_NUMBER
 			if (ctx.integer() != null) {
+				indent--;
 				return ctx.integer().accept(this);
 			}
 			else if (ctx.FLOAT_NUMBER() != null) {
 				Double nr = Double.parseDouble(ctx.FLOAT_NUMBER().getText());
+				indent--;
 				return new ast.expression.atom.Float(this.getLocInfo(ctx), nr);
 			}
 			else if (ctx.IMAG_NUMBER() != null) {
 				//strip out the "j" at the end
 				String s = ctx.IMAG_NUMBER().getText();
 				s = s.substring(0, s.length() - 1);
+				indent--;
 				return new Imaginary(this.getLocInfo(ctx), Double.parseDouble(s));
 			}
 			throw new IllegalArgumentException("Unknown context");
@@ -1423,35 +1427,40 @@ public class AstBuilder {
 		public Py3Node visitInteger(@NotNull Python3Parser.IntegerContext ctx) {
 			indent++;
 			print("visitInteger");
-			indent--;
 			//DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
 			if (ctx.DECIMAL_INTEGER() != null) {
 				BigInteger bi = new BigInteger(ctx.DECIMAL_INTEGER().getText());
+				indent--;
 				return new Int(this.getLocInfo(ctx), bi);
 			}
 			else if (ctx.OCT_INTEGER() != null) {
 				//strip out the "0O" prefix
 				String s = ctx.OCT_INTEGER().getText();
 				s = s.substring(2);
+				indent--;
 				return new Int(this.getLocInfo(ctx), new BigInteger(s, 8));
 			}
 			else if (ctx.HEX_INTEGER() != null) {
 				//strip out the "0X" prefix
 				String s = ctx.HEX_INTEGER().getText();
 				s = s.substring(2);
+				indent--;
 				return new Int(this.getLocInfo(ctx), new BigInteger(s, 16));
 			}
 			else if (ctx.BIN_INTEGER() != null) {
 				//strip out the "0B" prefix
 				String s = ctx.HEX_INTEGER().getText();
 				s = s.substring(2);
+				indent--;
 				return new Int(this.getLocInfo(ctx), new BigInteger(s, 2));
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
 
 		public Py3Node visitComment(@NotNull Python3Parser.CommentContext ctx) {
+			indent++;
 			print("visitComment");
+			indent--;
 			return new Comment(this.getLocInfo(ctx), ctx.COMMENT().getText());
 		}
 

@@ -1,13 +1,14 @@
-package ast.expression.datastruct;
+package ast.expression.primary;
 
 import ast.LocInfo;
+import ast.expression.Expr;
 import thesis.Py3TreeVisitor;
 
 /**
- * Created by Nik on 25-05-15
+ * Created by Nik on 17-06-2015
  */
-public class Range extends Sequence {
-	public Range(LocInfo locInfo) {
+public class AttributeRef extends Expr {
+	public AttributeRef(LocInfo locInfo) {
 		super(locInfo);
 	}
 
