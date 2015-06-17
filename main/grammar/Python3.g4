@@ -192,13 +192,17 @@ parameters
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
 ///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
 ///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
-typedargslist
- : tfpdef ( '=' test )? ( ',' tfpdef ( '=' test )? )* ( ',' ( '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
-                                                            | '**' tfpdef
-                                                            )?
-                                                      )?
- | '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
- | '**' tfpdef
+typedargslist returns [Map<TfpdefContext, TestContext> args]
+ @init {
+     Map<TfpdefContext, TestContext> args = new HashMap<>();
+ }
+ : a=tfpdef { args.put($a.ctx, null); } ( '=' aVal=test { args.put($a.ctx, $aVal.ctx); } )? ( ',' b=tfpdef { args.put($b.ctx, null); } ( '=' bVal=test { args.put($b.ctx, $bVal.ctx); } )? )*
+    ( ',' ( '*' c=tfpdef? { args.put($c.ctx, null); } ( ',' d=tfpdef { args.put($d.ctx, null); } ( '=' dVal=test { args.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { args.put($e.ctx, null); } )?
+        | '**' f=tfpdef { args.put($f.ctx, null); }
+        )?
+    )?
+ | '*' g=tfpdef? { args.put($g.ctx, null); } ( ',' h=tfpdef { args.put($h.ctx, null); } ( '=' hVal=test { args.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { args.put($i.ctx, null); } )?
+ | '**' j=tfpdef { args.put($j.ctx, null); }
  ;
 
 /// tfpdef: NAME [':' test]
@@ -209,13 +213,17 @@ tfpdef
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
 ///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
 ///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
-varargslist
- : vfpdef ( '=' test )? ( ',' vfpdef ( '=' test )? )* ( ',' ( '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
-                                                            | '**' vfpdef
-                                                            )?
-                                                      )?
- | '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
- | '**' vfpdef
+varargslist returns [Map<VfpdefContext, TestContext> args]
+@init {
+    Map<VfpdefContext, TestContext> args = new HashMap<>();
+}
+ : a=vfpdef { args.put($a.ctx, null); } ( '=' aVal=test { args.put($a.ctx, $aVal.ctx); } )? ( ',' b=vfpdef { args.put($b.ctx, null); } ( '=' bVal=test { args.put($b.ctx, $bVal.ctx); } )? )*
+    ( ',' ( '*' c=vfpdef? { args.put($c.ctx, null); } ( ',' d=vfpdef { args.put($d.ctx, null); } ( '=' dVal=test { args.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { args.put($e.ctx, null); } )?
+        | '**' f=vfpdef { args.put($f.ctx, null); }
+        )?
+    )?
+ | '*' g=vfpdef? { args.put($g.ctx, null); } ( ',' h=vfpdef { args.put($h.ctx, null); } ( '=' hVal=test { args.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { args.put($i.ctx, null); } )?
+ | '**' j=vfpdef { args.put($j.ctx, null); }
  ;
 
 /// vfpdef: NAME
@@ -263,19 +271,19 @@ testlist_star_expr
 /// augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
 ///             '<<=' | '>>=' | '**=' | '//=')
 augassign
- : '+='
- | '-='
- | '*='
- | '@=' // PEP 465
- | '/='
- | '%='
- | '&='
- | '|='
- | '^='
- | '<<='
- | '>>='
- | '**='
- | '//='
+ : op='+='
+ | op='-='
+ | op='*='
+ | op='@=' // PEP 465
+ | op='/='
+ | op='%='
+ | op='&='
+ | op='|='
+ | op='^='
+ | op='<<='
+ | op='>>='
+ | op='**='
+ | op='//='
  ;
 
 /// del_stmt: 'del' exprlist
@@ -471,21 +479,21 @@ lambdef_nocond
  ;
 
 /// or_test: and_test ('or' and_test)*
-or_test returns [List<String> operators, List<TermContext> operands]
+or_test returns [List<String> operators, List<And_testContext> operands]
 @init {
-    operators = new ArrayList<>();
-    operands = new ArrayList<>();
+    List<String> operators = new ArrayList<>();
+    List<And_testContext> operands = new ArrayList<>();
 }
- : left=and_test { operands.add(left) } ( op=OR right=and_test { operators.add(op); operands.add(right); } )*
+ : left=and_test { operands.add($left.ctx); } ( op=OR right=and_test { operators.add($op.text); operands.add($right.ctx); } )*
  ;
 
 /// and_test: not_test ('and' not_test)*
-and_test returns [List<String> operators, List<TermContext> operands]
+and_test returns [List<String> operators, List<Not_testContext> operands]
 @init {
-    operators = new ArrayList<>();
-    operands = new ArrayList<>();
+    List<String> operators = new ArrayList<>();
+    List<Not_testContext> operands = new ArrayList<>();
 }
- : left=not_test { operands.add(left) } ( op=AND right=not_test { operators.add(op); operands.add(right); } )*
+ : left=not_test { operands.add($left.ctx); } ( op=AND right=not_test { operators.add($op.text); operands.add($right.ctx); } )*
  ;
 
 /// not_test: 'not' not_test | comparison
@@ -495,12 +503,12 @@ not_test
  ;
 
 /// comparison: star_expr (comp_op star_expr)*
-comparison returns [List<String> operators, List<TermContext> operands]
+comparison returns [List<Comp_opContext> operators, List<Star_exprContext> operands]
 @init {
-    operators = new ArrayList<>();
-    operands = new ArrayList<>();
+    List<Comp_opContext> operators = new ArrayList<>();
+    List<Star_exprContext> operands = new ArrayList<>();
 }
- : left=star_expr { operands.add(left) } ( op=comp_op right=star_expr { operators.add(op); operands.add(right); } )*
+ : left=star_expr { operands.add($left.ctx); } ( op=comp_op right=star_expr { operators.add($op.ctx); operands.add($right.ctx); } )*
  ;
 
 /// # <> isn't actually a valid comparison operator in Python. It's here for the
@@ -543,33 +551,33 @@ and_expr
 /// shift_expr: arith_expr (('<<'|'>>') arith_expr)*
 shift_expr returns [List<String> operators]
 @init {
-    operators = new ArrayList<>();
+    List<String> operators = new ArrayList<>();
 }
- : arith_expr ( op='<<' arith_expr { operators.add(op) }
-              | op='>>' arith_expr { operators.add(op) }
+ : arith_expr ( op='<<' arith_expr { operators.add($op.text); }
+              | op='>>' arith_expr { operators.add($op.text); }
               )*
  ;
 
 /// arith_expr: term (('+'|'-') term)*
 arith_expr returns [List<String> operators]
 @init {
-    operators = new ArrayList<>();
+    List<String> operators = new ArrayList<>();
 }
- : term ( op='+' term { operators.add(op) }
-        | op='-' term { operators.add(op) }
+ : term ( op='+' term { operators.add($op.text); }
+        | op='-' term { operators.add($op.text); }
         )*
  ;
 
 /// term: factor (('*'|'/'|'%'|'//') factor)*
 term returns [List<String> operators]
 @init {
-    operators = new ArrayList<>();
+    List<String> operators = new ArrayList<>();
 }
- : factor ( op='*' factor { operators.add(op) }
-          | op='/' factor { operators.add(op) }
-          | op='%' factor { operators.add(op) }
-          | op='//' factor { operators.add(op) }
-          | op='@' factor { operators.add(op) } // PEP 465
+ : factor ( op='*' factor { operators.add($op.text); }
+          | op='/' factor { operators.add($op.text); }
+          | op='%' factor { operators.add($op.text); }
+          | op='//' factor { operators.add($op.text); }
+          | op='@' factor { operators.add($op.text); } // PEP 465
           )*
  ;
 
@@ -597,7 +605,7 @@ atom
  | NAME
  | number
  | string+
- | '...'
+ | ellipsis='...'
  | NONE
  | TRUE
  | FALSE
@@ -606,10 +614,10 @@ atom
 /// testlist_comp: test ( comp_for | (',' test)* [','] )
 testlist_comp returns [List<TestContext> values]
 @init{
-    values = new ArrayList<>();
+    List<TestContext> values = new ArrayList<>();
 }
  : test ( comp_for
-        | ( ',' val=test { values.add(val) } )* ','?
+        | ( ',' val=test { values.add($val.ctx); } )* ','?
         )
  ;
 
@@ -650,14 +658,14 @@ testlist
 ///                   (test (comp_for | (',' test)* [','])) )
 dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContext> dictValues]
 @init{
-    dictValues = new HashMap<>();
-    setValues = new ArrayList<>();
+    Map<TestContext, TestContext> dictValues = new HashMap<>();
+    List<TestContext> setValues = new ArrayList<>();
 }
  : dictVar=test ':' dictExpr=test ( comp_for
-                 | ( ',' dictKey=test ':' dictVal=test { dictValues.put(dictKey, dictVal) } )* ','?
+                 | ( ',' dictKey=test ':' dictVal=test { dictValues.put($dictKey.ctx, $dictVal.ctx); } )* ','?
                  )
  | setVar=test ( comp_for
-        | ( ',' setVal=test { setValues.add(setVal} )* ','?
+        | ( ',' setVal=test { setValues.add($setVal.ctx); } )* ','?
         )
  ;
 

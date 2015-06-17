@@ -10,10 +10,19 @@ import java.util.List;
 public class Shift extends Expr {
 
 	private final List<Expr> operands;
+	private final List<String> operators;
 
-	public Shift(LocInfo locInfo, List<Expr> operands) {
+	public Shift(LocInfo locInfo, List<Expr> operands, List<String> operators) {
 		super(locInfo);
 		this.operands = operands;
+		this.operators = operators;
 	}
 
+	public List<Expr> getOperands() {
+		return operands;
+	}
+
+	public List<String> getOperators() {
+		return operators;
+	}
 }

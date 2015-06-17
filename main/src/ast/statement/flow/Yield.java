@@ -1,6 +1,7 @@
-package ast;
+package ast.statement.flow;
 
 
+import ast.LocInfo;
 import ast.expression.Expr;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * Created by Nik on 25-05-2015
  */
-public class Yield extends Py3Node {
+public class Yield extends Flow {
 
 	private final List<Expr> values;
 

@@ -1,6 +1,7 @@
-package ast.expression;
+package ast.expression.datastruct;
 
 import ast.LocInfo;
+import ast.expression.Expr;
 
 /**
  * Created by Nik on 25-05-15

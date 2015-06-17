@@ -1,19 +1,20 @@
 package ast;
 
 import ast.expression.*;
-import ast.expression.atom.Comment;
-import ast.expression.atom.Imaginary;
-import ast.expression.atom.Int;
-import ast.expression.atom.Str;
+import ast.expression.arithmetic.Arithmetic;
+import ast.expression.atom.*;
 import ast.expression.bitwise.Xor;
 import ast.expression.logical.Logical;
+import ast.expression.logical.Not;
 import ast.expression.logical.Or;
 import ast.expression.maker.DictMaker;
 import ast.expression.maker.SetMaker;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
+import ast.statement.Pass;
 import ast.statement.Statement;
+import ast.statement.flow.*;
 import gen.Python3Parser;
 import gen.Python3Visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -24,9 +25,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +47,19 @@ public class AstBuilder {
 
 	private class AstBuilderVisitor implements Python3Visitor<Py3Node> {
 
+		public AstBuilderVisitor() {
+			this.suites = new Stack<>();
+		}
+
 		private int indent = 0;
+
+		//TODO: see if any of these vars can be removed and the values handled in a nicer way
+		private List<Expr> testListStarExprResults;
+		private List<Expr> testListResults;
+		private String augAssignResult;
+		private List<Expr> exprListResult;
+		private List<Decorator> decoratorsResult;
+		private Stack<List<Statement>> suites;
 
 		@Override
 		public Py3Node visitSingle_input(@NotNull Python3Parser.Single_inputContext ctx) {
@@ -73,13 +84,17 @@ public class AstBuilder {
 			indent++;
 			print("visitFile_input");
 			//( NEWLINE | stmt )* EOF
+			if (ctx.NEWLINE() != null) {
+				indent--;
+				return new Module(this.getLocInfo(ctx), Collections.emptyList());
+			}
 			if (ctx.stmt() != null) {
-				for (Python3Parser.StmtContext stmt : ctx.stmt()) {
-					stmt.accept(this);
-				}
+				List<Py3Node> children = new ArrayList<>();
+				ctx.stmt().forEach(e -> children.addAll(((Wrapper<Statement>) e.accept(this)).statements));
+				return new Module(this.getLocInfo(ctx), children);
 			}
 			indent--;
-			return null;
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -93,6 +108,7 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitDecorator(@NotNull Python3Parser.DecoratorContext ctx) {
+			//TODO
 			indent++;
 			print("visitDecorator");
 			//'@' dotted_name ( '(' arglist? ')' )? NEWLINE
@@ -101,7 +117,7 @@ public class AstBuilder {
 				ctx.arglist().accept(this);
 			}
 			indent--;
-			return null;
+			return new Decorator(this.getLocInfo(ctx), ctx.dotted_name().getText());
 		}
 
 		@Override
@@ -110,9 +126,12 @@ public class AstBuilder {
 			print("visitDecorators");
 			//decorator+
 			if (ctx.decorator() != null) {
-				for (Python3Parser.DecoratorContext c : ctx.decorator()) {
-					c.accept(this);
-				}
+				this.decoratorsResult = ctx.decorator()
+						.stream().map(e -> (Decorator) e.accept(this))
+						.collect(Collectors.toList());
+			}
+			else {
+				this.decoratorsResult = Collections.emptyList();
 			}
 			indent--;
 			return null;
@@ -125,13 +144,16 @@ public class AstBuilder {
 			//decorators ( classdef | funcdef )
 			ctx.decorators().accept(this);
 			if (ctx.classdef() != null) {
-				ctx.classdef().accept(this);
+				ClassDef cd = (ClassDef) ctx.classdef().accept(this);
+				indent--;
+				return new DecoratedClass(this.getLocInfo(ctx), this.decoratorsResult, cd.getName(), cd.getBody());
 			}
 			if (ctx.funcdef() != null) {
-				ctx.funcdef().accept(this);
+				Function f = (Function) ctx.funcdef().accept(this);
+				indent--;
+				return new DecoratedFunction(this.getLocInfo(ctx), this.decoratorsResult, f.getName(), f.getBody());
 			}
-			indent--;
-			return null;
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -139,17 +161,19 @@ public class AstBuilder {
 			indent++;
 			print("visitFuncdef");
 			//DEF NAME parameters ( '->' test )? ':' suite
+			//TODO: params
 			ctx.parameters().accept(this);
 			if (ctx.test() != null) {
 				ctx.test().accept(this);
 			}
 			ctx.suite().accept(this);
 			indent--;
-			return null;
+			return new Function(this.getLocInfo(ctx), ctx.NAME().getText(), this.suites.pop());
 		}
 
 		@Override
 		public Py3Node visitParameters(@NotNull Python3Parser.ParametersContext ctx) {
+			//TODO
 			indent++;
 			print("visitParameters");
 			//'(' typedargslist? ')'
@@ -158,11 +182,12 @@ public class AstBuilder {
 				return ctx.typedargslist().accept(this);
 			}
 			indent--;
-			return null;
+			return new Wrapper<>(this.getLocInfo(ctx), Collections.emptyList());
 		}
 
 		@Override
 		public Py3Node visitTypedargslist(@NotNull Python3Parser.TypedargslistContext ctx) {
+			//TODO
 			indent++;
 			print("visitTypedargslist");
 			//		tfpdef ( '=' test )? ( ',' tfpdef ( '=' test )? )* ( ',' ( '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
@@ -171,22 +196,21 @@ public class AstBuilder {
 			//		)?
 			//		| '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
 			//		| '**' tfpdef
-			if (ctx.tfpdef() != null) {
-				for (Python3Parser.TfpdefContext tfpdef : ctx.tfpdef()) {
-					tfpdef.accept(this);
-				}
+
+			Map<Py3Node, Py3Node> arguments = new HashMap<>();
+			for (Python3Parser.TfpdefContext key : ctx.args.keySet()) {
+				Py3Node keyNode = key.accept(this);
+				Python3Parser.TestContext value = ctx.args.get(key);
+				arguments.put(keyNode, value == null ? null : value.accept(this));
 			}
-			if (ctx.test() != null) {
-				for (Python3Parser.TestContext c : ctx.test()) {
-					c.accept(this);
-				}
-			}
+
 			indent--;
 			return null;
 		}
 
 		@Override
 		public Py3Node visitTfpdef(@NotNull Python3Parser.TfpdefContext ctx) {
+			//TODO
 			indent++;
 			print("visitTfpdef");
 			//NAME ( ':' test )?
@@ -200,6 +224,7 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitVarargslist(@NotNull Python3Parser.VarargslistContext ctx) {
+			//TODO
 			indent++;
 			print("visitVarargslist");
 			//		vfpdef ( '=' test )? ( ',' vfpdef ( '=' test )? )* ( ',' ( '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
@@ -208,22 +233,20 @@ public class AstBuilder {
 			//		)?
 			//		| '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
 			//		| '**' vfpdef
-			if (ctx.vfpdef() != null) {
-				for (Python3Parser.VfpdefContext vfpdef : ctx.vfpdef()) {
-					vfpdef.accept(this);
-				}
+			Map<Py3Node, Py3Node> arguments = new HashMap<>();
+			for (Python3Parser.VfpdefContext key : ctx.args.keySet()) {
+				Py3Node keyNode = key.accept(this);
+				Python3Parser.TestContext value = ctx.args.get(key);
+				arguments.put(keyNode, value == null ? null : value.accept(this));
 			}
-			if (ctx.test() != null) {
-				for (Python3Parser.TestContext c : ctx.test()) {
-					c.accept(this);
-				}
-			}
+
 			indent--;
 			return null;
 		}
 
 		@Override
 		public Py3Node visitVfpdef(@NotNull Python3Parser.VfpdefContext ctx) {
+			//TODO
 			indent++;
 			print("visitVfpdef");
 			//NAME
@@ -235,16 +258,16 @@ public class AstBuilder {
 		public Py3Node visitStmt(@NotNull Python3Parser.StmtContext ctx) {
 			indent++;
 			print("visitStmt " + ctx.getText());
+			indent--;
 			//simple_stmt | compound_stmt
 			if (ctx.simple_stmt() != null) {
-				indent--;
 				return ctx.simple_stmt().accept(this);
 			}
 			if (ctx.compound_stmt() != null) {
-				indent--;
-				return ctx.compound_stmt().accept(this);
+				List<Statement> s = new ArrayList<>();
+				s.add((Statement) ctx.compound_stmt().accept(this));
+				return new Wrapper<Statement>(this.getLocInfo(ctx), s);
 			}
-			indent--;
 			throw new IllegalArgumentException("Unknown context");
 		}
 
@@ -252,12 +275,12 @@ public class AstBuilder {
 		public Py3Node visitSimple_stmt(@NotNull Python3Parser.Simple_stmtContext ctx) {
 			indent++;
 			print("visitSimple_stmt");
-			//small_stmt ( ';' small_stmt )* ';'? NEWLINE
-			for (Python3Parser.Small_stmtContext stmt : ctx.small_stmt()) {
-				stmt.accept(this);
-			}
 			indent--;
-			return null;
+			//small_stmt ( ';' small_stmt )* ';'? NEWLINE
+			return new Wrapper<Statement>(this.getLocInfo(ctx),
+					ctx.small_stmt().stream()
+							.map(e -> (Statement) e.accept(this))
+							.collect(Collectors.toList()));
 		}
 
 		@Override
@@ -305,7 +328,7 @@ public class AstBuilder {
 		public Py3Node visitExpr_stmt(@NotNull Python3Parser.Expr_stmtContext ctx) {
 			indent++;
 			print("visitExpr_stmt");
-			//testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr| testlist_star_expr ) )* )
+			//testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr | testlist_star_expr ) )* )
 			if (ctx.testlist_star_expr() != null) {
 				for (Python3Parser.Testlist_star_exprContext e : ctx.testlist_star_expr()) {
 					e.accept(this);
@@ -313,6 +336,7 @@ public class AstBuilder {
 			}
 			if (ctx.augassign() != null) {
 				ctx.augassign().accept(this);
+				String operator = this.augAssignResult;
 			}
 			if (ctx.yield_expr() != null) {
 				for (Python3Parser.Yield_exprContext e : ctx.yield_expr()) {
@@ -330,16 +354,17 @@ public class AstBuilder {
 		public Py3Node visitTestlist_star_expr(@NotNull Python3Parser.Testlist_star_exprContext ctx) {
 			indent++;
 			print("visitTestlist_star_expr");
+			this.testListStarExprResults = new ArrayList<>();
 			//( test | star_expr ) ( ',' ( test |  star_expr ) )* ','?
 			if (ctx.test() != null) {
-				for (Python3Parser.TestContext testContext : ctx.test()) {
-					testContext.accept(this);
-				}
+				this.testListStarExprResults.addAll(ctx.test().stream()
+						.map(e -> (Expr) e.accept(this))
+						.collect(Collectors.toList()));
 			}
 			if (ctx.star_expr() != null) {
-				for (Python3Parser.Star_exprContext e : ctx.star_expr()) {
-					e.accept(this);
-				}
+				this.testListStarExprResults.addAll(ctx.star_expr().stream()
+						.map(e -> (Expr) e.accept(this))
+						.collect(Collectors.toList()));
 			}
 			indent--;
 			return null;
@@ -349,17 +374,19 @@ public class AstBuilder {
 		public Py3Node visitAugassign(@NotNull Python3Parser.AugassignContext ctx) {
 			indent++;
 			print("visitAugassign");
-			//'+=' | '-=' | '*=' | '@=' // PEP 465 | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=' | '>>=' | '**=' | '//='
 			indent--;
+			//'+=' | '-=' | '*=' | '@=' // PEP 465 | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=' | '>>=' | '**=' | '//='
+			this.augAssignResult = ctx.op.getText();
 			return null;
 		}
 
 		@Override
 		public Py3Node visitDel_stmt(@NotNull Python3Parser.Del_stmtContext ctx) {
+			//TODO
 			indent++;
 			print("visitDel_stmt");
-			//DEL exprlist
 			indent--;
+			//DEL exprlist
 			return ctx.exprlist().accept(this);
 		}
 
@@ -367,9 +394,9 @@ public class AstBuilder {
 		public Py3Node visitPass_stmt(@NotNull Python3Parser.Pass_stmtContext ctx) {
 			indent++;
 			print("visitPass_stmt");
-			//PASS
 			indent--;
-			return null;
+			//PASS
+			return new Pass(this.getLocInfo(ctx));
 		}
 
 		@Override
@@ -379,28 +406,20 @@ public class AstBuilder {
 			indent--;
 			//break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
 			if (ctx.break_stmt() != null) {
-				indent--;
 				return ctx.break_stmt().accept(this);
 			}
 			if (ctx.continue_stmt() != null) {
-				indent--;
 				return ctx.continue_stmt().accept(this);
 			}
-			indent--;
 			if (ctx.return_stmt() != null) {
-				indent--;
 				return ctx.return_stmt().accept(this);
 			}
-			indent--;
 			if (ctx.return_stmt() != null) {
-				indent--;
 				return ctx.return_stmt().accept(this);
 			}
 			if (ctx.yield_stmt() != null) {
-				indent--;
 				return ctx.yield_stmt().accept(this);
 			}
-			indent--;
 			throw new IllegalArgumentException("Unknown context");
 		}
 
@@ -408,18 +427,18 @@ public class AstBuilder {
 		public Py3Node visitBreak_stmt(@NotNull Python3Parser.Break_stmtContext ctx) {
 			indent++;
 			print("visitBreak_stmt");
-			//BREAK
 			indent--;
-			return null;
+			//BREAK
+			return new Break(this.getLocInfo(ctx));
 		}
 
 		@Override
 		public Py3Node visitContinue_stmt(@NotNull Python3Parser.Continue_stmtContext ctx) {
 			indent++;
 			print("visitContinue_stmt");
-			//CONTINUE
 			indent--;
-			return null;
+			//CONTINUE
+			return new Continue(this.getLocInfo(ctx));
 		}
 
 		@Override
@@ -428,19 +447,20 @@ public class AstBuilder {
 			print("visitReturn_stmt");
 			//RETURN testlist?
 			if (ctx.testlist() != null) {
+				ctx.testlist().accept(this);
 				indent--;
-				return ctx.testlist().accept(this);
+				return new Return(this.getLocInfo(ctx), this.testListResults);
 			}
 			indent--;
-			return null;
+			return new Return(this.getLocInfo(ctx), Collections.emptyList());
 		}
 
 		@Override
 		public Py3Node visitYield_stmt(@NotNull Python3Parser.Yield_stmtContext ctx) {
 			indent++;
 			print("visitYield_stmt");
-			//yield_expr
 			indent--;
+			//yield_expr
 			return ctx.yield_expr().accept(this);
 		}
 
@@ -737,18 +757,19 @@ public class AstBuilder {
 			print("visitSuite");
 			//simple_stmt | NEWLINE INDENT stmt+ DEDENT
 			if (ctx.simple_stmt() != null) {
-				indent--;
 				return ctx.simple_stmt().accept(this);
 			}
-			if (ctx.stmt() != null) {
+			else if (ctx.stmt() != null) {
 				List<Statement> statements = ctx.stmt().stream()
 						.map(c -> (Statement) c.accept(this))
 						.collect(Collectors.toList());
-				//TODO: create a suite node? figure out how to fix this
-				indent--;
-				return null;
+				this.suites.push(statements);
 			}
-			throw new IllegalArgumentException("Unknown context");
+			else {
+				throw new IllegalArgumentException("Unknown context");
+			}
+			indent--;
+			return null;
 		}
 
 		@Override
@@ -948,7 +969,6 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitShift_expr(@NotNull Python3Parser.Shift_exprContext ctx) {
-			//TODO
 			indent++;
 			print("visitShift_expr");
 			//arith_expr ( '<<' arith_expr | '>>' arith_expr )*
@@ -959,37 +979,31 @@ public class AstBuilder {
 			if (children.size() == 1) {
 				return children.get(0);
 			}
-			return new Shift(this.getLocInfo(ctx), children);
+			return new Shift(this.getLocInfo(ctx), children, ctx.operators);
 		}
 
 		@Override
 		public Py3Node visitArith_expr(@NotNull Python3Parser.Arith_exprContext ctx) {
-			//TODO
 			indent++;
 			print("visitArith_expr");
 			//term ( '+' term | '-' term )*
-			for (String op : ctx.operators) {
-			}
-			for (Python3Parser.TermContext c : ctx.term()) {
-				c.accept(this);
-			}
+			List<Expr> operands = ctx.term().stream()
+					.map(e -> (Expr) e.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
 		}
 
 		@Override
 		public Py3Node visitTerm(@NotNull Python3Parser.TermContext ctx) {
-			//TODO
 			indent++;
 			print("visitTerm");
 			//factor ( '*' factor | '/' factor | '%' factor | '//' factor | '@' factor // PEP 465 )
-			for (String op : ctx.operators) {
-			}
-			for (Python3Parser.FactorContext c : ctx.factor()) {
-				c.accept(this);
-			}
+			List<Expr> operands = ctx.factor().stream()
+					.map(e -> (Expr) e.accept(this))
+					.collect(Collectors.toList());
 			indent--;
-			return null;
+			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
 		}
 
 		@Override
@@ -1038,16 +1052,10 @@ public class AstBuilder {
 		public Py3Node visitAtom(@NotNull Python3Parser.AtomContext ctx) {
 			indent++;
 			print("visitAtom");
-			//		'(' ( yield_expr | testlist_comp )? ')'
-			//				| '[' testlist_comp? ']'
-			//				| '{' dictorsetmaker? '}'
-			//				| NAME
-			//				| number
-			//				| string+
-			//				| '...'
-			//				| NONE
-			//				| TRUE
-			//				| FALSE
+//			'(' ( yield_expr | testlist_comp )? ')'
+//			| '[' testlist_comp? ']'
+//			| '{' dictorsetmaker? '}'
+//			| NAME | number | string+ | '...' | NONE | TRUE | FALSE
 			indent--;
 			if (ctx.yield_expr() != null) {
 				return ctx.yield_expr().accept(this);
@@ -1058,15 +1066,32 @@ public class AstBuilder {
 			if (ctx.dictorsetmaker() != null) {
 				return ctx.dictorsetmaker().accept(this);
 			}
+			if (ctx.NAME() != null) {
+				//TODO
+				return null;
+			}
 			if (ctx.number() != null) {
 				return ctx.number().accept(this);
 			}
 			if (ctx.string() != null) {
-				//TODO: combine these silly strings
-				for (Python3Parser.StringContext c : ctx.string()) {
-					c.accept(this);
+				//TODO: filter out the start characters, quotes, etc.
+				String str = "";
+				for (Python3Parser.StringContext s : ctx.string()) {
+					str += s.getText();
 				}
-				return null;
+				return new Str(this.getLocInfo(ctx), str);
+			}
+			if (ctx.ellipsis != null) {
+				return new Ellipsis(this.getLocInfo(ctx));
+			}
+			if (ctx.NONE() != null) {
+				return new None(this.getLocInfo(ctx));
+			}
+			if (ctx.TRUE() != null) {
+				return new Bool(this.getLocInfo(ctx), true);
+			}
+			if (ctx.FALSE() != null) {
+				return new Bool(this.getLocInfo(ctx), false);
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1138,40 +1163,36 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitSliceop(@NotNull Python3Parser.SliceopContext ctx) {
-			//TODO
 			indent++;
 			print("visitSliceop");
+			indent--;
 			//':' test?
 			if (ctx.test() != null) {
-				indent--;
-				return ctx.test().accept(this);
+				return new Slice(this.getLocInfo(ctx), (Expr) ctx.test().accept(this));
 			}
-			indent--;
-			return null;
+			return new Slice(this.getLocInfo(ctx));
 		}
 
 		@Override
 		public Py3Node visitExprlist(@NotNull Python3Parser.ExprlistContext ctx) {
-			//TODO
 			indent++;
 			print("visitExprlist");
 			//star_expr ( ',' star_expr )* ','?
-			for (Python3Parser.Star_exprContext c : ctx.star_expr()) {
-				c.accept(this);
-			}
+			this.exprListResult = ctx.star_expr().stream()
+					.map(e -> (Expr) e.accept(this))
+					.collect(Collectors.toList());
 			indent--;
 			return null;
 		}
 
 		@Override
 		public Py3Node visitTestlist(@NotNull Python3Parser.TestlistContext ctx) {
-			//TODO
 			indent++;
 			print("visitTestlist");
 			//test ( ',' test )* ','?
-			for (Python3Parser.TestContext c : ctx.test()) {
-				c.accept(this);
-			}
+			this.testListResults = ctx.test().stream()
+					.map(e -> (Expr) e.accept(this))
+					.collect(Collectors.toList());
 			indent--;
 			return null;
 		}
@@ -1454,6 +1475,15 @@ public class AstBuilder {
 				System.out.print("\t");
 			}
 			System.out.println(s);
+		}
+
+		private class Wrapper<T> extends Py3Node {
+			public final List<T> statements;
+
+			public Wrapper(LocInfo locInfo, List<T> statements) {
+				super(locInfo);
+				this.statements = statements;
+			}
 		}
 	}
 }

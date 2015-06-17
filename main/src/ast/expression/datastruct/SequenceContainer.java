@@ -1,4 +1,4 @@
-package ast.expression;
+package ast.expression.datastruct;
 
 import ast.LocInfo;
 import ast.Py3Node;

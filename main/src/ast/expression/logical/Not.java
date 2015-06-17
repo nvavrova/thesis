@@ -1,11 +1,12 @@
-package ast.expression;
+package ast.expression.logical;
 
 import ast.LocInfo;
+import ast.expression.Expr;
 
 /**
  * Created by Nik on 09-06-2015
  */
-public class Not extends Expr {
+public class Not extends Logical {
 
 	private final Expr expression;
 
