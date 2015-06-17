@@ -2,6 +2,7 @@ package ast.expression.logical;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -12,5 +13,10 @@ public class Or extends Binary {
 
 	public Or(LocInfo locInfo, List<Expr> operands) {
 		super(locInfo, operands);
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

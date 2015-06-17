@@ -1,6 +1,7 @@
 package ast;
 
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 15-06-2015
@@ -44,5 +45,10 @@ public class Parameter extends Py3Node {
 
 	public Expr getDefValue() {
 		return defValue;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

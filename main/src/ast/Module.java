@@ -1,5 +1,7 @@
 package ast;
 
+import thesis.Py3TreeVisitor;
+
 import java.util.List;
 
 /**
@@ -16,5 +18,10 @@ public class Module extends Py3Node {
 
     public List<Py3Node> getBody() {
         return body;
+    }
+
+    @Override
+    public <T> T accept(Py3TreeVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

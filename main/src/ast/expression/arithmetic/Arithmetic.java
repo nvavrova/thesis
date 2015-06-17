@@ -2,6 +2,7 @@ package ast.expression.arithmetic;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -25,5 +26,10 @@ public class Arithmetic extends Expr {
 
 	public List<String> getOperators() {
 		return operators;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

@@ -1,7 +1,9 @@
-package ast.statement;
+package ast.statement.simple;
 
-import ast.Identifier;
+import ast.expression.atom.Identifier;
 import ast.LocInfo;
+import ast.statement.Statement;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -19,5 +21,10 @@ public class Nonlocal extends Statement {
 
 	public List<Identifier> getIdentifiers() {
 		return identifiers;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

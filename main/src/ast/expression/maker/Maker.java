@@ -6,7 +6,7 @@ import ast.expression.Expr;
 /**
  * Created by Nik on 15-06-2015
  */
-public class Maker extends Expr {
+public abstract class Maker extends Expr {
 	public Maker(LocInfo locInfo) {
 		super(locInfo);
 	}

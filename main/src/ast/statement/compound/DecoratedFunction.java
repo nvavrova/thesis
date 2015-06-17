@@ -1,5 +1,7 @@
-package ast;
+package ast.statement.compound;
 
+import ast.Decorator;
+import ast.LocInfo;
 import ast.statement.Statement;
 
 import java.util.List;

@@ -1,13 +1,15 @@
-package ast;
+package ast.statement.compound;
 
+import ast.LocInfo;
 import ast.statement.Statement;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
 /**
  * Created by Nik on 25-05-15
  */
-public class Function extends Py3Node {
+public class Function extends Statement {
 
     //TODO: arguments
 
@@ -28,5 +30,9 @@ public class Function extends Py3Node {
 		return body;
 	}
 
+    @Override
+    public <T> T accept(Py3TreeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
 }

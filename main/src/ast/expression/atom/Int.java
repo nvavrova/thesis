@@ -1,6 +1,7 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import thesis.Py3TreeVisitor;
 
 import java.math.BigInteger;
 
@@ -18,5 +19,10 @@ public class Int extends Numeric {
 
 	public BigInteger getValue() {
 		return value;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

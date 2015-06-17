@@ -2,6 +2,7 @@ package ast.expression.logical;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 09-06-2015
@@ -17,5 +18,10 @@ public class Not extends Logical {
 
 	public Expr getExpression() {
 		return expression;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

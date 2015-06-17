@@ -1,6 +1,7 @@
 package ast.expression;
 
 import ast.LocInfo;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -24,5 +25,10 @@ public class Shift extends Expr {
 
 	public List<String> getOperators() {
 		return operators;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

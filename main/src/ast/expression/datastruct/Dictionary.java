@@ -2,6 +2,7 @@ package ast.expression.datastruct;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.Map;
 
@@ -15,5 +16,10 @@ public class Dictionary extends SequenceContainer {
 	public Dictionary(LocInfo locInfo, Map<Expr, Expr> body) {
 		super(locInfo);
 		this.body = body;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

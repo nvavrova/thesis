@@ -1,5 +1,7 @@
 package ast;
 
+import thesis.Py3TreeVisitor;
+
 /**
  * Created by Nik on 19-05-2015
  */
@@ -18,4 +20,6 @@ public abstract class Py3Node {
     public Boolean countsTowardsLoc() {
         return true;
     }
+
+	public abstract <T> T accept(Py3TreeVisitor<T> visitor);
 }

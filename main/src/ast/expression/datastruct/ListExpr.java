@@ -2,6 +2,7 @@ package ast.expression.datastruct;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -17,5 +18,8 @@ public class ListExpr extends Sequence {
         this.body = body;
     }
 
-
+    @Override
+    public <T> T accept(Py3TreeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }

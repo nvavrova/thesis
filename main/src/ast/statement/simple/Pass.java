@@ -1,13 +1,14 @@
-package ast.expression.atom;
+package ast.statement.simple;
 
 import ast.LocInfo;
+import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
 /**
- * Created by Nik on 10-06-2015
+ * Created by Nik on 25-05-2015
  */
-public class Literal extends Atom {
-	public Literal(LocInfo locInfo) {
+public class Pass extends Statement {
+	public Pass(LocInfo locInfo) {
 		super(locInfo);
 	}
 

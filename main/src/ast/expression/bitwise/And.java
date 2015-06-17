@@ -2,6 +2,7 @@ package ast.expression.bitwise;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -11,5 +12,10 @@ import java.util.List;
 public class And extends Bitwise {
 	public And(LocInfo locInfo, List<Expr> operands) {
 		super(locInfo, operands);
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

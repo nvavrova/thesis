@@ -2,6 +2,7 @@ package ast.expression;
 
 import ast.LocInfo;
 import ast.expression.logical.Logical;
+import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 14-06-2015
@@ -33,5 +34,10 @@ public class Conditional extends Expr {
 
 	public Expr getConditionFalseValue() {
 		return conditionFalseValue;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

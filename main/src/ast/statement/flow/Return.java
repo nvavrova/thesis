@@ -2,6 +2,7 @@ package ast.statement.flow;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
@@ -19,5 +20,10 @@ public class Return extends Flow {
 
 	public List<Expr> getValues() {
 		return values;
+	}
+
+	@Override
+	public <T> T accept(Py3TreeVisitor<T> visitor) {
+		return visitor.visit(this);
 	}
 }

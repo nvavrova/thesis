@@ -1,5 +1,7 @@
 package ast;
 
+import thesis.Py3TreeVisitor;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -37,5 +39,8 @@ public class Import extends Py3Node {
         return this.modules.get(moduleName);
     }
 
-
+    @Override
+    public <T> T accept(Py3TreeVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 }
