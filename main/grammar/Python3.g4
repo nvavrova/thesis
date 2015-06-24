@@ -661,7 +661,7 @@ subscriptlist
 /// subscript: test | [test] ':' [test] [sliceop]
 subscript
  : index=test
- | lowerBound=test? colon=':' upperBound=test? stride=sliceop?
+ | lowerBound=test? ':' upperBound=test? stride=sliceop?
  ;
 
 /// sliceop: ':' [test]
