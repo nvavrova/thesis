@@ -262,8 +262,8 @@ small_stmt
 /// expr_stmt: testlist_star_expr (augassign (yield_expr|testlist) |
 ///                      ('=' (yield_expr|testlist_star_expr))*)
 expr_stmt
- : testlist_star_expr ( augassign ( yield_expr | testlist)
-                      | ( '=' ( yield_expr | testlist_star_expr ) )*
+ : target=testlist_star_expr ( augassign ( assignYield=yield_expr | assignTest=testlist)
+                      | ( '=' ( assignYield=yield_expr | assignTestStarredList=testlist_star_expr ) )*
                       )
  ;
 
@@ -536,18 +536,21 @@ comparison returns [List<Comp_opContext> operators, List<Star_exprContext> opera
 /// # <> isn't actually a valid comparison operator in Python. It's here for the
 /// # sake of a __future__ import described in PEP 401
 /// comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
-comp_op
- : '<'
- | '>'
- | '=='
- | '>='
- | '<='
- | '<>'
- | '!='
- | IN
- | NOT IN
- | IS
- | IS NOT
+comp_op returns [String operator]
+@init{
+    $operator = "";
+}
+ : op='<' { $operator = $op.text; }
+ | op='>' { $operator = $op.text; }
+ | op='==' { $operator = $op.text; }
+ | op='>=' { $operator = $op.text; }
+ | op='<=' { $operator = $op.text; }
+ | op='<>' { $operator = $op.text; }
+ | op='!=' { $operator = $op.text; }
+ | op=IN { $operator = $op.text; }
+ | neg=NOT op=IN { $operator = $neg.text + " " + $op.text; }
+ | op=IS { $operator = $op.text; }
+ | op=IS neg=NOT { $operator = $op.text + " " + $neg.text; }
  ;
 
 /// star_expr: ['*'] expr
