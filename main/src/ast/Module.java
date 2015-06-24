@@ -17,7 +17,7 @@ public class Module extends Py3Node {
     }
 
     public List<Py3Node> getBody() {
-        return body;
+        return this.body;
     }
 
     @Override

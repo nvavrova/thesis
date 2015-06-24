@@ -19,7 +19,7 @@ public class And extends Expr {
 	}
 
 	public List<Expr> getOperands() {
-		return operands;
+		return this.operands;
 	}
 
 	@Override

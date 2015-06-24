@@ -17,7 +17,7 @@ public class SubscriptIndex extends Subscript {
 	}
 
 	public Expr getIndex() {
-		return index;
+		return this.index;
 	}
 
 	@Override

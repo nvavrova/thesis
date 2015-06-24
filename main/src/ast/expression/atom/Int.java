@@ -18,7 +18,7 @@ public class Int extends Numeric {
 	}
 
 	public BigInteger getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override

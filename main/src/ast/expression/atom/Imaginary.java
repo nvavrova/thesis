@@ -16,7 +16,7 @@ public class Imaginary extends Numeric {
 	}
 
 	public Double getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override

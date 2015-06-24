@@ -20,6 +20,6 @@ public abstract class CompIter extends Expr {
 	}
 
 	public CompIter getNextLink() {
-		return nextLink;
+		return this.nextLink;
 	}
 }

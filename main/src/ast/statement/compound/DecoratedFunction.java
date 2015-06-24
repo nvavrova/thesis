@@ -2,6 +2,8 @@ package ast.statement.compound;
 
 import ast.Decorator;
 import ast.LocInfo;
+import ast.expression.Expr;
+import ast.param.Params;
 import ast.expression.atom.Identifier;
 import ast.statement.Statement;
 
@@ -14,12 +16,12 @@ public class DecoratedFunction extends Function {
 
 	private final List<Decorator> decorators;
 
-	public DecoratedFunction(LocInfo locInfo, List<Decorator> decorators, Identifier name, List<Statement> body) {
-		super(locInfo, name, body);
+	public DecoratedFunction(LocInfo locInfo, Identifier name, Expr returnType, List<Statement> body, Params params, List<Decorator> decorators) {
+		super(locInfo, name, returnType, body, params);
 		this.decorators = decorators;
 	}
 
 	public List<Decorator> getDecorators() {
-		return decorators;
+		return this.decorators;
 	}
 }

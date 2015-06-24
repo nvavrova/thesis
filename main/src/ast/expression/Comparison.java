@@ -24,7 +24,7 @@ public class Comparison extends Expr {
 	}
 
 	public List<Expr> getOperands() {
-		return operands;
+		return this.operands;
 	}
 
 //	public List<String> getOperators() {
@@ -32,7 +32,7 @@ public class Comparison extends Expr {
 //	}
 
 	public Integer getArity() {
-		return operands.size();
+		return this.operands.size();
 	}
 
 	@Override

@@ -21,11 +21,11 @@ public class Arithmetic extends Expr {
 	}
 
 	public List<Expr> getOperands() {
-		return operands;
+		return this.operands;
 	}
 
 	public List<String> getOperators() {
-		return operators;
+		return this.operators;
 	}
 
 	@Override

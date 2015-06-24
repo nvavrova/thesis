@@ -192,17 +192,19 @@ parameters
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
 ///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
 ///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
-typedargslist returns [Map<TfpdefContext, TestContext> args]
+typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefContext, TestContext> args, Map<TfpdefContext, TestContext> kwargs]
  @init {
+     $positional = new HashMap<>();
      $args = new HashMap<>();
+     $kwargs = new HashMap<>();
  }
- : a=tfpdef { $args.put($a.ctx, null); } ( '=' aVal=test { $args.put($a.ctx, $aVal.ctx); } )? ( ',' b=tfpdef { $args.put($b.ctx, null); } ( '=' bVal=test { $args.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); } ( ',' d=tfpdef { $args.put($d.ctx, null); } ( '=' dVal=test { $args.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { $args.put($e.ctx, null); } )?
-        | '**' f=tfpdef { $args.put($f.ctx, null); }
+ : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+    ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); } ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
+        | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
         )?
     )?
- | '*' g=tfpdef? { $args.put($g.ctx, null); } ( ',' h=tfpdef { $args.put($h.ctx, null); } ( '=' hVal=test { $args.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { $args.put($i.ctx, null); } )?
- | '**' j=tfpdef { $args.put($j.ctx, null); }
+ | '*' g=tfpdef? { $args.put($g.ctx, null); } ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
+ | '**' j=tfpdef { $kwargs.put($j.ctx, null); }
  ;
 
 /// tfpdef: NAME [':' test]
@@ -213,17 +215,19 @@ tfpdef
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
 ///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
 ///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
-varargslist returns [Map<VfpdefContext, TestContext> args]
+varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefContext, TestContext> args, Map<VfpdefContext, TestContext> kwargs]
 @init {
+    $positional = new HashMap<>();
     $args = new HashMap<>();
+    $kwargs = new HashMap<>();
 }
- : a=vfpdef { $args.put($a.ctx, null); } ( '=' aVal=test { $args.put($a.ctx, $aVal.ctx); } )? ( ',' b=vfpdef { $args.put($b.ctx, null); } ( '=' bVal=test { $args.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); } ( ',' d=vfpdef { $args.put($d.ctx, null); } ( '=' dVal=test { $args.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { $args.put($e.ctx, null); } )?
-        | '**' f=vfpdef { $args.put($f.ctx, null); }
+ : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+    ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); } ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
+        | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
         )?
     )?
- | '*' g=vfpdef? { $args.put($g.ctx, null); } ( ',' h=vfpdef { $args.put($h.ctx, null); } ( '=' hVal=test { $args.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { $args.put($i.ctx, null); } )?
- | '**' j=vfpdef { $args.put($j.ctx, null); }
+ | '*' g=vfpdef? { $args.put($g.ctx, null); } ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
+ | '**' j=vfpdef { $kwargs.put($j.ctx, null); }
  ;
 
 /// vfpdef: NAME
@@ -356,7 +360,7 @@ import_from
 
 /// import_as_name: NAME ['as' NAME]
 import_as_name
- : name=NAME ( AS alias=NAME )?
+ : NAME ( AS NAME )?
  ;
 
 /// dotted_as_name: dotted_name ['as' NAME]
@@ -441,11 +445,14 @@ for_stmt
 ///       ['else' ':' suite]
 ///       ['finally' ':' suite] |
 ///      'finally' ':' suite))
-try_stmt
- : TRY ':' suite ( ( except_clause ':' suite )+
-                   ( ELSE ':' suite )?
-                   ( FINALLY ':' suite )?
-                 | FINALLY ':' suite
+try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks]
+@init{
+    $exceptBlocks = new HashMap<>();
+}
+ : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
+                   ( ELSE ':' elseBlock=suite )?
+                   ( FINALLY ':' finallyBlock=suite )?
+                 | FINALLY ':' finallyBlock=suite
                  )
  ;
 
@@ -631,7 +638,7 @@ testlist_comp returns [List<TestContext> values]
 @init{
     $values = new ArrayList<>();
 }
- : test ( comp_for
+ : initial=test { $values.add($initial.ctx); } ( comp_for
         | ( ',' val=test { $values.add($val.ctx); } )* ','?
         )
  ;
@@ -707,8 +714,8 @@ arglist returns [List<ArgumentContext> positionalArgs]
 /// # results in an ambiguity. ast.c makes sure it's a NAME.
 /// argument: test [comp_for] | test '=' test  # Really [keyword '='] test
 argument
- : test comp_for?
- | test '=' test
+ : value=test condition=comp_for?
+ | name=test '=' value=test
  ;
 
 /// comp_iter: comp_for | comp_if

@@ -20,7 +20,7 @@ public class Nonlocal extends Statement {
 	}
 
 	public List<Identifier> getIdentifiers() {
-		return identifiers;
+		return this.identifiers;
 	}
 
 	@Override

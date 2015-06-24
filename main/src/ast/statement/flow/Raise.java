@@ -19,11 +19,11 @@ public class Raise extends Flow {
 	}
 
 	public Expr getType() {
-		return type;
+		return this.type;
 	}
 
 	public Expr getSource() {
-		return source;
+		return this.source;
 	}
 
 	@Override

@@ -16,7 +16,7 @@ public class Str extends Atom {
 	}
 
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override

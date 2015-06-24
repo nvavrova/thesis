@@ -1,5 +1,6 @@
 package ast;
 
+import ast.arg.Args;
 import ast.expression.atom.Identifier;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
@@ -12,21 +13,26 @@ import java.util.List;
 public class ClassDef extends Py3Node {
 
 	private final Identifier name;
-//	private final List<Expr> inheritance;
+	private final Args inheritance;
 	private final List<Statement> body;
 
-	public ClassDef(LocInfo locInfo, Identifier name, List<Statement> body) {
+	public ClassDef(LocInfo locInfo, Identifier name, Args inheritance, List<Statement> body) {
 		super(locInfo);
 		this.name = name;
+		this.inheritance = inheritance;
 		this.body = body;
 	}
 
 	public Identifier getName() {
-		return name;
+		return this.name;
+	}
+
+	public Args getInheritance() {
+		return this.inheritance;
 	}
 
 	public List<Statement> getBody() {
-		return body;
+		return this.body;
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class Delete extends Statement {
 	}
 
 	public List<Expr> getItems() {
-		return items;
+		return this.items;
 	}
 
 	@Override

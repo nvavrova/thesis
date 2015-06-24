@@ -16,7 +16,7 @@ public class Float extends Literal {
 	}
 
 	public Double getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override

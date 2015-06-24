@@ -18,6 +18,6 @@ public abstract class Bitwise extends Expr {
 	}
 
 	public List<Expr> getOperands() {
-		return operands;
+		return this.operands;
 	}
 }

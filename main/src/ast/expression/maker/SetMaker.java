@@ -29,11 +29,11 @@ public class SetMaker extends Maker {
 	}
 
 	public CompFor getCompFor() {
-		return compFor;
+		return this.compFor;
 	}
 
 	public List<Expr> getValues() {
-		return values;
+		return this.values;
 	}
 
 	@Override

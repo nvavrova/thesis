@@ -24,11 +24,11 @@ public class Assert extends Statement {
 	}
 
 	public Expr getAssertion() {
-		return assertion;
+		return this.assertion;
 	}
 
 	public Expr getAssertionError() {
-		return assertionError;
+		return this.assertionError;
 	}
 
 	public Boolean hasError() {

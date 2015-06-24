@@ -17,7 +17,7 @@ public class YieldFrom extends Flow {
 	}
 
 	public Expr getFrom() {
-		return from;
+		return this.from;
 	}
 
 	@Override

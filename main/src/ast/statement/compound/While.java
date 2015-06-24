@@ -24,15 +24,15 @@ public class While extends Statement {
 	}
 
 	public Expr getCondition() {
-		return condition;
+		return this.condition;
 	}
 
 	public List<Statement> getBody() {
-		return body;
+		return this.body;
 	}
 
 	public List<Statement> getElseBody() {
-		return elseBody;
+		return this.elseBody;
 	}
 
 	@Override

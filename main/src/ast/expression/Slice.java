@@ -24,7 +24,7 @@ public class Slice extends Expr {
 	}
 
 	public Expr getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override

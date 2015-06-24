@@ -22,11 +22,11 @@ public class CompFor extends CompIter {
 	}
 
 	public List<Expr> getTargets() {
-		return targets;
+		return this.targets;
 	}
 
 	public Logical getSource() {
-		return source;
+		return this.source;
 	}
 
 	@Override

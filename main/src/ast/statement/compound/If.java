@@ -36,11 +36,11 @@ public class If extends Statement {
 	}
 
 	public List<Expr> getConditions() {
-		return conditions;
+		return this.conditions;
 	}
 
 	public List<Statement> getElseBody() {
-		return elseBody;
+		return this.elseBody;
 	}
 
 	public List<Statement> getBody(Expr condition) {

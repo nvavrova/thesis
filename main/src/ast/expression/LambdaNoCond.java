@@ -5,29 +5,29 @@ import ast.param.Params;
 import thesis.Py3TreeVisitor;
 
 /**
- * Created by Nik on 26-05-2015
+ * Created by Nik on 22-06-2015
  */
-public class Lambda extends Expr {
+public class LambdaNoCond extends ExprNoCond {
 
 	private final Params parameters;
-	private final Expr expression;
+	private final ExprNoCond expression;
 
-	public Lambda(LocInfo locInfo, Params parameters, Expr expression) {
+	public LambdaNoCond(LocInfo locInfo, Params parameters, ExprNoCond expression) {
 		super(locInfo);
 		this.expression = expression;
 		this.parameters = parameters;
-	}
-
-	public Expr getExpression() {
-		return this.expression;
 	}
 
 	public Params getParameters() {
 		return this.parameters;
 	}
 
+	public ExprNoCond getExpression() {
+		return this.expression;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
-		return visitor.visit(this);
+		return null;
 	}
 }

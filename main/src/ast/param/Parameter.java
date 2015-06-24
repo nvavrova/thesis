@@ -1,5 +1,7 @@
-package ast;
+package ast.param;
 
+import ast.LocInfo;
+import ast.Py3Node;
 import ast.expression.Expr;
 import thesis.Py3TreeVisitor;
 
@@ -36,15 +38,15 @@ public class Parameter extends Py3Node {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public Expr getType() {
-		return type;
+		return this.type;
 	}
 
 	public Expr getDefValue() {
-		return defValue;
+		return this.defValue;
 	}
 
 	@Override

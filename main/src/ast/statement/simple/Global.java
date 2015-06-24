@@ -20,7 +20,7 @@ public class Global extends Statement {
 	}
 
 	public List<Identifier> getIdentifiers() {
-		return identifiers;
+		return this.identifiers;
 	}
 
 	@Override

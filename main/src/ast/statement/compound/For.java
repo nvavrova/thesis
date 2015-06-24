@@ -21,11 +21,11 @@ public class For extends Statement {
 	}
 
 	public List<Statement> getBody() {
-		return body;
+		return this.body;
 	}
 
 	public List<Statement> getElseBody() {
-		return elseBody;
+		return this.elseBody;
 	}
 
 	@Override

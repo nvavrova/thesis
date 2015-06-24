@@ -25,15 +25,15 @@ public class Conditional extends Expr {
 	}
 
 	public Logical getValue() {
-		return value;
+		return this.value;
 	}
 
 	public Logical getCondition() {
-		return condition;
+		return this.condition;
 	}
 
 	public Expr getConditionFalseValue() {
-		return conditionFalseValue;
+		return this.conditionFalseValue;
 	}
 
 	@Override

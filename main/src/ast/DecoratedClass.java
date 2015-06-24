@@ -1,5 +1,6 @@
 package ast;
 
+import ast.arg.Args;
 import ast.expression.atom.Identifier;
 import ast.statement.Statement;
 
@@ -12,12 +13,12 @@ public class DecoratedClass extends ClassDef {
 
 	private final List<Decorator> decorators;
 
-	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, Identifier name, List<Statement> body) {
-		super(locInfo, name, body);
+	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, Identifier name, Args inheritance, List<Statement> body) {
+		super(locInfo, name, inheritance, body);
 		this.decorators = decorators;
 	}
 
 	public List<Decorator> getDecorators() {
-		return decorators;
+		return this.decorators;
 	}
 }

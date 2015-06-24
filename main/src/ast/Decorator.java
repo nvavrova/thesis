@@ -1,5 +1,6 @@
 package ast;
 
+import ast.arg.Args;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -7,16 +8,21 @@ import thesis.Py3TreeVisitor;
  */
 public class Decorator extends Py3Node {
 
-	private final String name;
-	//TODO: args
+	private final DottedImport name;
+	private final Args args;
 
-	public Decorator(LocInfo locInfo, String name) {
+	public Decorator(LocInfo locInfo, DottedImport name, Args args) {
 		super(locInfo);
 		this.name = name;
+		this.args = args;
 	}
 
-	public String getName() {
-		return name;
+	public DottedImport getName() {
+		return this.name;
+	}
+
+	public Args getArgs() {
+		return this.args;
 	}
 
 	@Override

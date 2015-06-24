@@ -2,16 +2,22 @@ package ast;
 
 import thesis.Py3TreeVisitor;
 
+import java.util.List;
+
 /**
  * Created by Nik on 25-05-15
  */
 public class ImportFrom extends Import {
 
-    private final String location;
+    private final Path module;
 
-    public ImportFrom(LocInfo locInfo, String location) {
-        super(locInfo);
-        this.location = location;
+    public ImportFrom(LocInfo locInfo, List<Path> paths, Path module) {
+        super(locInfo, paths);
+        this.module = module;
+    }
+
+    public Path getModule() {
+        return this.module;
     }
 
     @Override

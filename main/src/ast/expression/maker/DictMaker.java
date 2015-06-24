@@ -28,11 +28,11 @@ public class DictMaker extends Maker {
 	}
 
 	public CompFor getCompFor() {
-		return compFor;
+		return this.compFor;
 	}
 
 	public Map<Expr, Expr> getValues() {
-		return values;
+		return this.values;
 	}
 
 	@Override

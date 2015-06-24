@@ -1,6 +1,7 @@
 package ast.expression.display;
 
 import ast.LocInfo;
+import ast.expression.ExprNoCond;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -8,8 +9,15 @@ import thesis.Py3TreeVisitor;
  */
 public class CompIf extends CompIter {
 
-	public CompIf(LocInfo locInfo, CompIter nextLink) {
+	private final ExprNoCond expression;
+
+	public CompIf(LocInfo locInfo, CompIter nextLink, ExprNoCond expression) {
 		super(locInfo, nextLink);
+		this.expression = expression;
+	}
+
+	public ExprNoCond getExpression() {
+		return this.expression;
 	}
 
 	@Override

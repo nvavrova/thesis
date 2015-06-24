@@ -16,7 +16,7 @@ public class Bool extends Literal {
 	}
 
 	public Boolean getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override
