@@ -41,6 +41,6 @@ public class Params extends Py3Node {
 
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
-		return null;
+		return visitor.visit(this);
 	}
 }

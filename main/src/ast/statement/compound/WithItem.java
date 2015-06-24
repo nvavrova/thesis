@@ -29,6 +29,6 @@ public class WithItem extends Statement {
 
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
-		return null;
+		return visitor.visit(this);
 	}
 }

@@ -28,6 +28,6 @@ public class LambdaNoCond extends ExprNoCond {
 
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
-		return null;
+		return visitor.visit(this);
 	}
 }
