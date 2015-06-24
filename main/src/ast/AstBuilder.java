@@ -15,6 +15,7 @@ import ast.expression.maker.SetMaker;
 import ast.expression.primary.SliceBound;
 import ast.expression.primary.Subscript;
 import ast.expression.primary.SubscriptIndex;
+import ast.expression.primary.Subscripts;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -26,6 +27,7 @@ import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;
+import com.sun.deploy.util.StringUtils;
 import gen.Python3Parser;
 import gen.Python3Visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -71,6 +73,7 @@ public class AstBuilder {
 			this.print("visitSingle_input");
 			this.indent--;
 			//      NEWLINE | simple_stmt | compound_stmt NEWLINE
+
 			if (ctx.simple_stmt() != null) {
 				return ctx.simple_stmt().accept(this);
 			}
@@ -88,6 +91,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFile_input");
 			//      ( NEWLINE | stmt )* EOF
+
 			if (ctx.stmt() != null) {
 				List<Py3Node> children = new ArrayList<>();
 				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<Statement>) e.accept(this)).items));
@@ -106,6 +110,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitEval_input");
 			//      testlist NEWLINE* EOF
+
 			this.indent--;
 			return ctx.testlist().accept(this);
 		}
@@ -115,6 +120,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitDecorator");
 			//      '@' dotted_name ( '(' arglist? ')' )? NEWLINE
+
 			DottedImport id = (DottedImport) ctx.dotted_name().accept(this);
 			Args args = ctx.arglist() == null ? null : (Args) ctx.arglist().accept(this);
 			this.indent--;
@@ -126,6 +132,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitDecorators");
 			//      decorator+
+
 			if (ctx.decorator() != null) {
 				List<Decorator> decorators = ctx.decorator()
 						.stream().map(e -> (Decorator) e.accept(this))
@@ -166,6 +173,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFuncdef");
 			//      DEF NAME parameters ( '->' test )? ':' suite
+
 			Params params = (Params) ctx.parameters().accept(this);
 			Expr returnType = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
 			CollectionWrapper<Statement> wrap = this.getResultWrapper(ctx.suite());
@@ -178,6 +186,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitParameters");
 			//      '(' typedargslist? ')'
+
 			if (ctx.typedargslist() != null) {
 				this.indent--;
 				return ctx.typedargslist().accept(this);
@@ -196,6 +205,7 @@ public class AstBuilder {
 			//		)?
 			//		| '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
 			//		| '**' tfpdef
+
 			List<Param> positional = this.getTfpParams(ctx.positional);
 			List<Param> args = this.getTfpParams(ctx.args);
 			List<Param> kwargs = this.getTfpParams(ctx.kwargs);
@@ -208,6 +218,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTfpdef");
 			//      NAME ( ':' test )?
+
 			Identifier id = this.getIdentifier(ctx.NAME());
 			if (ctx.test() != null) {
 				Expr returnType = (Expr) ctx.test().accept(this);
@@ -228,6 +239,7 @@ public class AstBuilder {
 			//		)?
 			//		| '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
 			//		| '**' vfpdef
+
 			List<Param> positional = this.getVfpParams(ctx.positional);
 			List<Param> args = this.getVfpParams(ctx.args);
 			List<Param> kwargs = this.getVfpParams(ctx.kwargs);
@@ -240,6 +252,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitVfpdef");
 			//      NAME
+
 			this.indent--;
 			return new Param(this.getLocInfo(ctx), this.getIdentifier(ctx.NAME()));
 		}
@@ -250,6 +263,7 @@ public class AstBuilder {
 			this.print("visitStmt " + ctx.getText());
 			this.indent--;
 			//      simple_stmt | compound_stmt
+
 			if (ctx.simple_stmt() != null) {
 				return ctx.simple_stmt().accept(this); //returns a Wrapper
 			}
@@ -267,6 +281,7 @@ public class AstBuilder {
 			this.print("visitSimple_stmt");
 			this.indent--;
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
+
 			return new CollectionWrapper<>(this.getLocInfo(ctx),
 					ctx.small_stmt().stream()
 							.map(e -> (Statement) e.accept(this))
@@ -278,6 +293,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitSmall_stmt");
 			//      expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt | global_stmt | nonlocal_stmt | assert_stmt
+
 			if (ctx.expr_stmt() != null) {
 				this.indent--;
 				return ctx.expr_stmt().accept(this);
@@ -352,6 +368,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTestlist_star_expr");
 			//      ( test | star_expr ) ( ',' ( test |  star_expr ) )* ','?
+
 			List<Expr> children = new ArrayList<>();
 			if (ctx.test() != null) {
 				children.addAll(ctx.test().stream()
@@ -373,6 +390,7 @@ public class AstBuilder {
 			this.print("visitAugassign");
 			this.indent--;
 			//      '+=' | '-=' | '*=' | '@=' // PEP 465 | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=' | '>>=' | '**=' | '//='
+
 			return new Wrapper<>(this.getLocInfo(ctx), ctx.op.getText());
 		}
 
@@ -381,6 +399,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitDel_stmt");
 			//      DEL exprlist
+
 			CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
 			this.indent--;
 			return new Delete(this.getLocInfo(ctx), expressions.getItems());
@@ -392,6 +411,7 @@ public class AstBuilder {
 			this.print("visitPass_stmt");
 			this.indent--;
 			//PASS
+
 			return new Pass(this.getLocInfo(ctx));
 		}
 
@@ -400,6 +420,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFlow_stmt");
 			//      break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
+
 			if (ctx.break_stmt() != null) {
 				this.indent--;
 				return ctx.break_stmt().accept(this);
@@ -429,6 +450,7 @@ public class AstBuilder {
 			this.print("visitBreak_stmt");
 			this.indent--;
 			//      BREAK
+
 			return new Break(this.getLocInfo(ctx));
 		}
 
@@ -438,6 +460,7 @@ public class AstBuilder {
 			this.print("visitContinue_stmt");
 			this.indent--;
 			//      CONTINUE
+
 			return new Continue(this.getLocInfo(ctx));
 		}
 
@@ -446,6 +469,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitReturn_stmt");
 			//      RETURN testlist?
+
 			if (ctx.testlist() != null) {
 				CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
 				this.indent--;
@@ -458,6 +482,7 @@ public class AstBuilder {
 		@Override
 		public Py3Node visitYield_stmt(@NotNull Python3Parser.Yield_stmtContext ctx) {
 			//      yield_expr
+
 			return ctx.yield_expr().accept(this);
 		}
 
@@ -466,6 +491,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitRaise_stmt");
 			//      RAISE ( test ( FROM test )? )?
+
 			Expr type = (Expr) ctx.except.accept(this);
 			Expr source = (Expr) ctx.source.accept(this);
 			this.indent--;
@@ -477,6 +503,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitImport_stmt");
 			//      import_name | import_from
+
 			if (ctx.import_name() != null) {
 				this.indent--;
 				return ctx.import_name().accept(this);
@@ -494,6 +521,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitImport_name");
 			//      IMPORT dotted_as_names
+
 			CollectionWrapper<Path> wrap = (CollectionWrapper<Path>) ctx.dotted_as_names().accept(this);
 			this.indent--;
 			return new Import(this.getLocInfo(ctx), wrap.getItems());
@@ -510,6 +538,7 @@ public class AstBuilder {
 			//				| '(' import_as_names ')'
 			//				| import_as_names
 			//		)
+
 			//TODO: include the '.' and '...' ?
 			DottedPath module = ctx.dotted_name() == null ? null : (DottedPath) ctx.dotted_name().accept(this);
 			CollectionWrapper<Path> wrap = ctx.import_as_names() == null ? null : (CollectionWrapper<Path>) ctx.import_as_names().accept(this);
@@ -522,6 +551,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitImport_as_name");
 			//      NAME ( AS NAME )?
+
 			Identifier alias = ctx.NAME().size() != 2 ? null : this.getIdentifier(ctx.NAME().get(1));
 			this.indent--;
 			return new SimplePath(this.getLocInfo(ctx), alias, ctx.NAME().get(0).getText());
@@ -532,6 +562,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitDotted_as_name");
 			//      dotted_name ( AS NAME )?
+
 			CollectionWrapper<String> wrap = (CollectionWrapper<String>) ctx.dotted_name().accept(this);
 			if (ctx.NAME() != null) {
 				Identifier id = this.getIdentifier(ctx.NAME());
@@ -546,6 +577,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitImport_as_names");
 			//      import_as_name ( ',' import_as_name )* ','?
+
 			List<SimplePath> ids = ctx.import_as_name().stream()
 					.map(e -> (SimplePath) e.accept(this))
 					.collect(Collectors.toList());
@@ -559,6 +591,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitDotted_as_names");
 			//      dotted_as_name ( ',' dotted_as_name )*
+
 			List<DottedPath> dottedPaths = ctx.dotted_as_name().stream()
 					.map(e -> (DottedPath) e.accept(this))
 					.collect(Collectors.toList());
@@ -573,6 +606,7 @@ public class AstBuilder {
 			this.print("visitDotted_name");
 			this.indent--;
 			//      NAME ( '.' NAME )*
+
 			return new DottedPath(this.getLocInfo(ctx), ctx.names);
 		}
 
@@ -581,6 +615,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitGlobal_stmt");
 			//      GLOBAL NAME ( ',' NAME )*
+
 			List<Identifier> ids = ctx.names.stream()
 					.map(e -> new Identifier(this.getLocInfo(ctx), e))
 					.collect(Collectors.toList());
@@ -593,6 +628,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitNonlocal_stmt");
 			//      NONLOCAL NAME ( ',' otherName = NAME )*
+
 			List<Identifier> ids = ctx.names.stream()
 					.map(e -> new Identifier(this.getLocInfo(ctx), e))
 					.collect(Collectors.toList());
@@ -605,6 +641,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitAssert_stmt");
 			//      ASSERT test ( ',' test )?
+
 			Expr assertion = (Expr) ctx.assertion.accept(this);
 			if (ctx.assertionError != null) {
 				Expr error = (Expr) ctx.assertionError.accept(this);
@@ -620,6 +657,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitCompound_stmt " + ctx.getText());
 			//      if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
+
 			if (ctx.if_stmt() != null) {
 				this.indent--;
 				return ctx.if_stmt().accept(this);
@@ -696,6 +734,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFor_stmt");
 			//      FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
+
 			CollectionWrapper<Expr> iterator = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
 			CollectionWrapper<Expr> source = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
 			List<Statement> body = this.process(ctx.body);
@@ -714,6 +753,7 @@ public class AstBuilder {
 			//		( FINALLY ':' suite )?
 			//		| FINALLY ':' suite
 			//		)
+
 			List<Statement> tryBlock = this.process(ctx.tryBlock);
 			List<Statement> elseBlock = this.processOptional(ctx.elseBlock);
 			List<Statement> finallyBlock = this.processOptional(ctx.finallyBlock);
@@ -731,30 +771,28 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitWith_stmt(@NotNull Python3Parser.With_stmtContext ctx) {
-			//TODO
 			this.indent++;
 			this.print("visitWith_stmt");
 			//      WITH with_item ( ',' with_item )* ':' suite
-			for (Python3Parser.With_itemContext c : ctx.with_item()) {
-				c.accept(this);
-			}
+
+			List<WithItem> items = ctx.with_item().stream()
+					.map(e -> (WithItem) e.accept(this))
+					.collect(Collectors.toList());
 			List<Statement> stmts = this.process(ctx.suite());
 			this.indent--;
-			return null;
+			return new With(this.getLocInfo(ctx), items, stmts);
 		}
 
 		@Override
 		public Py3Node visitWith_item(@NotNull Python3Parser.With_itemContext ctx) {
-			//TODO
 			this.indent++;
 			this.print("visitWith_item");
 			//      test ( AS expr )?
-			ctx.test().accept(this);
-			if (ctx.expr() != null) {
-				ctx.expr().accept(this);
-			}
+
+			Expr item = (Expr) ctx.test().accept(this);
+			Expr alias = ctx.expr() == null ? null : (Expr) ctx.expr().accept(this);
 			this.indent--;
-			return null;
+			return new WithItem(this.getLocInfo(ctx), item, alias);
 		}
 
 		@Override
@@ -762,6 +800,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitExcept_clause");
 			//      EXCEPT ( test ( AS NAME )? )?
+
 			Expr exception = (Expr) ctx.test().accept(this);
 			String alias = ctx.NAME() == null ? null : ctx.NAME().getText();
 			this.indent--;
@@ -773,6 +812,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitSuite");
 			//      simple_stmt | NEWLINE INDENT stmt+ DEDENT
+
 			if (ctx.simple_stmt() != null) {
 				return ctx.simple_stmt().accept(this); //returns a Wrapper
 			}
@@ -793,6 +833,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTest");
 			//      value=or_test ( IF condition=or_test ELSE test )? | lambdef
+
 			this.indent--;
 			if (ctx.lambdef() != null) {
 				return ctx.lambdef().accept(this);
@@ -813,6 +854,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTest_nocond");
 			//      or_test | lambdef_nocond
+
 			this.indent--;
 			if (ctx.or_test() != null) {
 				//TODO: This needs to return something of type ExprNoCond! Figure out what should it be!
@@ -829,6 +871,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitLambdef");
 			//      LAMBDA varargslist? ':' test
+
 			Params parameters = ctx.varargslist() == null ? null : (Params) ctx.varargslist().accept(this);
 			Expr expr = (Expr) ctx.test().accept(this);
 			this.indent--;
@@ -840,6 +883,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitLambdef_nocond");
 			//      LAMBDA varargslist? ':' test_nocond
+
 			Params parameters = ctx.varargslist() == null ? null : (Params) ctx.varargslist().accept(this);
 			ExprNoCond expr = (ExprNoCond) ctx.test_nocond().accept(this);
 			this.indent--;
@@ -851,6 +895,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitOr_test");
 			//      and_test ( OR and_test )*
+
 			List<Expr> children = ctx.and_test().stream()
 					.map(c -> (Expr) c.accept(this))
 					.collect(Collectors.toList());
@@ -867,6 +912,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitAnd_test");
 			//      not_test ( AND not_test )*
+
 
 			List<Expr> children = ctx.not_test().stream()
 					.map(c -> (Expr) c.accept(this))
@@ -885,6 +931,7 @@ public class AstBuilder {
 			this.print("visitNot_test");
 			this.indent--;
 			//      NOT not_test | comparison
+
 			if (ctx.not_test() != null) {
 				return new Not(this.getLocInfo(ctx), (Expr) ctx.not_test().accept(this));
 			}
@@ -899,6 +946,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitComparison");
 			//      star_expr ( comp_op star_expr )*
+
 			List<Expr> operands = ctx.star_expr().stream()
 					.map(c -> (Expr) c.accept(this))
 					.collect(Collectors.toList());
@@ -925,6 +973,7 @@ public class AstBuilder {
 			this.print("visitComp_op " + ctx.getText());
 			this.indent--;
 			//      '<' | '>' | '==' | '>=' | '<=' | '<>' | '!=' | IN | NOT IN | IS | IS NOT
+
 			return new Wrapper<String>(this.getLocInfo(ctx), ctx.operator);
 		}
 
@@ -934,7 +983,7 @@ public class AstBuilder {
 			this.print("visitStar_expr " + ctx.getText());
 			this.indent--;
 			//      '*'? expr
-			//TODO: is this ok or should it be wrapped in something extra?
+
 			return ctx.expr().accept(this);
 		}
 
@@ -943,6 +992,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitExpr");
 			//      xor_expr ( '|' xor_expr )*
+
 			List<Py3Node> children = new ArrayList<>();
 			ctx.xor_expr().forEach(c -> children.add((Py3Node) c.accept(this)));
 			this.indent--;
@@ -957,6 +1007,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitXor_expr");
 			//      and_expr ( '^' and_expr )*
+
 			List<Expr> children = ctx.and_expr().stream()
 					.map(c -> (Expr) c.accept(this))
 					.collect(Collectors.toList());
@@ -972,6 +1023,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitAnd_expr");
 			//      shift_expr ( '&' shift_expr )*
+
 			List<Expr> children = ctx.shift_expr().stream()
 					.map(c -> (Expr) c.accept(this))
 					.collect(Collectors.toList());
@@ -987,6 +1039,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitShift_expr");
 			//      arith_expr ( '<<' arith_expr | '>>' arith_expr )*
+
 			List<Expr> children = ctx.arith_expr().stream()
 					.map(c -> (Expr) c.accept(this))
 					.collect(Collectors.toList());
@@ -1002,11 +1055,13 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitArith_expr");
 			//      term ( '+' term | '-' term )*
+
 			List<Expr> operands = ctx.term().stream()
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
 			if (operands.size() == 1) {
-				return operands.get(0); //TODO: keep this or not?
+				this.indent--;
+				return operands.get(0);
 			}
 			this.indent--;
 			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
@@ -1017,12 +1072,14 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTerm");
 			//      factor ( '*' factor | '/' factor | '%' factor | '//' factor | '@' factor // PEP 465 )
+
 			List<Expr> operands = ctx.factor().stream()
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
 
 			if (operands.size() == 1) {
-				return operands.get(0); //TODO: keep this or not?
+				this.indent--;
+				return operands.get(0);
 			}
 			this.indent--;
 			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
@@ -1034,6 +1091,7 @@ public class AstBuilder {
 			this.print("visitFactor");
 			this.indent--;
 			//      '+' factor | '-' factor | '~' factor | power
+
 			if (ctx.factor() != null) {
 				if (ctx.op.getText().equals("+")) {
 					return new Plus(this.getLocInfo(ctx), (Expr) ctx.power().accept(this));
@@ -1054,21 +1112,24 @@ public class AstBuilder {
 
 		@Override
 		public Py3Node visitPower(@NotNull Python3Parser.PowerContext ctx) {
-			//TODO
 			this.indent++;
 			this.print("visitPower");
 			//      atom trailer* ( '**' factor )?
-			ctx.atom().accept(this);
-			if (ctx.trailer() != null) {
-				for (Python3Parser.TrailerContext c : ctx.trailer()) {
-					c.accept(this);
-				}
+
+			Atom atom = (Atom) ctx.atom().accept(this);
+			if (ctx.trailer() == null && ctx.factor() == null) {
+				this.indent--;
+				return atom;
 			}
-			if (ctx.factor() != null) {
-				ctx.factor().accept(this);
-			}
+
+			List<Expr> trailers = ctx.trailer() == null ? Collections.emptyList() :
+					ctx.trailer().stream()
+							.map(e -> (Expr) e.accept(this))
+							.collect(Collectors.toList());
+
+			Expr exponent = ctx.factor() == null ? null : (Expr) ctx.factor().accept(this);
 			this.indent--;
-			return null;
+			return new Power(this.getLocInfo(ctx), atom, trailers, exponent);
 		}
 
 		@Override
@@ -1079,6 +1140,7 @@ public class AstBuilder {
 			//		| '[' testlist_comp? ']'
 			//		| '{' dictorsetmaker? '}'
 			//		| NAME | number | string+ | '...' | NONE | TRUE | FALSE
+
 			this.indent--;
 			if (ctx.yield_expr() != null) {
 				return ctx.yield_expr().accept(this);
@@ -1097,12 +1159,11 @@ public class AstBuilder {
 				return ctx.number().accept(this);
 			}
 			if (ctx.string() != null) {
-				//TODO: filter out the start characters, quotes, etc.
-				String str = "";
-				for (Python3Parser.StringContext s : ctx.string()) {
-					str += s.getText();
-				}
-				return new Str(this.getLocInfo(ctx), str);
+				//TODO: check if this is OK
+				List<String> strs = ctx.string().stream()
+						.map(e -> ((Str) e.accept(this)).getValue())
+						.collect(Collectors.toList());
+				return new Str(this.getLocInfo(ctx), StringUtils.join(strs, ""));
 			}
 			if (ctx.ellipsis != null) {
 				return new Ellipsis(this.getLocInfo(ctx));
@@ -1124,6 +1185,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTestlist_comp");
 			//      test ( comp_for | ( ',' test )* ','? )
+
 			if (ctx.comp_for() != null) {
 				Expr expression = (Expr) ctx.initial.accept(this);
 				CompFor compFor = (CompFor) ctx.comp_for().accept(this);
@@ -1143,11 +1205,12 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTrailer");
 			//      '(' arglist? ')' | '[' subscriptlist ']' | '.' NAME
+
 			if (ctx.arglist() != null) {
 				return ctx.arglist().accept(this); //Args
 			}
 			if (ctx.subscriptlist() != null) {
-				CollectionWrapper<Subscript> wrap = (CollectionWrapper<Subscript>) ctx.subscriptlist().accept(this);
+				return ctx.subscriptlist().accept(this); //Subscript / Subscripts
 			}
 			if (ctx.NAME() != null) {
 				return this.getIdentifier(ctx.NAME()); //Identifier
@@ -1161,11 +1224,17 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitSubscriptlist");
 			//      subscript ( ',' subscript )* ','?
+
 			List<Subscript> subscripts = ctx.subscript().stream()
 					.map(e -> (Subscript) e.accept(this))
 					.collect(Collectors.toList());
+
+			if (subscripts.size() == 1) {
+				this.indent--;
+				return subscripts.get(0);
+			}
 			this.indent--;
-			return new CollectionWrapper<>(this.getLocInfo(ctx), subscripts);
+			return new Subscripts(this.getLocInfo(ctx), subscripts);
 		}
 
 		@Override
@@ -1201,6 +1270,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitExprlist");
 			//      star_expr ( ',' star_expr )* ','?
+
 			//TODO: this should probably be changed into a different type, not Expr
 			List<Expr> expressions = ctx.star_expr().stream()
 					.map(e -> (Expr) e.accept(this))
@@ -1214,6 +1284,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTestlist");
 			//      test ( ',' test )* ','?
+
 			List<Expr> expressions = ctx.test().stream()
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
@@ -1254,6 +1325,8 @@ public class AstBuilder {
 		public Py3Node visitClassdef(@NotNull Python3Parser.ClassdefContext ctx) {
 			this.indent++;
 			this.print("visitClassdef");
+			//      CLASS NAME ( '(' arglist? ')' )? ':' suite
+
 			Identifier id = this.getIdentifier(ctx.NAME());
 			Args args = (Args) ctx.arglist().accept(this);
 			CollectionWrapper<Statement> suite = (CollectionWrapper<Statement>) ctx.suite().accept(this);
@@ -1266,6 +1339,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitArglist");
 			//      ( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
+
 			List<Arg> positional = ctx.positionalArgs.stream()
 					.map(e -> (Arg) e.accept(this))
 					.collect(Collectors.toList());
@@ -1280,6 +1354,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitArgument");
 			//      test comp_for? | test '=' test
+
 			if (ctx.name != null) {
 				Identifier id = (Identifier) ctx.name.accept(this);
 				Expr value = (Expr) ctx.value.accept(this);
@@ -1304,6 +1379,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitComp_iter");
 			//      comp_for | comp_if
+
 			if (ctx.comp_for() != null) {
 				this.indent--;
 				return ctx.comp_for().accept(this);
@@ -1321,6 +1397,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitComp_for");
 			//      FOR exprlist IN or_test comp_iter?
+
 			CollectionWrapper<Expr> targets = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
 			Logical source = (Logical) ctx.or_test().accept(this);
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
@@ -1333,6 +1410,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitComp_if");
 			//      IF test_nocond comp_iter?
+
 			ExprNoCond expr = (ExprNoCond) ctx.test_nocond().accept(this);
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
 			this.indent--;
@@ -1344,6 +1422,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitYield_expr");
 			//      YIELD yield_arg?
+
 			if (ctx.yield_arg() != null) {
 				this.indent--;
 				return ctx.yield_arg().accept(this);
@@ -1357,6 +1436,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitYield_arg");
 			//      FROM test | testlist
+
 			if (ctx.test() != null) {
 				this.indent--;
 				return new YieldFrom(this.getLocInfo(ctx), (Expr) ctx.test().accept(this));
@@ -1375,6 +1455,7 @@ public class AstBuilder {
 			this.print("visitString");
 			this.indent--;
 			//      STRING_LITERAL | BYTES_LITERAL
+
 			//TODO: strip out prefix + quotes?
 			if (ctx.STRING_LITERAL() != null) {
 				return new Str(this.getLocInfo(ctx), ctx.STRING_LITERAL().getText());
@@ -1391,6 +1472,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitNumber");
 			//      integer | FLOAT_NUMBER | IMAG_NUMBER
+
 			if (ctx.integer() != null) {
 				this.indent--;
 				return ctx.integer().accept(this);
@@ -1415,6 +1497,7 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitInteger");
 			//      DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
+
 			if (ctx.DECIMAL_INTEGER() != null) {
 				BigInteger bi = new BigInteger(ctx.DECIMAL_INTEGER().getText());
 				this.indent--;
@@ -1456,7 +1539,6 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visit");
 			this.indent--;
-			//TODO
 			return null;
 		}
 
@@ -1465,7 +1547,6 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitChildren");
 			this.indent--;
-			//TODO
 			return null;
 		}
 
@@ -1474,7 +1555,6 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitTerminal");
 			this.indent--;
-			//TODO
 			return null;
 		}
 
@@ -1483,12 +1563,11 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitErrorNode");
 			this.indent--;
-			//TODO
 			return null;
 		}
 
 		private LocInfo getLocInfo(TerminalNode node) {
-			//TODO: check this
+			//TODO: implement this properly
 			return new LocInfo(node.getSymbol().getStartIndex(), node.getSymbol().getStopIndex());
 		}
 

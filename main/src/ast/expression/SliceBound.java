@@ -1,13 +1,13 @@
 package ast.expression;
 
 import ast.LocInfo;
-import ast.Py3Node;
+import ast.expression.primary.Subscript;
 import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 24-06-2015
  */
-public class SliceBound extends Py3Node {
+public class SliceBound extends Subscript {
 
 	private final Expr lowerBound;
 	private final Expr upperBound;

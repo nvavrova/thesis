@@ -1,17 +1,16 @@
 package ast;
 
-import ast.PseudoNode;
 import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 19-05-2015
  */
-public abstract class Py3Node extends PseudoNode {
+public abstract class Py3Node {
 
     protected final LocInfo locInfo;
 
     public Py3Node(LocInfo locInfo) {
-        super(locInfo);
+        this.locInfo = locInfo;
     }
 
     public Boolean countsTowardsLoc() {
