@@ -1,10 +1,10 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.Suite;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,13 +12,13 @@ import java.util.Map;
  */
 public class Try extends Statement {
 
-	private final List<Statement> tryBlock;
-	private final Map<Except, List<Statement>> exceptBlocks;
-	private final List<Statement> elseBlock;
-	private final List<Statement> finallyBlock;
+	private final Suite tryBlock;
+	private final Map<Except, Suite> exceptBlocks;
+	private final Suite elseBlock;
+	private final Suite finallyBlock;
 
-	public Try(LocInfo locInfo, List<Statement> tryBlock, Map<Except, List<Statement>> exceptBlocks,
-	           List<Statement> elseBlock, List<Statement> finallyBlock) {
+	public Try(LocInfo locInfo, Suite tryBlock, Map<Except, Suite> exceptBlocks,
+	           Suite elseBlock, Suite finallyBlock) {
 		super(locInfo);
 		this.tryBlock = tryBlock;
 		this.exceptBlocks = exceptBlocks;
@@ -26,19 +26,19 @@ public class Try extends Statement {
 		this.finallyBlock = finallyBlock;
 	}
 
-	public List<Statement> getTryBlock() {
+	public Suite getTryBlock() {
 		return this.tryBlock;
 	}
 
-	public Map<Except, List<Statement>> getExceptBlocks() {
+	public Map<Except, Suite> getExceptBlocks() {
 		return this.exceptBlocks;
 	}
 
-	public List<Statement> getElseBlock() {
+	public Suite getElseBlock() {
 		return this.elseBlock;
 	}
 
-	public List<Statement> getFinallyBlock() {
+	public Suite getFinallyBlock() {
 		return this.finallyBlock;
 	}
 

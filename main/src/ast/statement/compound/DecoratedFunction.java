@@ -2,10 +2,10 @@ package ast.statement.compound;
 
 import ast.Decorator;
 import ast.LocInfo;
+import ast.Suite;
 import ast.expression.Expr;
-import ast.param.Params;
 import ast.expression.atom.Identifier;
-import ast.statement.Statement;
+import ast.param.Params;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class DecoratedFunction extends Function {
 
 	private final List<Decorator> decorators;
 
-	public DecoratedFunction(LocInfo locInfo, Identifier name, Expr returnType, List<Statement> body, Params params, List<Decorator> decorators) {
+	public DecoratedFunction(LocInfo locInfo, Identifier name, Expr returnType, Suite body, Params params, List<Decorator> decorators) {
 		super(locInfo, name, returnType, body, params);
 		this.decorators = decorators;
 	}

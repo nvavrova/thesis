@@ -1,6 +1,7 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
@@ -14,10 +15,10 @@ public class For extends Statement {
 
 	private final List<Expr> iterator;
 	private final List<Expr> source;
-	private final List<Statement> body;
-	private final List<Statement> elseBody;
+	private final Suite body;
+	private final Suite elseBody;
 
-	public For(LocInfo locInfo, List<Expr> iterator, List<Expr> source, List<Statement> body, List<Statement> elseBody) {
+	public For(LocInfo locInfo, List<Expr> iterator, List<Expr> source, Suite body, Suite elseBody) {
 		super(locInfo);
 		this.iterator = iterator;
 		this.source = source;
@@ -25,11 +26,11 @@ public class For extends Statement {
 		this.elseBody = elseBody;
 	}
 
-	public List<Statement> getBody() {
+	public Suite getBody() {
 		return this.body;
 	}
 
-	public List<Statement> getElseBody() {
+	public Suite getElseBody() {
 		return this.elseBody;
 	}
 

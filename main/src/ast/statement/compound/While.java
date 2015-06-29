@@ -1,11 +1,10 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
-
-import java.util.List;
 
 /**
  * Created by Nik on 17-06-2015
@@ -13,10 +12,10 @@ import java.util.List;
 public class While extends Statement {
 
 	private final Expr condition;
-	private final List<Statement> body;
-	private final List<Statement> elseBody;
+	private final Suite body;
+	private final Suite elseBody;
 
-	public While(LocInfo locInfo, Expr condition, List<Statement> body, List<Statement> elseBody) {
+	public While(LocInfo locInfo, Expr condition, Suite body, Suite elseBody) {
 		super(locInfo);
 		this.condition = condition;
 		this.body = body;
@@ -27,11 +26,11 @@ public class While extends Statement {
 		return this.condition;
 	}
 
-	public List<Statement> getBody() {
+	public Suite getBody() {
 		return this.body;
 	}
 
-	public List<Statement> getElseBody() {
+	public Suite getElseBody() {
 		return this.elseBody;
 	}
 

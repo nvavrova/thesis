@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * Created by Nik on 25-06-2015
  */
-//TODO?
 public class Suite extends Py3Node {
 
 	private final List<Statement> statements;
@@ -24,6 +23,6 @@ public class Suite extends Py3Node {
 
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
-		return null;
+		return visitor.visit(this);
 	}
 }

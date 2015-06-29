@@ -176,9 +176,9 @@ public class AstBuilder {
 
 			Params params = (Params) ctx.parameters().accept(this);
 			Expr returnType = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
-			CollectionWrapper<Statement> wrap = this.getResultWrapper(ctx.suite());
+			Suite suite = this.process(ctx.suite());
 			this.indent--;
-			return new Function(this.getLocInfo(ctx), this.getIdentifier(ctx.NAME()), returnType, wrap.getItems(), params);
+			return new Function(this.getLocInfo(ctx), this.getIdentifier(ctx.NAME()), returnType, suite, params);
 		}
 
 		@Override
@@ -701,8 +701,8 @@ public class AstBuilder {
 			//      IF test ':' suite ( ELIF test ':' suite )* ( ELSE ':' suite )?
 
 			Expr ifCond = (Expr) ctx.ifTest.accept(this);
-			List<Statement> stmts = this.process(ctx.ifSuite);
-			List<Statement> elseStmts = this.processOptional(ctx.elseSuite);
+			Suite stmts = this.process(ctx.ifSuite);
+			Suite elseStmts = this.processOptional(ctx.elseSuite);
 
 			If ifStatement = new If(this.getLocInfo(ctx), ifCond, stmts, elseStmts);
 
@@ -722,8 +722,8 @@ public class AstBuilder {
 			//      WHILE test ':' suite ( ELSE ':' suite )?
 
 			Expr condition = (Expr) ctx.test().accept(this);
-			List<Statement> body = this.process(ctx.body);
-			List<Statement> elseBody = this.processOptional(ctx.elseBody);
+			Suite body = this.process(ctx.body);
+			Suite elseBody = this.processOptional(ctx.elseBody);
 
 			this.indent--;
 			return new While(this.getLocInfo(ctx), condition, body, elseBody);
@@ -737,8 +737,8 @@ public class AstBuilder {
 
 			CollectionWrapper<Expr> iterator = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
 			CollectionWrapper<Expr> source = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
-			List<Statement> body = this.process(ctx.body);
-			List<Statement> elseBody = this.processOptional(ctx.elseBody);
+			Suite body = this.process(ctx.body);
+			Suite elseBody = this.processOptional(ctx.elseBody);
 
 			this.indent--;
 			return new For(this.getLocInfo(ctx), iterator.getItems(), source.getItems(), body, elseBody);
@@ -754,13 +754,13 @@ public class AstBuilder {
 			//		| FINALLY ':' suite
 			//		)
 
-			List<Statement> tryBlock = this.process(ctx.tryBlock);
-			List<Statement> elseBlock = this.processOptional(ctx.elseBlock);
-			List<Statement> finallyBlock = this.processOptional(ctx.finallyBlock);
-			Map<Except, List<Statement>> exceptBlocks = new HashMap<>();
+			Suite tryBlock = this.process(ctx.tryBlock);
+			Suite elseBlock = this.processOptional(ctx.elseBlock);
+			Suite finallyBlock = this.processOptional(ctx.finallyBlock);
+			Map<Except, Suite> exceptBlocks = new HashMap<>();
 
 			for (Python3Parser.Except_clauseContext c : ctx.exceptBlocks.keySet()) {
-				List<Statement> block = this.process(ctx.exceptBlocks.get(c));
+				Suite block = this.process(ctx.exceptBlocks.get(c));
 				Except except = (Except) c.accept(this);
 				exceptBlocks.put(except, block);
 			}
@@ -778,7 +778,7 @@ public class AstBuilder {
 			List<WithItem> items = ctx.with_item().stream()
 					.map(e -> (WithItem) e.accept(this))
 					.collect(Collectors.toList());
-			List<Statement> stmts = this.process(ctx.suite());
+			Suite stmts = this.process(ctx.suite());
 			this.indent--;
 			return new With(this.getLocInfo(ctx), items, stmts);
 		}
@@ -823,7 +823,7 @@ public class AstBuilder {
 				List<Statement> statements = new ArrayList<>();
 				collectionWrappers.forEach(e -> statements.addAll(e.getItems()));
 				this.indent--;
-				return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
+				return new Suite(this.getLocInfo(ctx), statements);
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1625,15 +1625,15 @@ public class AstBuilder {
 			System.out.println(s);
 		}
 
-		private List<Statement> processOptional(Python3Parser.SuiteContext node) {
+		private Suite processOptional(Python3Parser.SuiteContext node) {
 			if (node == null) {
-				return Collections.emptyList();
+				return new Suite(this.getLocInfo(node), Collections.emptyList());
 			}
 			return this.process(node);
 		}
 
-		private List<Statement> process(Python3Parser.SuiteContext node) {
-			return this.getResultWrapper(node).getItems();
+		private Suite process(Python3Parser.SuiteContext node) {
+			return (Suite) node.accept(this);
 		}
 
 		private CollectionWrapper<Statement> getResultWrapper(Python3Parser.SuiteContext node) {

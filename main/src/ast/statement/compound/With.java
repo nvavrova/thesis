@@ -1,6 +1,7 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.Suite;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
@@ -12,9 +13,9 @@ import java.util.List;
 public class With extends Statement {
 
 	private final List<WithItem> items;
-	private final List<Statement> body;
+	private final Suite body;
 
-	public With(LocInfo locInfo, List<WithItem> items, List<Statement> body) {
+	public With(LocInfo locInfo, List<WithItem> items, Suite body) {
 		super(locInfo);
 		this.items = items;
 		this.body = body;
@@ -24,7 +25,7 @@ public class With extends Statement {
 		return this.items;
 	}
 
-	public List<Statement> getBody() {
+	public Suite getBody() {
 		return this.body;
 	}
 

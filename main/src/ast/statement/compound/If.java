@@ -1,11 +1,15 @@
 package ast.statement.compound;
 
 import ast.LocInfo;
+import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nik on 17-06-2015
@@ -13,10 +17,10 @@ import java.util.*;
 public class If extends Statement {
 
 	private final List<Expr> conditions;
-	private final Map<Expr, List<Statement>> bodies;
-	private final List<Statement> elseBody;
+	private final Map<Expr, Suite> bodies;
+	private final Suite elseBody;
 
-	public If(LocInfo locInfo, Expr condition, List<Statement> condBody, List<Statement> elseBody) {
+	public If(LocInfo locInfo, Expr condition, Suite condBody, Suite elseBody) {
 		super(locInfo);
 
 		this.conditions = new ArrayList<>();
@@ -26,11 +30,11 @@ public class If extends Statement {
 		this.addClause(condition, condBody);
 	}
 
-	public void addElseIf(Expr condition, List<Statement> condBody) {
+	public void addElseIf(Expr condition, Suite condBody) {
 		this.addClause(condition, condBody);
 	}
 
-	private void addClause(Expr condition, List<Statement> condBody) {
+	private void addClause(Expr condition, Suite condBody) {
 		this.conditions.add(condition);
 		this.bodies.put(condition, condBody);
 	}
@@ -39,11 +43,11 @@ public class If extends Statement {
 		return this.conditions;
 	}
 
-	public List<Statement> getElseBody() {
+	public Suite getElseBody() {
 		return this.elseBody;
 	}
 
-	public List<Statement> getBody(Expr condition) {
+	public Suite getBody(Expr condition) {
 		assert (this.bodies.containsKey(condition));
 		return this.bodies.get(condition);
 	}
