@@ -18,6 +18,10 @@ public class DottedPath extends Path {
 		this(locInfo, path, null);
 	}
 
+	public DottedPath(LocInfo locInfo, DottedPath path, Identifier alias) {
+		this(locInfo, path.getPathParts(), alias);
+	}
+
 	public DottedPath(LocInfo locInfo, List<String> path, Identifier alias) {
 		super(locInfo, alias);
 		this.path = path;

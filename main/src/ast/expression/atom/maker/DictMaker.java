@@ -1,28 +1,27 @@
-package ast.expression.maker;
+package ast.expression.atom.maker;
 
 import ast.LocInfo;
-import ast.expression.Expr;
 import ast.expression.display.CompFor;
+import ast.expression.Expr;
 import thesis.Py3TreeVisitor;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Nik on 15-06-2015
  */
-public class SetMaker extends Maker {
+public class DictMaker extends Maker {
 
 	private final CompFor compFor;
-	private final List<Expr> values;
+	private final Map<Expr, Expr> values;
 
-	public SetMaker(LocInfo locInfo, CompFor compFor) {
+	public DictMaker(LocInfo locInfo, CompFor compFor) {
 		super(locInfo);
 		this.compFor = compFor;
-		this.values = Collections.emptyList();
+		this.values = Collections.emptyMap();
 	}
-
-	public SetMaker(LocInfo locInfo, List<Expr> values) {
+	public DictMaker(LocInfo locInfo, Map<Expr, Expr> values) {
 		super(locInfo);
 		this.values = values;
 		this.compFor = null;
@@ -32,7 +31,7 @@ public class SetMaker extends Maker {
 		return this.compFor;
 	}
 
-	public List<Expr> getValues() {
+	public Map<Expr, Expr> getValues() {
 		return this.values;
 	}
 

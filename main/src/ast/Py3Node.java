@@ -13,10 +13,6 @@ public abstract class Py3Node {
         this.locInfo = locInfo;
     }
 
-    public Boolean countsTowardsLoc() {
-        return true;
-    }
-
 	public abstract <T> T accept(Py3TreeVisitor<T> visitor);
 
     public Integer getLocSpan() {

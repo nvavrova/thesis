@@ -16,4 +16,8 @@ public abstract class Binary extends Logical {
 		super(locInfo);
 		this.operands = operands;
 	}
+
+	public List<Expr> getOperands() {
+		return this.operands;
+	}
 }

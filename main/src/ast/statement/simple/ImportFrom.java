@@ -1,5 +1,7 @@
-package ast;
+package ast.statement.simple;
 
+import ast.LocInfo;
+import ast.Path;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;

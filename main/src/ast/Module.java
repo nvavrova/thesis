@@ -1,5 +1,6 @@
 package ast;
 
+import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -9,14 +10,14 @@ import java.util.List;
  */
 public class Module extends Py3Node {
 
-    private final List<Py3Node> body;
+    private final List<Statement> body;
 
-    public Module(LocInfo locInfo, List<Py3Node> body) {
+    public Module(LocInfo locInfo, List<Statement> body) {
         super(locInfo);
         this.body = body;
     }
 
-    public List<Py3Node> getBody() {
+    public List<Statement> getBody() {
         return this.body;
     }
 

@@ -1,5 +1,8 @@
-package ast;
+package ast.statement.simple;
 
+import ast.LocInfo;
+import ast.Path;
+import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -7,7 +10,7 @@ import java.util.List;
 /**
  * Created by Nik on 25-05-15
  */
-public class Import extends Py3Node {
+public class Import extends Statement {
 
     private final List<Path> paths;
 

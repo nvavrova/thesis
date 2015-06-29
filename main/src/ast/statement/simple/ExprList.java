@@ -1,24 +1,25 @@
-package ast.expression.primary;
+package ast.statement.simple;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
 
 /**
- * Created by Nik on 24-06-2015
+ * Created by Nik on 29-06-2015
  */
-public class Subscripts extends Expr {
+public class ExprList extends Statement {
 
-	private final List<Subscript> values;
+	private final List<Expr> values;
 
-	public Subscripts(LocInfo locInfo, List<Subscript> values) {
+	public ExprList(LocInfo locInfo, List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}
 
-	public List<Subscript> getValues() {
+	public List<Expr> getValues() {
 		return this.values;
 	}
 

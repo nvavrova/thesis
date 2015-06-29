@@ -25,7 +25,7 @@ public class Comparison extends Expr {
 	}
 
 	public List<String> getOperators() {
-		return operators;
+		return this.operators;
 	}
 
 	public Integer getArity() {

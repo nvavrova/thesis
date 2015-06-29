@@ -1,8 +1,10 @@
-package ast;
+package ast.statement.compound;
 
-import ast.arg.Args;
+import ast.Decorator;
+import ast.LocInfo;
+import ast.Suite;
+import ast.expression.primary.ArgList;
 import ast.expression.atom.Identifier;
-import ast.statement.Statement;
 
 import java.util.List;
 
@@ -13,8 +15,8 @@ public class DecoratedClass extends ClassDef {
 
 	private final List<Decorator> decorators;
 
-	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, Identifier name, Args inheritance, List<Statement> body) {
-		super(locInfo, name, inheritance, body);
+	public DecoratedClass(LocInfo locInfo, List<Decorator> decorators, Identifier name, Suite body, ArgList inheritance) {
+		super(locInfo, name, body, inheritance);
 		this.decorators = decorators;
 	}
 

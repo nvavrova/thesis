@@ -1,27 +1,25 @@
 package ast.expression.display;
 
 import ast.LocInfo;
-import ast.expression.Expr;
 import ast.expression.logical.Logical;
+import ast.statement.simple.ExprList;
 import thesis.Py3TreeVisitor;
-
-import java.util.List;
 
 /**
  * Created by Nik on 17-06-2015
  */
 public class CompFor extends CompIter {
 
-	private final List<Expr> targets;
+	private final ExprList targets;
 	private final Logical source;
 
-	public CompFor(LocInfo locInfo, CompIter nextLink, List<Expr> targets, Logical source) {
+	public CompFor(LocInfo locInfo, CompIter nextLink, ExprList targets, Logical source) {
 		super(locInfo, nextLink);
 		this.targets = targets;
 		this.source = source;
 	}
 
-	public List<Expr> getTargets() {
+	public ExprList getTargets() {
 		return this.targets;
 	}
 

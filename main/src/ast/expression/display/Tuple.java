@@ -18,6 +18,10 @@ public class Tuple extends Sequence {
 		this.body = body;
 	}
 
+	public List<Expr> getBody() {
+		return this.body;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

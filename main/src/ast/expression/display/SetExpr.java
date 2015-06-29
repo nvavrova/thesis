@@ -18,6 +18,10 @@ public class SetExpr extends Expr {
 		this.body = body;
 	}
 
+	public Set<Expr> getBody() {
+		return this.body;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

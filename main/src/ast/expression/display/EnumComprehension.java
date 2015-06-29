@@ -18,6 +18,10 @@ public class EnumComprehension extends Comprehension {
 		this.values = values;
 	}
 
+	public List<Expr> getValues() {
+		return this.values;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

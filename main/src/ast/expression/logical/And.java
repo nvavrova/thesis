@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Nik on 08-06-2015
  */
-public class And extends Expr {
+public class And extends Logical {
 
 	private final List<Expr> operands;
 

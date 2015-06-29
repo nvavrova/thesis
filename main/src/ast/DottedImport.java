@@ -1,5 +1,6 @@
 package ast;
 
+import ast.statement.simple.Import;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;

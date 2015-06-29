@@ -9,8 +9,8 @@ import ast.expression.display.ListExpr;
 import ast.expression.display.SetExpr;
 import ast.expression.display.Tuple;
 import ast.expression.logical.Not;
-import ast.expression.maker.DictMaker;
-import ast.expression.maker.SetMaker;
+import ast.expression.atom.maker.DictMaker;
+import ast.expression.atom.maker.SetMaker;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -20,50 +20,49 @@ import ast.expression.unary.Plus;
  */
 public interface ExpressionVisitor<T> {
 
-	public T visit(Comparison n);
-	public T visit(Conditional n);
-	public T visit(Lambda n);
-	public T visit(Shift n);
-	public T visit(Slice n);
+	T visit(Comparison n);
+	T visit(Conditional n);
+	T visit(Lambda n);
+	T visit(Shift n);
 
 	//arithmetic
 	//TODO
 
 	//atom
-	public T visit(Bool n);
-	public T visit(Comment n);
-	public T visit(Ellipsis n);
-	public T visit(Enclosure n);
-	public T visit(ast.expression.atom.Float n);
-	public T visit(Identifier n);
-	public T visit(Imaginary n);
-	public T visit(Int n);
-	public T visit(Literal n);
-	public T visit(None n);
-	public T visit(Str n);
+	T visit(Bool n);
+	T visit(Comment n);
+	T visit(Ellipsis n);
+	T visit(Enclosure n);
+	T visit(ast.expression.atom.Float n);
+	T visit(Identifier n);
+	T visit(Imaginary n);
+	T visit(Int n);
+	T visit(Literal n);
+	T visit(None n);
+	T visit(Str n);
 
 	//bitwise
-	public T visit(And n);
-	public T visit(Or n);
-	public T visit(Xor n);
+	T visit(And n);
+	T visit(Or n);
+	T visit(Xor n);
 
 	//data structures
-	public T visit(Dictionary n);
-	public T visit(ListExpr n);
-	public T visit(SetExpr n);
-	public T visit(Tuple n);
+	T visit(Dictionary n);
+	T visit(ListExpr n);
+	T visit(SetExpr n);
+	T visit(Tuple n);
 
 	//logical
-	public T visit(ast.expression.logical.And n);
-	public T visit(Not n);
-	public T visit(ast.expression.logical.Or n);
+	T visit(ast.expression.logical.And n);
+	T visit(Not n);
+	T visit(ast.expression.logical.Or n);
 
 	//makers
-	public T visit(DictMaker n);
-	public T visit(SetMaker n);
+	T visit(DictMaker n);
+	T visit(SetMaker n);
 
 	//unary
-	public T visit(Invert n);
-	public T visit(Minus n);
-	public T visit(Plus n);
+	T visit(Invert n);
+	T visit(Minus n);
+	T visit(Plus n);
 }

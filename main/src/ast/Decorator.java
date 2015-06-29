@@ -1,6 +1,6 @@
 package ast;
 
-import ast.arg.Args;
+import ast.expression.primary.ArgList;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -8,21 +8,21 @@ import thesis.Py3TreeVisitor;
  */
 public class Decorator extends Py3Node {
 
-	private final DottedImport name;
-	private final Args args;
+	private final DottedPath name;
+	private final ArgList argList;
 
-	public Decorator(LocInfo locInfo, DottedImport name, Args args) {
+	public Decorator(LocInfo locInfo, DottedPath name, ArgList argList) {
 		super(locInfo);
 		this.name = name;
-		this.args = args;
+		this.argList = argList;
 	}
 
-	public DottedImport getName() {
+	public DottedPath getName() {
 		return this.name;
 	}
 
-	public Args getArgs() {
-		return this.args;
+	public ArgList getArgList() {
+		return this.argList;
 	}
 
 	@Override

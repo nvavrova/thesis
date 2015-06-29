@@ -26,6 +26,14 @@ public class Raise extends Flow {
 		return this.source;
 	}
 
+	public Boolean hasType() {
+		return this.type != null;
+	}
+
+	public Boolean hasSource() {
+		return this.source != null;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

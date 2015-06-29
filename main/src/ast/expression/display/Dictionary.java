@@ -18,6 +18,10 @@ public class Dictionary extends SequenceContainer {
 		this.body = body;
 	}
 
+	public Map<Expr, Expr> getBody() {
+		return this.body;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

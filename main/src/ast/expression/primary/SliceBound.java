@@ -20,6 +20,18 @@ public class SliceBound extends Subscript {
 		this.stride = stride;
 	}
 
+	public Expr getLowerBound() {
+		return this.lowerBound;
+	}
+
+	public Expr getUpperBound() {
+		return this.upperBound;
+	}
+
+	public Expr getStride() {
+		return this.stride;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

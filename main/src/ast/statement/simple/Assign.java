@@ -1,10 +1,7 @@
 package ast.statement.simple;
 
 import ast.LocInfo;
-import ast.expression.Expr;
 import ast.statement.Statement;
-
-import java.util.List;
 
 /**
  * Created by Nik on 17-06-2015
@@ -12,9 +9,9 @@ import java.util.List;
 public abstract class Assign extends Statement {
 
 	private final String operator;
-	private final List<Expr> targets;
+	private final ExprList targets;
 
-	public Assign(LocInfo locInfo, String operator, List<Expr> targets) {
+	public Assign(LocInfo locInfo, String operator, ExprList targets) {
 		super(locInfo);
 		this.operator = operator;
 		this.targets = targets;
@@ -24,7 +21,7 @@ public abstract class Assign extends Statement {
 		return this.operator;
 	}
 
-	public List<Expr> getTargets() {
+	public ExprList getTargets() {
 		return this.targets;
 	}
 }

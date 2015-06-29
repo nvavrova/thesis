@@ -27,6 +27,10 @@ public class Except extends Statement {
 		return this.alias;
 	}
 
+	public Boolean hasException() {
+		return this.exception != null;
+	}
+
 	public Boolean hasAlias() {
 		return this.alias != null;
 	}

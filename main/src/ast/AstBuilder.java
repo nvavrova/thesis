@@ -1,25 +1,25 @@
 package ast;
 
-import ast.arg.*;
+import ast.arg.Arg;
+import ast.arg.ArgCond;
+import ast.arg.Kwarg;
+import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
 import ast.expression.atom.Float;
+import ast.expression.atom.maker.DictMaker;
+import ast.expression.atom.maker.SetMaker;
+import ast.expression.bitwise.Xor;
 import ast.expression.display.*;
 import ast.expression.logical.And;
 import ast.expression.logical.Logical;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
-import ast.expression.maker.DictMaker;
-import ast.expression.maker.SetMaker;
-import ast.expression.primary.SliceBound;
-import ast.expression.primary.Subscript;
-import ast.expression.primary.SubscriptIndex;
-import ast.expression.primary.Subscripts;
+import ast.expression.primary.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.expression.bitwise.Xor;
 import ast.param.Param;
 import ast.param.Params;
 import ast.param.TypedParam;
@@ -91,9 +91,8 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFile_input");
 			//      ( NEWLINE | stmt )* EOF
-
 			if (ctx.stmt() != null) {
-				List<Py3Node> children = new ArrayList<>();
+				List<Statement> children = new ArrayList<>();
 				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<Statement>) e.accept(this)).items));
 				this.indent--;
 				return new Module(this.getLocInfo(ctx), children);
@@ -121,10 +120,10 @@ public class AstBuilder {
 			this.print("visitDecorator");
 			//      '@' dotted_name ( '(' arglist? ')' )? NEWLINE
 
-			DottedImport id = (DottedImport) ctx.dotted_name().accept(this);
-			Args args = ctx.arglist() == null ? null : (Args) ctx.arglist().accept(this);
+			DottedPath id = (DottedPath) ctx.dotted_name().accept(this);
+			ArgList argList = ctx.arglist() == null ? null : (ArgList) ctx.arglist().accept(this);
 			this.indent--;
-			return new Decorator(this.getLocInfo(ctx), id, args);
+			return new Decorator(this.getLocInfo(ctx), id, argList);
 		}
 
 		@Override
@@ -153,14 +152,12 @@ public class AstBuilder {
 
 			CollectionWrapper<Decorator> decorators = (CollectionWrapper<Decorator>) ctx.decorators().accept(this);
 			if (ctx.classdef() != null) {
-				//XXX: is there a nicer way to do this part?
 				ClassDef cd = (ClassDef) ctx.classdef().accept(this);
 				this.indent--;
-				return new DecoratedClass(this.getLocInfo(ctx), decorators.getItems(), cd.getName(), cd.getInheritance(), cd.getBody());
+				return new DecoratedClass(this.getLocInfo(ctx), decorators.getItems(), cd.getName(), cd.getBody(), cd.getInheritance());
 			}
 
 			if (ctx.funcdef() != null) {
-				//XXX: is there a nicer way to do this part?
 				Function f = (Function) ctx.funcdef().accept(this);
 				this.indent--;
 				return new DecoratedFunction(this.getLocInfo(ctx), f.getName(), f.getReturnType(), f.getBody(), f.getParams(), decorators.getItems());
@@ -261,15 +258,16 @@ public class AstBuilder {
 		public Py3Node visitStmt(@NotNull Python3Parser.StmtContext ctx) {
 			this.indent++;
 			this.print("visitStmt " + ctx.getText());
-			this.indent--;
 			//      simple_stmt | compound_stmt
 
 			if (ctx.simple_stmt() != null) {
+				this.indent--;
 				return ctx.simple_stmt().accept(this); //returns a Wrapper
 			}
 			if (ctx.compound_stmt() != null) {
 				//wrap this for consistency
 				Statement s = (Statement) ctx.compound_stmt().accept(this);
+				this.indent--;
 				return new CollectionWrapper<>(this.getLocInfo(ctx), s);
 			}
 			throw new IllegalArgumentException("Unknown context");
@@ -279,54 +277,46 @@ public class AstBuilder {
 		public Py3Node visitSimple_stmt(@NotNull Python3Parser.Simple_stmtContext ctx) {
 			this.indent++;
 			this.print("visitSimple_stmt");
-			this.indent--;
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
 
-			return new CollectionWrapper<>(this.getLocInfo(ctx),
-					ctx.small_stmt().stream()
-							.map(e -> (Statement) e.accept(this))
-							.collect(Collectors.toList()));
+			List<Statement> statements = ctx.small_stmt().stream()
+					.map(e -> (Statement) e.accept(this))
+					.collect(Collectors.toList());
+			this.indent--;
+			return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
 		}
 
 		@Override
 		public Py3Node visitSmall_stmt(@NotNull Python3Parser.Small_stmtContext ctx) {
 			this.indent++;
 			this.print("visitSmall_stmt");
+			this.indent--;
 			//      expr_stmt | del_stmt | pass_stmt | flow_stmt | import_stmt | global_stmt | nonlocal_stmt | assert_stmt
 
 			if (ctx.expr_stmt() != null) {
-				this.indent--;
 				return ctx.expr_stmt().accept(this);
 			}
 			if (ctx.del_stmt() != null) {
-				this.indent--;
 				return ctx.del_stmt().accept(this);
 			}
 			if (ctx.pass_stmt() != null) {
-				this.indent--;
 				return ctx.pass_stmt().accept(this);
 			}
 			if (ctx.flow_stmt() != null) {
-				this.indent--;
 				return ctx.flow_stmt().accept(this);
 			}
 			if (ctx.import_stmt() != null) {
-				this.indent--;
 				return ctx.import_stmt().accept(this);
 			}
 			if (ctx.global_stmt() != null) {
-				this.indent--;
 				return ctx.global_stmt().accept(this);
 			}
 			if (ctx.nonlocal_stmt() != null) {
-				this.indent--;
 				return ctx.nonlocal_stmt().accept(this);
 			}
 			if (ctx.assert_stmt() != null) {
-				this.indent--;
 				return ctx.assert_stmt().accept(this);
 			}
-			this.indent--;
 			throw new IllegalArgumentException("Unknown context");
 		}
 
@@ -336,7 +326,7 @@ public class AstBuilder {
 			this.print("visitExpr_stmt");
 			//      testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr | testlist_star_expr ) )* )
 
-			CollectionWrapper<Expr> targetWrap = (CollectionWrapper<Expr>) ctx.target.accept(this);
+			ExprList targets = (ExprList) ctx.target.accept(this);
 
 			String operator = "=";
 			if (ctx.augassign() != null) {
@@ -347,19 +337,21 @@ public class AstBuilder {
 			if (ctx.assignYield != null) {
 				Yield yield = (Yield) ctx.assignYield.accept(this);
 				this.indent--;
-				return new AssignYield(this.getLocInfo(ctx), operator, targetWrap.getItems(), yield);
+				return new AssignYield(this.getLocInfo(ctx), operator, targets, yield);
 			}
 			if (ctx.assignTest != null) {
-				CollectionWrapper<Expr> exprWrap = (CollectionWrapper<Expr>) ctx.assignTest.accept(this);
+				ExprList source = (ExprList) ctx.assignTest.accept(this);
 				this.indent--;
-				return new AssignExpr(this.getLocInfo(ctx), operator, targetWrap.getItems(), exprWrap.getItems());
+				return new AssignExpr(this.getLocInfo(ctx), operator, targets, source);
 			}
 			if (ctx.assignTestStarredList != null) {
-				CollectionWrapper<Expr> exprWrap = (CollectionWrapper<Expr>) ctx.assignTestStarredList.accept(this);
+				ExprList source = (ExprList) ctx.assignTestStarredList.accept(this);
 				this.indent--;
-				return new AssignExpr(this.getLocInfo(ctx), operator, targetWrap.getItems(), exprWrap.getItems());
+				return new AssignExpr(this.getLocInfo(ctx), operator, targets, source);
 			}
-			throw new IllegalArgumentException("Unknown context");
+
+			this.indent--;
+			return targets;
 		}
 
 
@@ -381,7 +373,7 @@ public class AstBuilder {
 						.collect(Collectors.toList()));
 			}
 			this.indent--;
-			return new CollectionWrapper<>(this.getLocInfo(ctx), children);
+			return new ExprList(this.getLocInfo(ctx), children);
 		}
 
 		@Override
@@ -400,9 +392,9 @@ public class AstBuilder {
 			this.print("visitDel_stmt");
 			//      DEL exprlist
 
-			CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
+			ExprList expressions = (ExprList) ctx.exprlist().accept(this);
 			this.indent--;
-			return new Delete(this.getLocInfo(ctx), expressions.getItems());
+			return new Delete(this.getLocInfo(ctx), expressions);
 		}
 
 		@Override
@@ -471,12 +463,12 @@ public class AstBuilder {
 			//      RETURN testlist?
 
 			if (ctx.testlist() != null) {
-				CollectionWrapper<Expr> expressions = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
+				ExprList expressions = (ExprList) ctx.testlist().accept(this);
 				this.indent--;
-				return new Return(this.getLocInfo(ctx), expressions.getItems());
+				return new Return(this.getLocInfo(ctx), expressions);
 			}
 			this.indent--;
-			return new Return(this.getLocInfo(ctx), Collections.emptyList());
+			return new Return(this.getLocInfo(ctx));
 		}
 
 		@Override
@@ -492,8 +484,8 @@ public class AstBuilder {
 			this.print("visitRaise_stmt");
 			//      RAISE ( test ( FROM test )? )?
 
-			Expr type = (Expr) ctx.except.accept(this);
-			Expr source = (Expr) ctx.source.accept(this);
+			Expr type = ctx.except == null ? null : (Expr) ctx.except.accept(this);
+			Expr source = ctx.source == null ? null : (Expr) ctx.source.accept(this);
 			this.indent--;
 			return new Raise(this.getLocInfo(ctx), type, source);
 		}
@@ -541,9 +533,15 @@ public class AstBuilder {
 
 			//TODO: include the '.' and '...' ?
 			DottedPath module = ctx.dotted_name() == null ? null : (DottedPath) ctx.dotted_name().accept(this);
-			CollectionWrapper<Path> wrap = ctx.import_as_names() == null ? null : (CollectionWrapper<Path>) ctx.import_as_names().accept(this);
+
+			List<Path> items = new ArrayList<>();
+			if (ctx.import_as_names() != null) {
+				CollectionWrapper<Path> wrap = (CollectionWrapper<Path>) ctx.import_as_names().accept(this);
+				items.addAll(wrap.getItems());
+			}
+
 			this.indent--;
-			return new ImportFrom(this.getLocInfo(ctx), wrap.getItems(), module);
+			return new ImportFrom(this.getLocInfo(ctx), items, module);
 		}
 
 		@Override
@@ -563,13 +561,13 @@ public class AstBuilder {
 			this.print("visitDotted_as_name");
 			//      dotted_name ( AS NAME )?
 
-			CollectionWrapper<String> wrap = (CollectionWrapper<String>) ctx.dotted_name().accept(this);
+			DottedPath path = (DottedPath) ctx.dotted_name().accept(this);
 			if (ctx.NAME() != null) {
 				Identifier id = this.getIdentifier(ctx.NAME());
-				return new DottedPath(this.getLocInfo(ctx), wrap.getItems(), id);
+				return new DottedPath(this.getLocInfo(ctx), path, id);
 			}
 			this.indent--;
-			return new DottedPath(this.getLocInfo(ctx), wrap.getItems());
+			return path;
 		}
 
 		@Override
@@ -735,13 +733,13 @@ public class AstBuilder {
 			this.print("visitFor_stmt");
 			//      FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
 
-			CollectionWrapper<Expr> iterator = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
-			CollectionWrapper<Expr> source = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
+			ExprList iterator = (ExprList) ctx.exprlist().accept(this);
+			ExprList source = (ExprList) ctx.testlist().accept(this);
 			Suite body = this.process(ctx.body);
 			Suite elseBody = this.processOptional(ctx.elseBody);
 
 			this.indent--;
-			return new For(this.getLocInfo(ctx), iterator.getItems(), source.getItems(), body, elseBody);
+			return new For(this.getLocInfo(ctx), iterator, source, body, elseBody);
 		}
 
 		@Override
@@ -801,7 +799,7 @@ public class AstBuilder {
 			this.print("visitExcept_clause");
 			//      EXCEPT ( test ( AS NAME )? )?
 
-			Expr exception = (Expr) ctx.test().accept(this);
+			Expr exception = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
 			String alias = ctx.NAME() == null ? null : ctx.NAME().getText();
 			this.indent--;
 			return new Except(this.getLocInfo(ctx), exception, alias);
@@ -814,7 +812,8 @@ public class AstBuilder {
 			//      simple_stmt | NEWLINE INDENT stmt+ DEDENT
 
 			if (ctx.simple_stmt() != null) {
-				return ctx.simple_stmt().accept(this); //returns a Wrapper
+				CollectionWrapper<Statement> wrap = (CollectionWrapper<Statement>) ctx.simple_stmt().accept(this);
+				return new Suite(this.getLocInfo(ctx), wrap.getItems());
 			}
 			else if (ctx.stmt() != null) {
 				List<CollectionWrapper<Statement>> collectionWrappers = ctx.stmt().stream()
@@ -857,7 +856,7 @@ public class AstBuilder {
 
 			this.indent--;
 			if (ctx.or_test() != null) {
-				//TODO: This needs to return something of type ExprNoCond! Figure out what should it be!
+				//TODO: This needs to return something of type ExprNoCond! Figure out what it should be!
 				return ctx.or_test().accept(this);
 			}
 			if (ctx.lambdef_nocond() != null) {
@@ -974,7 +973,7 @@ public class AstBuilder {
 			this.indent--;
 			//      '<' | '>' | '==' | '>=' | '<=' | '<>' | '!=' | IN | NOT IN | IS | IS NOT
 
-			return new Wrapper<String>(this.getLocInfo(ctx), ctx.operator);
+			return new Wrapper<>(this.getLocInfo(ctx), ctx.operator);
 		}
 
 		@Override
@@ -1094,13 +1093,13 @@ public class AstBuilder {
 
 			if (ctx.factor() != null) {
 				if (ctx.op.getText().equals("+")) {
-					return new Plus(this.getLocInfo(ctx), (Expr) ctx.power().accept(this));
+					return new Plus(this.getLocInfo(ctx), (Expr) ctx.factor().accept(this));
 				}
 				if (ctx.op.getText().equals("-")) {
-					new Minus(this.getLocInfo(ctx), (Expr) ctx.power().accept(this));
+					return new Minus(this.getLocInfo(ctx), (Expr) ctx.factor().accept(this));
 				}
 				if (ctx.op.getText().equals("~")) {
-					new Invert(this.getLocInfo(ctx), (Expr) ctx.power().accept(this));
+					return new Invert(this.getLocInfo(ctx), (Expr) ctx.factor().accept(this));
 				}
 				throw new IllegalArgumentException("Unknown context");
 			}
@@ -1234,7 +1233,7 @@ public class AstBuilder {
 				return subscripts.get(0);
 			}
 			this.indent--;
-			return new Subscripts(this.getLocInfo(ctx), subscripts);
+			return new SubscriptList(this.getLocInfo(ctx), subscripts);
 		}
 
 		@Override
@@ -1270,13 +1269,11 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitExprlist");
 			//      star_expr ( ',' star_expr )* ','?
-
-			//TODO: this should probably be changed into a different type, not Expr
 			List<Expr> expressions = ctx.star_expr().stream()
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
 			this.indent--;
-			return new CollectionWrapper<>(this.getLocInfo(ctx), expressions);
+			return new ExprList(this.getLocInfo(ctx), expressions);
 		}
 
 		@Override
@@ -1289,7 +1286,7 @@ public class AstBuilder {
 					.map(e -> (Expr) e.accept(this))
 					.collect(Collectors.toList());
 			this.indent--;
-			return new CollectionWrapper<>(this.getLocInfo(ctx), expressions);
+			return new ExprList(this.getLocInfo(ctx), expressions);
 		}
 
 		@Override
@@ -1328,10 +1325,14 @@ public class AstBuilder {
 			//      CLASS NAME ( '(' arglist? ')' )? ':' suite
 
 			Identifier id = this.getIdentifier(ctx.NAME());
-			Args args = (Args) ctx.arglist().accept(this);
-			CollectionWrapper<Statement> suite = (CollectionWrapper<Statement>) ctx.suite().accept(this);
+			Suite suite = (Suite) ctx.suite().accept(this);
+			if (ctx.arglist() != null) {
+				ArgList argList = (ArgList) ctx.arglist().accept(this);
+				this.indent--;
+				return new ClassDef(this.getLocInfo(ctx), id, suite, argList);
+			}
 			this.indent--;
-			return new ClassDef(this.getLocInfo(ctx), id, args, suite.getItems());
+			return new ClassDef(this.getLocInfo(ctx), id, suite);
 		}
 
 		@Override
@@ -1346,7 +1347,7 @@ public class AstBuilder {
 			Expr args = ctx.args == null ? null : (Expr) ctx.args.accept(this);
 			Expr kwargs = ctx.kwargs == null ? null : (Expr) ctx.kwargs.accept(this);
 			this.indent--;
-			return new Args(this.getLocInfo(ctx), positional, args, kwargs);
+			return new ArgList(this.getLocInfo(ctx), positional, args, kwargs);
 		}
 
 		@Override
@@ -1356,10 +1357,11 @@ public class AstBuilder {
 			//      test comp_for? | test '=' test
 
 			if (ctx.name != null) {
-				Identifier id = (Identifier) ctx.name.accept(this);
 				Expr value = (Expr) ctx.value.accept(this);
+				//TODO: either translate this to Identifier somehow or change the param for Kwarg to Expr
+				//Identifier id = (Identifier) ctx.name.accept(this);
 				this.indent--;
-				return new Kwarg(this.getLocInfo(ctx), value, id);
+				return new Kwarg(this.getLocInfo(ctx), value, null);
 			}
 			if (ctx.value != null) {
 				Expr value = (Expr) ctx.value.accept(this);
@@ -1398,11 +1400,11 @@ public class AstBuilder {
 			this.print("visitComp_for");
 			//      FOR exprlist IN or_test comp_iter?
 
-			CollectionWrapper<Expr> targets = (CollectionWrapper<Expr>) ctx.exprlist().accept(this);
+			ExprList targets = (ExprList) ctx.exprlist().accept(this);
 			Logical source = (Logical) ctx.or_test().accept(this);
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
 			this.indent--;
-			return new CompFor(this.getLocInfo(ctx), iter, targets.getItems(), source);
+			return new CompFor(this.getLocInfo(ctx), iter, targets, source);
 		}
 
 		@Override
@@ -1442,9 +1444,9 @@ public class AstBuilder {
 				return new YieldFrom(this.getLocInfo(ctx), (Expr) ctx.test().accept(this));
 			}
 			if (ctx.testlist() != null) {
-				CollectionWrapper<Expr> wrap = (CollectionWrapper<Expr>) ctx.testlist().accept(this);
+				ExprList list = (ExprList) ctx.testlist().accept(this);
 				this.indent--;
-				return new YieldValues(this.getLocInfo(ctx), wrap.getItems());
+				return new YieldValues(this.getLocInfo(ctx), list);
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1567,11 +1569,13 @@ public class AstBuilder {
 		}
 
 		private LocInfo getLocInfo(TerminalNode node) {
-			//TODO: implement this properly
 			return new LocInfo(node.getSymbol().getStartIndex(), node.getSymbol().getStopIndex());
 		}
 
 		private LocInfo getLocInfo(ParserRuleContext ctx) {
+			if (ctx.getStop() == null) {
+				return new LocInfo(ctx.getStart().getLine(), ctx.getStart().getLine());
+			}
 			return new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine());
 		}
 
@@ -1619,15 +1623,15 @@ public class AstBuilder {
 		}
 
 		private void print(String s) {
-			for (int i = 0; i < this.indent; i++) {
-				System.out.print("\t");
-			}
-			System.out.println(s);
+//			for (int i = 0; i < this.indent; i++) {
+//				System.out.print("\t");
+//			}
+//			System.out.println(s);
 		}
 
 		private Suite processOptional(Python3Parser.SuiteContext node) {
 			if (node == null) {
-				return new Suite(this.getLocInfo(node), Collections.emptyList());
+				return null;//new Suite(this.getLocInfo(node), Collections.emptyList());
 			}
 			return this.process(node);
 		}

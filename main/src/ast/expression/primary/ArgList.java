@@ -1,8 +1,9 @@
-package ast.arg;
+package ast.expression.primary;
 
 import ast.LocInfo;
-import ast.Py3Node;
+import ast.arg.Arg;
 import ast.expression.Expr;
+import ast.expression.ExprNoCond;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -10,13 +11,13 @@ import java.util.List;
 /**
  * Created by Nik on 23-06-2015
  */
-public class Args extends Py3Node {
+public class ArgList extends ExprNoCond {
 
 	private final List<Arg> positional;
 	private final Expr args;
 	private final Expr kwargs;
 
-	public Args(LocInfo locInfo, List<Arg> positional, Expr args, Expr kwargs) {
+	public ArgList(LocInfo locInfo, List<Arg> positional, Expr args, Expr kwargs) {
 		super(locInfo);
 		this.positional = positional;
 		this.args = args;

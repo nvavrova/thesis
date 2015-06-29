@@ -2,6 +2,7 @@ package ast.expression.arithmetic;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.expression.ExprNoCond;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by Nik on 10-06-2015
  */
-public class Arithmetic extends Expr {
+public class Arithmetic extends ExprNoCond {
 
 	private final List<Expr> operands;
 	private final List<String> operators;
