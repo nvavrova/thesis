@@ -1,6 +1,7 @@
 package ast;
 
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class Suite extends Py3Node {
 
 	private final List<Statement> statements;
 
-	public Suite(LocInfo locInfo, List<Statement> statements) {
+	public Suite(LocInfo locInfo, @NotNull List<Statement> statements) {
 		super(locInfo);
 		this.statements = statements;
 	}

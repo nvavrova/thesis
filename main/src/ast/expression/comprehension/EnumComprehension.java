@@ -1,7 +1,8 @@
-package ast.expression.display;
+package ast.expression.comprehension;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class EnumComprehension extends Comprehension {
 
 	private final List<Expr> values;
 
-	public EnumComprehension(LocInfo locInfo, List<Expr> values) {
+	public EnumComprehension(LocInfo locInfo, @NotNull List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}

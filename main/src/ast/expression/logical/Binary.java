@@ -2,6 +2,7 @@ package ast.expression.logical;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public abstract class Binary extends Logical {
 
 	private final List<Expr> operands;
 
-	public Binary(LocInfo locInfo, List<Expr> operands) {
+	public Binary(LocInfo locInfo, @NotNull List<Expr> operands) {
 		super(locInfo);
 		this.operands = operands;
 	}

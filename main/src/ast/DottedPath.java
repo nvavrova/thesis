@@ -1,7 +1,7 @@
 package ast;
 
-import ast.expression.atom.Identifier;
 import com.sun.deploy.util.StringUtils;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -14,21 +14,9 @@ public class DottedPath extends Path {
 	private static final String DELIMITER = ".";
 	private final List<String> path;
 
-	public DottedPath(LocInfo locInfo, List<String> path) {
-		this(locInfo, path, null);
-	}
-
-	public DottedPath(LocInfo locInfo, DottedPath path, Identifier alias) {
-		this(locInfo, path.getPathParts(), alias);
-	}
-
-	public DottedPath(LocInfo locInfo, List<String> path, Identifier alias) {
-		super(locInfo, alias);
+	public DottedPath(LocInfo locInfo, @NotNull List<String> path) {
+		super(locInfo);
 		this.path = path;
-	}
-
-	public List<String> getPathParts() {
-		return this.path;
 	}
 
 	@Override

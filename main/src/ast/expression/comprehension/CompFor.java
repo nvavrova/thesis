@@ -1,8 +1,9 @@
-package ast.expression.display;
+package ast.expression.comprehension;
 
 import ast.LocInfo;
-import ast.expression.logical.Logical;
+import ast.expression.Expr;
 import ast.statement.simple.ExprList;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,9 +12,9 @@ import thesis.Py3TreeVisitor;
 public class CompFor extends CompIter {
 
 	private final ExprList targets;
-	private final Logical source;
+	private final Expr source;
 
-	public CompFor(LocInfo locInfo, CompIter nextLink, ExprList targets, Logical source) {
+	public CompFor(LocInfo locInfo, CompIter nextLink, @NotNull ExprList targets, @NotNull Expr source) {
 		super(locInfo, nextLink);
 		this.targets = targets;
 		this.source = source;
@@ -23,7 +24,7 @@ public class CompFor extends CompIter {
 		return this.targets;
 	}
 
-	public Logical getSource() {
+	public Expr getSource() {
 		return this.source;
 	}
 

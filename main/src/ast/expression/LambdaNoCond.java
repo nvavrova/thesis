@@ -2,6 +2,7 @@ package ast.expression;
 
 import ast.LocInfo;
 import ast.param.Params;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -12,7 +13,7 @@ public class LambdaNoCond extends ExprNoCond {
 	private final Params parameters;
 	private final ExprNoCond expression;
 
-	public LambdaNoCond(LocInfo locInfo, Params parameters, ExprNoCond expression) {
+	public LambdaNoCond(LocInfo locInfo, @NotNull ExprNoCond expression, @NotNull Params parameters) {
 		super(locInfo);
 		this.expression = expression;
 		this.parameters = parameters;

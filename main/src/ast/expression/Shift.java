@@ -1,6 +1,7 @@
 package ast.expression;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -8,12 +9,12 @@ import java.util.List;
 /**
  * Created by Nik on 10-06-2015
  */
-public class Shift extends Expr {
+public class Shift extends ExprNoCond {
 
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Shift(LocInfo locInfo, List<Expr> operands, List<String> operators) {
+	public Shift(LocInfo locInfo, @NotNull List<Expr> operands, List<String> operators) {
 		super(locInfo);
 		this.operands = operands;
 		this.operators = operators;

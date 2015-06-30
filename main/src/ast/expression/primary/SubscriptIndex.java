@@ -2,6 +2,7 @@ package ast.expression.primary;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class SubscriptIndex extends Subscript {
 
 	private final Expr index;
 
-	public SubscriptIndex(LocInfo locInfo, Expr index) {
+	public SubscriptIndex(LocInfo locInfo, @NotNull Expr index) {
 		super(locInfo);
 		this.index = index;
 	}

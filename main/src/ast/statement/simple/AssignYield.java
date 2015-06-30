@@ -2,6 +2,7 @@ package ast.statement.simple;
 
 import ast.LocInfo;
 import ast.statement.flow.Yield;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class AssignYield extends Assign {
 
 	public final Yield yield;
 
-	public AssignYield(LocInfo locInfo, String operator, ExprList targets, Yield yield) {
+	public AssignYield(LocInfo locInfo, String operator, ExprList targets, @NotNull Yield yield) {
 		super(locInfo, operator, targets);
 		this.yield = yield;
 	}

@@ -1,13 +1,14 @@
 package ast.statement.flow;
 
 import ast.LocInfo;
+import ast.statement.Statement;
 import ast.statement.simple.ExprList;
 import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 15-06-2015
  */
-public class Return extends Flow {
+public class Return extends Statement {
 
 	private final ExprList values;
 

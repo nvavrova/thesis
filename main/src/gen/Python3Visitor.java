@@ -521,10 +521,4 @@ public interface Python3Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitInteger(@NotNull Python3Parser.IntegerContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Python3Parser#comment}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitComment(@NotNull Python3Parser.CommentContext ctx);
 }

@@ -1,5 +1,7 @@
 package ast;
 
+import org.antlr.v4.runtime.misc.NotNull;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +13,7 @@ public class LocInfo {
 	private final Integer endLine;
 	private final Set<Integer> lines;
 
-	public LocInfo(Integer startLine, Integer endLine) {
+	public LocInfo(@NotNull Integer startLine, @NotNull Integer endLine) {
 		assert (startLine <= endLine);
 
 		this.startLine = startLine;
@@ -27,6 +29,10 @@ public class LocInfo {
 		return this.endLine;
 	}
 
+	public Set<Integer> getLines() {
+		return this.lines;
+	}
+
 	public Integer getLocSpan() {
 		Integer count = 0;
 		for (Integer i = this.startLine; i <= this.endLine; i++) {
@@ -35,6 +41,10 @@ public class LocInfo {
 			}
 		}
 		return count;
+	}
+
+	public void setRangeCovered() {
+		this.addRange(this.startLine, this.endLine);
 	}
 
 	public void addLine(Integer line) {

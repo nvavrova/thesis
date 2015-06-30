@@ -13,13 +13,20 @@ public class YieldValues extends Yield {
 	private final ExprList values;
 
 	public YieldValues(LocInfo locInfo) {
-		super(locInfo);
-		this.values = null;
+		this(locInfo, null);
 	}
 
 	public YieldValues(LocInfo locInfo, ExprList values) {
 		super(locInfo);
 		this.values = values;
+	}
+
+	public ExprList getValues() {
+		return this.values;
+	}
+
+	public Boolean hasValues() {
+		return this.values != null;
 	}
 
 	@Override

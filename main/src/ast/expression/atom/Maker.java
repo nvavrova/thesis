@@ -1,4 +1,4 @@
-package ast.expression.atom.maker;
+package ast.expression.atom;
 
 import ast.LocInfo;
 import ast.expression.atom.Atom;

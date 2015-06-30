@@ -1,6 +1,7 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -10,7 +11,7 @@ public class Bool extends Literal {
 
 	private final Boolean value;
 
-	public Bool(LocInfo locInfo, Boolean value) {
+	public Bool(LocInfo locInfo, @NotNull Boolean value) {
 		super(locInfo);
 		this.value = value;
 	}

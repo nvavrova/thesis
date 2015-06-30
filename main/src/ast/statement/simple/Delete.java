@@ -2,6 +2,7 @@ package ast.statement.simple;
 
 import ast.LocInfo;
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class Delete extends Statement {
 
 	private final ExprList items;
 
-	public Delete(LocInfo locInfo, ExprList items) {
+	public Delete(LocInfo locInfo, @NotNull ExprList items) {
 		super(locInfo);
 		this.items = items;
 	}

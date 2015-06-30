@@ -2,6 +2,7 @@ package ast.statement.flow;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class YieldFrom extends Yield {
 
 	private final Expr from;
 
-	public YieldFrom(LocInfo locInfo, Expr from) {
+	public YieldFrom(LocInfo locInfo, @NotNull Expr from) {
 		super(locInfo);
 		this.from = from;
 	}

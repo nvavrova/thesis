@@ -3,6 +3,7 @@ package ast.statement.simple;
 import ast.LocInfo;
 import ast.Path;
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class Import extends Statement {
 
     private final List<Path> paths;
 
-    public Import(LocInfo locInfo, List<Path> paths) {
+    public Import(LocInfo locInfo, @NotNull List<Path> paths) {
         super(locInfo);
         this.paths = paths;
     }

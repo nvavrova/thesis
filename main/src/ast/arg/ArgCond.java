@@ -1,7 +1,7 @@
 package ast.arg;
 
 import ast.LocInfo;
-import ast.expression.display.CompFor;
+import ast.expression.comprehension.CompFor;
 import ast.expression.Expr;
 
 /**

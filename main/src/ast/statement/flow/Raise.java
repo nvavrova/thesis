@@ -2,12 +2,13 @@ package ast.statement.flow;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.statement.Statement;
 import thesis.Py3TreeVisitor;
 
 /**
  * Created by Nik on 25-05-2015
  */
-public class Raise extends Flow {
+public class Raise extends Statement {
 
 	private final Expr type;
 	private final Expr source;

@@ -4,6 +4,7 @@ import ast.LocInfo;
 import ast.Py3Node;
 import ast.expression.atom.Identifier;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -14,7 +15,7 @@ public class Param extends Py3Node {
 	private final Identifier id;
 	private Expr defaultVal;
 
-	public Param(LocInfo locInfo, Identifier id) {
+	public Param(LocInfo locInfo, @NotNull Identifier id) {
 		super(locInfo);
 		this.id = id;
 	}
@@ -31,7 +32,7 @@ public class Param extends Py3Node {
 		return this.defaultVal;
 	}
 
-	public void setDefaultVal(Expr defaultVal) {
+	public void setDefaultVal(@NotNull Expr defaultVal) {
 		this.defaultVal = defaultVal;
 	}
 

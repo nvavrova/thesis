@@ -32,6 +32,18 @@ public class SliceBound extends Subscript {
 		return this.stride;
 	}
 
+	public Boolean hasLowerBound() {
+		return this.lowerBound != null;
+	}
+
+	public Boolean hasUpperBound() {
+		return this.upperBound != null;
+	}
+
+	public Boolean hasStride() {
+		return this.stride != null;
+	}
+
 	@Override
 	public <T> T accept(Py3TreeVisitor<T> visitor) {
 		return visitor.visit(this);

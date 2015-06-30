@@ -3,6 +3,7 @@ package ast.statement.simple;
 import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -13,11 +14,11 @@ public class Assert extends Statement {
 	private final Expr assertion;
 	private final Expr assertionError;
 
-	public Assert(LocInfo locInfo, Expr assertion) {
+	public Assert(LocInfo locInfo, @NotNull Expr assertion) {
 		this(locInfo, assertion, null);
 	}
 
-	public Assert(LocInfo locInfo, Expr assertion, Expr assertionError) {
+	public Assert(LocInfo locInfo, @NotNull Expr assertion, Expr assertionError) {
 		super(locInfo);
 		this.assertion = assertion;
 		this.assertionError = assertionError;
@@ -31,7 +32,7 @@ public class Assert extends Statement {
 		return this.assertionError;
 	}
 
-	public Boolean hasError() {
+	public Boolean hasAssertionError() {
 		return this.assertionError != null;
 	}
 

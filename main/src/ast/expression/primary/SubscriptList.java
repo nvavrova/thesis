@@ -2,6 +2,7 @@ package ast.expression.primary;
 
 import ast.LocInfo;
 import ast.expression.ExprNoCond;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class SubscriptList extends ExprNoCond {
 
 	private final List<Subscript> values;
 
-	public SubscriptList(LocInfo locInfo, List<Subscript> values) {
+	public SubscriptList(LocInfo locInfo, @NotNull List<Subscript> values) {
 		super(locInfo);
 		this.values = values;
 	}

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.expression.primary.ArgList;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class Decorator extends Py3Node {
 	private final DottedPath name;
 	private final ArgList argList;
 
-	public Decorator(LocInfo locInfo, DottedPath name, ArgList argList) {
+	public Decorator(LocInfo locInfo, @NotNull DottedPath name, ArgList argList) {
 		super(locInfo);
 		this.name = name;
 		this.argList = argList;
@@ -23,6 +24,10 @@ public class Decorator extends Py3Node {
 
 	public ArgList getArgList() {
 		return this.argList;
+	}
+
+	public Boolean hasArgList() {
+		return this.argList != null;
 	}
 
 	@Override

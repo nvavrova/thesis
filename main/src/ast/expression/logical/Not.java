@@ -2,6 +2,7 @@ package ast.expression.logical;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class Not extends Logical {
 
 	private final Expr expression;
 
-	public Not(LocInfo locInfo, Expr expression) {
+	public Not(LocInfo locInfo, @NotNull Expr expression) {
 		super(locInfo);
 		this.expression = expression;
 	}

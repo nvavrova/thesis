@@ -2,6 +2,7 @@ package ast.expression;
 
 import ast.LocInfo;
 import ast.param.Params;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -12,7 +13,7 @@ public class Lambda extends Expr {
 	private final Params parameters;
 	private final Expr expression;
 
-	public Lambda(LocInfo locInfo, Params parameters, Expr expression) {
+	public Lambda(LocInfo locInfo, @NotNull Expr expression, Params parameters) {
 		super(locInfo);
 		this.expression = expression;
 		this.parameters = parameters;
@@ -24,6 +25,10 @@ public class Lambda extends Expr {
 
 	public Params getParameters() {
 		return this.parameters;
+	}
+
+	public Boolean hasParameters() {
+		return this.parameters != null;
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package ast.expression.arithmetic;
 import ast.LocInfo;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -15,8 +16,9 @@ public class Arithmetic extends ExprNoCond {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Arithmetic(LocInfo locInfo, List<Expr> operands, List<String> operators) {
+	public Arithmetic(LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
+
 		this.operands = operands;
 		this.operators = operators;
 	}

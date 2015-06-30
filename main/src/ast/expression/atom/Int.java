@@ -1,6 +1,7 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.math.BigInteger;
@@ -12,7 +13,7 @@ public class Int extends Numeric {
 
 	private final BigInteger value;
 
-	public Int(LocInfo locInfo, BigInteger value) {
+	public Int(LocInfo locInfo, @NotNull BigInteger value) {
 		super(locInfo);
 		this.value = value;
 	}

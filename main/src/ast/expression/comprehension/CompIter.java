@@ -1,4 +1,4 @@
-package ast.expression.display;
+package ast.expression.comprehension;
 
 import ast.LocInfo;
 import ast.expression.Expr;

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public class Module extends Py3Node {
 
     private final List<Statement> body;
 
-    public Module(LocInfo locInfo, List<Statement> body) {
+    public Module(LocInfo locInfo, @NotNull List<Statement> body) {
         super(locInfo);
         this.body = body;
     }

@@ -4,8 +4,10 @@ import ast.LocInfo;
 import ast.arg.Arg;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,7 +19,15 @@ public class ArgList extends ExprNoCond {
 	private final Expr args;
 	private final Expr kwargs;
 
-	public ArgList(LocInfo locInfo, List<Arg> positional, Expr args, Expr kwargs) {
+	public ArgList(LocInfo locInfo) {
+		this(locInfo, Collections.emptyList());
+	}
+
+	public ArgList(LocInfo locInfo, @NotNull List<Arg> positional) {
+		this(locInfo, positional, null, null);
+	}
+
+	public ArgList(LocInfo locInfo, @NotNull List<Arg> positional, Expr args, Expr kwargs) {
 		super(locInfo);
 		this.positional = positional;
 		this.args = args;
@@ -34,6 +44,14 @@ public class ArgList extends ExprNoCond {
 
 	public Expr getKwargs() {
 		return this.kwargs;
+	}
+
+	public Boolean hasArgs() {
+		return this.args != null;
+	}
+
+	public Boolean hasKwargs() {
+		return this.kwargs != null;
 	}
 
 	@Override

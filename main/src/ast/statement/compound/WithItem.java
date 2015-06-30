@@ -3,6 +3,7 @@ package ast.statement.compound;
 import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -13,7 +14,7 @@ public class WithItem extends Statement {
 	private final Expr item;
 	private final Expr alias;
 
-	public WithItem(LocInfo locInfo, Expr item, Expr alias) {
+	public WithItem(LocInfo locInfo, @NotNull Expr item, Expr alias) {
 		super(locInfo);
 		this.item = item;
 		this.alias = alias;
@@ -25,6 +26,10 @@ public class WithItem extends Statement {
 
 	public Expr getAlias() {
 		return this.alias;
+	}
+
+	public Boolean hasAlias() {
+		return this.alias != null;
 	}
 
 	@Override

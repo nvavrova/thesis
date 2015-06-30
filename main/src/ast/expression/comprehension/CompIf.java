@@ -1,7 +1,8 @@
-package ast.expression.display;
+package ast.expression.comprehension;
 
 import ast.LocInfo;
 import ast.expression.ExprNoCond;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -11,7 +12,7 @@ public class CompIf extends CompIter {
 
 	private final ExprNoCond expression;
 
-	public CompIf(LocInfo locInfo, CompIter nextLink, ExprNoCond expression) {
+	public CompIf(LocInfo locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
 		super(locInfo, nextLink);
 		this.expression = expression;
 	}

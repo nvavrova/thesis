@@ -4,6 +4,7 @@ import ast.LocInfo;
 import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class If extends Statement {
 	private final Map<Expr, Suite> bodies;
 	private final Suite elseBody;
 
-	public If(LocInfo locInfo, Expr condition, Suite condBody, Suite elseBody) {
+	public If(LocInfo locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
 		super(locInfo);
 
 		this.conditions = new ArrayList<>();
@@ -50,6 +51,10 @@ public class If extends Statement {
 	public Suite getBody(Expr condition) {
 		assert (this.bodies.containsKey(condition));
 		return this.bodies.get(condition);
+	}
+
+	public Boolean hasElseBody() {
+		return this.elseBody != null;
 	}
 
 	@Override

@@ -192,18 +192,18 @@ parameters
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
 ///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
 ///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
-typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefContext, TestContext> argList, Map<TfpdefContext, TestContext> kwargs]
+typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefContext, TestContext> args, Map<TfpdefContext, TestContext> kwargs]
  @init {
      $positional = new HashMap<>();
-     $argList = new HashMap<>();
+     $args = new HashMap<>();
      $kwargs = new HashMap<>();
  }
  : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=tfpdef? { $argList.put($c.ctx, null); } ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
+    ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); } ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
         | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
         )?
     )?
- | '*' g=tfpdef? { $argList.put($g.ctx, null); } ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
+ | '*' g=tfpdef? { $args.put($g.ctx, null); } ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
  | '**' j=tfpdef { $kwargs.put($j.ctx, null); }
  ;
 
@@ -215,18 +215,18 @@ tfpdef
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
 ///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
 ///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
-varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefContext, TestContext> argList, Map<VfpdefContext, TestContext> kwargs]
+varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefContext, TestContext> args, Map<VfpdefContext, TestContext> kwargs]
 @init {
     $positional = new HashMap<>();
-    $argList = new HashMap<>();
+    $args = new HashMap<>();
     $kwargs = new HashMap<>();
 }
  : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=vfpdef? { $argList.put($c.ctx, null); } ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
+    ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); } ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
         | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
         )?
     )?
- | '*' g=vfpdef? { $argList.put($g.ctx, null); } ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
+ | '*' g=vfpdef? { $args.put($g.ctx, null); } ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
  | '**' j=vfpdef { $kwargs.put($j.ctx, null); }
  ;
 
@@ -445,11 +445,12 @@ for_stmt
 ///       ['else' ':' suite]
 ///       ['finally' ':' suite] |
 ///      'finally' ':' suite))
-try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks]
+try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks, List<Except_clauseContext> exceptions]
 @init{
     $exceptBlocks = new HashMap<>();
+    $exceptions = new ArrayList<>();
 }
- : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
+ : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptions.add($exKey.ctx); $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
                    ( ELSE ':' elseBlock=suite )?
                    ( FINALLY ':' finallyBlock=suite )?
                  | FINALLY ':' finallyBlock=suite
@@ -648,7 +649,7 @@ testlist_comp returns [List<TestContext> values]
 
 /// trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
 trailer
- : '(' arglist? ')'
+ : callBracket='(' arglist? ')'
  | '[' subscriptlist ']'
  | '.' NAME
  ;
@@ -765,10 +766,6 @@ integer
  | OCT_INTEGER
  | HEX_INTEGER
  | BIN_INTEGER
- ;
-
-comment
- : COMMENT
  ;
 
 /*

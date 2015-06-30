@@ -7,15 +7,18 @@ import ast.expression.atom.Identifier;
  */
 public abstract class Path extends Py3Node {
 
-	protected final Identifier alias;
+	private Identifier alias;
 
-	public Path(LocInfo locInfo, Identifier alias) {
+	public Path(LocInfo locInfo) {
 		super(locInfo);
-		this.alias = alias;
 	}
 
 	public Identifier getAlias() {
 		return this.alias;
+	}
+
+	public void setAlias(Identifier alias) {
+		this.alias = alias;
 	}
 
 	public Boolean hasAlias() {

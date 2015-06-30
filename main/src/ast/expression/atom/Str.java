@@ -1,6 +1,7 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -10,7 +11,7 @@ public class Str extends Atom {
 
 	private final String value;
 
-	public Str(LocInfo locInfo, String value) {
+	public Str(LocInfo locInfo, @NotNull String value) {
 		super(locInfo);
 		this.value = value;
 	}

@@ -1,6 +1,7 @@
 package ast.statement.simple;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -10,7 +11,7 @@ public class AssignExpr extends Assign {
 
 	private final ExprList source;
 
-	public AssignExpr(LocInfo locInfo, String operator, ExprList targets, ExprList source) {
+	public AssignExpr(LocInfo locInfo, String operator, ExprList targets, @NotNull ExprList source) {
 		super(locInfo, operator, targets);
 		this.source = source;
 	}

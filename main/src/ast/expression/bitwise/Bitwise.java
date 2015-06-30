@@ -3,6 +3,7 @@ package ast.expression.bitwise;
 import ast.LocInfo;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public abstract class Bitwise extends ExprNoCond {
 
 	protected final List<Expr> operands;
 
-	public Bitwise(LocInfo locInfo, List<Expr> operands) {
+	public Bitwise(LocInfo locInfo, @NotNull List<Expr> operands) {
 		super(locInfo);
 		this.operands = operands;
 	}

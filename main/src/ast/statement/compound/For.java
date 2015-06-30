@@ -4,6 +4,7 @@ import ast.LocInfo;
 import ast.Suite;
 import ast.statement.Statement;
 import ast.statement.simple.ExprList;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -16,7 +17,7 @@ public class For extends Statement {
 	private final Suite body;
 	private final Suite elseBody;
 
-	public For(LocInfo locInfo, ExprList iterator, ExprList source, Suite body, Suite elseBody) {
+	public For(LocInfo locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
 		super(locInfo);
 		this.iterator = iterator;
 		this.source = source;
@@ -38,6 +39,10 @@ public class For extends Statement {
 
 	public Suite getElseBody() {
 		return this.elseBody;
+	}
+
+	public Boolean hasElseBody () {
+		return this.elseBody != null;
 	}
 
 	@Override

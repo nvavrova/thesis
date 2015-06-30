@@ -1,6 +1,6 @@
 package ast;
 
-import ast.expression.atom.Identifier;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -10,8 +10,8 @@ public class SimplePath extends Path {
 
 	private final String path;
 
-	public SimplePath(LocInfo locInfo, Identifier alias, String path) {
-		super(locInfo, alias);
+	public SimplePath(LocInfo locInfo, @NotNull String path) {
+		super(locInfo);
 		this.path = path;
 	}
 

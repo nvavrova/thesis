@@ -2,6 +2,7 @@ package ast.statement.simple;
 
 import ast.LocInfo;
 import ast.Path;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.List;
@@ -13,13 +14,17 @@ public class ImportFrom extends Import {
 
     private final Path module;
 
-    public ImportFrom(LocInfo locInfo, List<Path> paths, Path module) {
+    public ImportFrom(LocInfo locInfo, @NotNull List<Path> paths, Path module) {
         super(locInfo, paths);
         this.module = module;
     }
 
     public Path getModule() {
         return this.module;
+    }
+
+    public Boolean hasModule() {
+        return this.module != null;
     }
 
     @Override

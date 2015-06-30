@@ -1,7 +1,7 @@
 package ast.expression;
 
 import ast.LocInfo;
-import ast.expression.logical.Logical;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -9,26 +9,22 @@ import thesis.Py3TreeVisitor;
  */
 public class Conditional extends Expr {
 
-	private final Logical value;
-	private final Logical condition;
+	private final Expr value;
+	private final Expr condition;
 	private final Expr conditionFalseValue;
 
-	public Conditional(LocInfo locInfo, Logical value) {
-		this(locInfo, value, null, null);
-	}
-
-	public Conditional(LocInfo locInfo, Logical value, Logical condition, Expr conditionFalseValue) {
+	public Conditional(LocInfo locInfo, @NotNull Expr value, @NotNull Expr condition, @NotNull Expr conditionFalseValue) {
 		super(locInfo);
 		this.value = value;
 		this.condition = condition;
 		this.conditionFalseValue = conditionFalseValue;
 	}
 
-	public Logical getValue() {
+	public Expr getValue() {
 		return this.value;
 	}
 
-	public Logical getCondition() {
+	public Expr getCondition() {
 		return this.condition;
 	}
 

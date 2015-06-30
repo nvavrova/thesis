@@ -2,6 +2,7 @@ package ast.param;
 
 import ast.LocInfo;
 import ast.Py3Node;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 import java.util.Collections;
@@ -20,7 +21,7 @@ public class Params extends Py3Node {
 		this(locInfo, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 	}
 
-	public Params(LocInfo locInfo, List<Param> positionalArgs, List<Param> args, List<Param> kwargs) {
+	public Params(LocInfo locInfo, @NotNull List<Param> positionalArgs, @NotNull List<Param> args, @NotNull List<Param> kwargs) {
 		super(locInfo);
 		this.positionalArgs = positionalArgs;
 		this.args = args;

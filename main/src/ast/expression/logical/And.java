@@ -9,17 +9,10 @@ import java.util.List;
 /**
  * Created by Nik on 08-06-2015
  */
-public class And extends Logical {
-
-	private final List<Expr> operands;
+public class And extends Binary {
 
 	public And(LocInfo locInfo, List<Expr> operands) {
-		super(locInfo);
-		this.operands = operands;
-	}
-
-	public List<Expr> getOperands() {
-		return this.operands;
+		super(locInfo, operands);
 	}
 
 	@Override

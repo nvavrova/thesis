@@ -1,7 +1,8 @@
-package ast.expression.display;
+package ast.expression.comprehension;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -12,7 +13,7 @@ public class CondComprehension extends Comprehension {
 	private final Expr expression;
 	private final CompFor compFor;
 
-	public CondComprehension(LocInfo locInfo, Expr expression, CompFor compFor) {
+	public CondComprehension(LocInfo locInfo, @NotNull Expr expression, @NotNull CompFor compFor) {
 		super(locInfo);
 		this.expression = expression;
 		this.compFor = compFor;

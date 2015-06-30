@@ -1,6 +1,7 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Py3TreeVisitor;
 
 /**
@@ -10,7 +11,7 @@ public class Imaginary extends Numeric {
 
 	private final Double value;
 
-	public Imaginary(LocInfo locInfo, Double value) {
+	public Imaginary(LocInfo locInfo, @NotNull Double value) {
 		super(locInfo);
 		this.value = value;
 	}
