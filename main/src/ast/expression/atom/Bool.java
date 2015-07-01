@@ -2,7 +2,7 @@ package ast.expression.atom;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 25-05-2015
@@ -21,7 +21,7 @@ public class Bool extends Literal {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

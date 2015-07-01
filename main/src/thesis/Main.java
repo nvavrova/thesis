@@ -4,14 +4,9 @@ import ast.AstBuilder;
 import ast.Py3Node;
 import gen.Python3Lexer;
 import gen.Python3Parser;
-import org.antlr.runtime.ANTLRFileStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.python.antlr.*;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,49 +18,43 @@ public class Main {
 		FileHelper fh = new FileHelper(folder);
 		List<String> filePaths = fh.getPythonFilePaths();
 
-		Map<String, PythonTree> trees = getTrees(filePaths);
+		Map<String, Py3Node> trees = getTrees(filePaths);
 
-		PyVisitorExceptionHandler exHandler = new PyVisitorExceptionHandler();
-
-		ClassCollector classCollector = new ClassCollector(trees.values(), exHandler);
-
-		DependencyCollector depCollector = new DependencyCollector(trees.values(), exHandler, classCollector.getClasses());
-		DependencyGraph dependencyGraph = depCollector.getDependencyGraph();
-		dependencyGraph.printAlphabetically();
-		dependencyGraph.findCyclicDependencies();
+		ClassCollector collector = new ClassCollector(trees.values());
+		Classes classes = collector.getClasses();
+		for (Class pyClass : classes) {
+			if (pyClass.isBlob()) {
+				System.out.println("FOUND BLOB");
+			}
+		}
 	}
 
-	public static Map<String, PythonTree> getTrees(List<String> filePaths) {
-		Map<String, PythonTree> trees = new HashMap<>();
+	public static Map<String, Py3Node> getTrees(List<String> filePaths) {
+		Map<String, Py3Node> trees = new HashMap<>();
 		System.out.println("start");
 		long startTime = System.nanoTime();
 		for (String filePath : filePaths) {
 			try {
-				System.out.println("FILE: " + filePath);
-                System.out.println("----------------------------- Parse 3 -----------------------------");
-                parse3(filePath);
-                System.out.println("----------------------------- Parse 2 -----------------------------");
-				PythonTree tree = parse(filePath);
+                System.out.println("------------------------------ Parse ------------------------------");
+				System.out.println("FILE: \t" + filePath);
+                Py3Node tree = parse(filePath);
+				LocCoverageResolver.resolve(tree);
 				trees.put(filePath, tree);
-				PyTreePrinter p = new PyTreePrinter(tree);
-				PyVisitorExceptionHandler pve = new PyVisitorExceptionHandler();
-				List<PythonTree> pytrees = new ArrayList<>();
-				pytrees.add(tree);
-				ClassCollector cc = new ClassCollector(pytrees, pve);
-				cc.getClasses();
-				p.prettyPrint();
+				System.out.println("LOC: \t" + tree.getLocSpan());
+				System.out.println("-------------------------------------------------------------------\n");
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime) / 1000000000;
 		System.out.println("Duration: " + duration + "s");
 		return trees;
 	}
 
-	public static void parse3(String fileName) throws Exception {
+	public static Py3Node parse(String fileName) throws Exception {
 		org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
 		Python3Lexer lexer = new Python3Lexer(input);
 
@@ -74,23 +63,6 @@ public class Main {
 
 		ParserRuleContext context = parser.file_input();
 		AstBuilder astBuilder = new AstBuilder(context);
-		Py3Node py3Tree = astBuilder.build();
-	}
-
-	public static PythonTree parse(String fileName) throws Exception {
-		CharStream input = new ANTLRFileStream(fileName);
-		PythonLexer lexer = new PythonLexer(input);
-
-		FailFastHandler eh = new FailFastHandler();
-		lexer.setErrorHandler(eh);
-
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		PythonTokenSource indentedSource = new PythonTokenSource(tokens, fileName);
-		tokens = new CommonTokenStream(indentedSource);
-		PythonParser parser = new PythonParser(tokens);
-
-		parser.setErrorHandler(eh);
-		parser.setTreeAdaptor(new PythonTreeAdaptor());
-		return (PythonTree) parser.file_input().getTree();
+		return astBuilder.build();
 	}
 }

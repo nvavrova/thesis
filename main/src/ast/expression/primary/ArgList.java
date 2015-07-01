@@ -5,7 +5,7 @@ import ast.arg.Arg;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ArgList extends ExprNoCond {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

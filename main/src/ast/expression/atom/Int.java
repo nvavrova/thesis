@@ -2,7 +2,7 @@ package ast.expression.atom;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.math.BigInteger;
 
@@ -23,7 +23,7 @@ public class Int extends Numeric {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

@@ -35,7 +35,7 @@ public class FileHelper {
 				fileNames.add(f.getAbsolutePath());
 			}
 			else if (f.isDirectory()) {
-				fileNames.addAll(getFilePaths(f));
+				fileNames.addAll(this.getFilePaths(f));
 			}
 		}
 

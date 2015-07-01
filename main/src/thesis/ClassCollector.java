@@ -1,20 +1,44 @@
 package thesis;
 
-import org.python.antlr.PythonTree;
-import org.python.antlr.ast.*;
+import ast.*;
+import ast.arg.Kwarg;
+import ast.arg.SimpleArg;
+import ast.expression.*;
+import ast.expression.arithmetic.Arithmetic;
+import ast.expression.atom.*;
+import ast.expression.atom.Float;
+import ast.expression.bitwise.And;
+import ast.expression.bitwise.Or;
+import ast.expression.bitwise.Xor;
+import ast.expression.comprehension.CompFor;
+import ast.expression.comprehension.CompIf;
+import ast.expression.comprehension.CondComprehension;
+import ast.expression.comprehension.EnumComprehension;
+import ast.expression.logical.Not;
+import ast.expression.primary.ArgList;
+import ast.expression.primary.SliceBound;
+import ast.expression.primary.SubscriptIndex;
+import ast.expression.primary.SubscriptList;
+import ast.expression.unary.Invert;
+import ast.expression.unary.Minus;
+import ast.expression.unary.Plus;
+import ast.param.Param;
+import ast.param.Params;
+import ast.statement.compound.*;
+import ast.statement.flow.*;
+import ast.statement.simple.*;
 
 import java.util.Collection;
 
 /**
  * Created by Nik on 17-05-2015
  */
-public class ClassCollector extends DataCollector {
+public class ClassCollector {
 
 	private final ClassVisitor classVisitor;
 
-	public ClassCollector(Collection<PythonTree> trees, PyVisitorExceptionHandler exceptionHandler) {
-		super(trees, exceptionHandler);
-		this.classVisitor = new ClassVisitor(trees, exceptionHandler);
+	public ClassCollector(Collection<Py3Node> trees) {
+		this.classVisitor = new ClassVisitor(trees);
 	}
 
 	public Classes getClasses() {
@@ -22,14 +46,17 @@ public class ClassCollector extends DataCollector {
 	}
 
 
-	private class ClassVisitor extends PyTreeVisitor<Integer> {
+	private class ClassVisitor extends DefaultVisitor<Void> {
 
 		private final Classes pyClasses;
+		private Class currentClass;
 
-		public ClassVisitor(Collection<PythonTree> trees, PyVisitorExceptionHandler exceptionHandler) {
-			super(trees, exceptionHandler);
+		public ClassVisitor(Collection<Py3Node> trees) {
+			super();
 			this.pyClasses = new Classes();
-			this.visit();
+			for (Py3Node n : trees) {
+				n.accept(this);
+			}
 		}
 
 		public Classes getClasses() {
@@ -37,284 +64,438 @@ public class ClassCollector extends DataCollector {
 		}
 
 		@Override
-		public Integer visitClassDef(ClassDef node) throws Exception {
-			Integer loc = this.visitChildren(node);
-			this.pyClasses.add(node.getInternalName(), loc);
+		public Void visit(Decorator n) {
+			this.visitChildren(n);
 			return null;
 		}
 
 		@Override
-		public Integer visitModule(Module node) throws Exception {
-			return super.visitModule(node);
+		public Void visit(DottedImport n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitInteractive(Interactive node) throws Exception {
-			return super.visitInteractive(node);
+		public Void visit(DottedPath n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitExpression(Expression node) throws Exception {
-			return super.visitExpression(node);
+		public Void visit(Module n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitSuite(Suite node) throws Exception {
-			return super.visitSuite(node);
+		public Void visit(SimplePath n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitFunctionDef(FunctionDef node) throws Exception {
-			return super.visitFunctionDef(node);
+		public Void visit(Suite n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitReturn(Return node) throws Exception {
-			return super.visitReturn(node);
+		public Void visit(Kwarg n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitDelete(Delete node) throws Exception {
-			return super.visitDelete(node);
+		public Void visit(SimpleArg n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitAssign(Assign node) throws Exception {
-			return super.visitAssign(node);
+		public Void visit(Param n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitAugAssign(AugAssign node) throws Exception {
-			return super.visitAugAssign(node);
+		public Void visit(Params n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitPrint(Print node) throws Exception {
-			return super.visitPrint(node);
+		public Void visit(Assert n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitFor(For node) throws Exception {
-			return super.visitFor(node);
+		public Void visit(AssignExpr n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitWhile(While node) throws Exception {
-			return super.visitWhile(node);
+		public Void visit(AssignYield n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitIf(If node) throws Exception {
-			return super.visitIf(node);
+		public Void visit(Delete n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitWith(With node) throws Exception {
-			return super.visitWith(node);
+		public Void visit(ExprList n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitRaise(Raise node) throws Exception {
-			return super.visitRaise(node);
+		public Void visit(Global n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitTryExcept(TryExcept node) throws Exception {
-			return super.visitTryExcept(node);
+		public Void visit(Import n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitTryFinally(TryFinally node) throws Exception {
-			return super.visitTryFinally(node);
+		public Void visit(ImportFrom n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitAssert(Assert node) throws Exception {
-			return super.visitAssert(node);
+		public Void visit(Nonlocal n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitImport(Import node) throws Exception {
-			return super.visitImport(node);
+		public Void visit(Pass n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitImportFrom(ImportFrom node) throws Exception {
-			return super.visitImportFrom(node);
+		public Void visit(Break n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitExec(Exec node) throws Exception {
-			return super.visitExec(node);
+		public Void visit(Continue n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitGlobal(Global node) throws Exception {
-			return super.visitGlobal(node);
+		public Void visit(Raise n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitExpr(Expr node) throws Exception {
-			return super.visitExpr(node);
+		public Void visit(Return n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitPass(Pass node) throws Exception {
-			return super.visitPass(node);
+		public Void visit(YieldValues n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitBreak(Break node) throws Exception {
-			return super.visitBreak(node);
+		public Void visit(YieldFrom n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitContinue(Continue node) throws Exception {
-			return super.visitContinue(node);
+		public Void visit(ClassDef n) {
+			this.currentClass = new Class(n.getLocSpan(), n.isController());
+			this.visitChildren(n);
+			this.pyClasses.add(this.currentClass);
+			this.currentClass = null;
+			return null;
 		}
 
 		@Override
-		public Integer visitBoolOp(BoolOp node) throws Exception {
-			return super.visitBoolOp(node);
+		public Void visit(Except n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitBinOp(BinOp node) throws Exception {
-			return super.visitBinOp(node);
+		public Void visit(For n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitUnaryOp(UnaryOp node) throws Exception {
-			return super.visitUnaryOp(node);
+		public Void visit(Function n) {
+			if (this.amIInClass()) {
+				if (n.isAccessor()) {
+					this.currentClass.addAccessor(n.getNameString(), n.getLocSpan());
+				}
+				else {
+					this.currentClass.addMethod(n.getNameString(), n.getLocSpan(), n.isController());
+				}
+			}
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitLambda(Lambda node) throws Exception {
-			return super.visitLambda(node);
+		public Void visit(If n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitIfExp(IfExp node) throws Exception {
-			return super.visitIfExp(node);
+		public Void visit(Try n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitDict(Dict node) throws Exception {
-			return super.visitDict(node);
+		public Void visit(While n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitSet(Set node) throws Exception {
-			return super.visitSet(node);
+		public Void visit(With n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitListComp(ListComp node) throws Exception {
-			return super.visitListComp(node);
+		public Void visit(WithItem n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitSetComp(SetComp node) throws Exception {
-			return super.visitSetComp(node);
+		public Void visit(Comparison n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitDictComp(DictComp node) throws Exception {
-			return super.visitDictComp(node);
+		public Void visit(Conditional n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitGeneratorExp(GeneratorExp node) throws Exception {
-			return super.visitGeneratorExp(node);
+		public Void visit(Lambda n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitYield(Yield node) throws Exception {
-			return super.visitYield(node);
+		public Void visit(LambdaNoCond n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitCompare(Compare node) throws Exception {
-			return super.visitCompare(node);
+		public Void visit(Power n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitCall(Call node) throws Exception {
-			return super.visitCall(node);
+		public Void visit(Shift n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitRepr(Repr node) throws Exception {
-			return super.visitRepr(node);
+		public Void visit(Arithmetic n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitNum(Num node) throws Exception {
-			return super.visitNum(node);
+		public Void visit(Bool n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitStr(Str node) throws Exception {
-			return super.visitStr(node);
+		public Void visit(DictMaker n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitAttribute(Attribute node) throws Exception {
-			return super.visitAttribute(node);
+		public Void visit(Ellipsis n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitSubscript(Subscript node) throws Exception {
-			return super.visitSubscript(node);
+		public Void visit(Float n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitName(Name node) throws Exception {
-			return super.visitName(node);
+		public Void visit(Identifier n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitList(List node) throws Exception {
-			System.out.println("char position in line: " + node);
-
-			System.out.println("LIST start & stop: " + node.getTokenStopIndex() + " & " + node.getTokenStopIndex() +  "  " );
-			System.out.println("LIST char position in line: " + node.getCharPositionInLine());
-			return super.visitList(node);
+		public Void visit(Imaginary n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitTuple(Tuple node) throws Exception {
-			return super.visitTuple(node);
+		public Void visit(Int n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitEllipsis(Ellipsis node) throws Exception {
-			return super.visitEllipsis(node);
+		public Void visit(Literal n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitSlice(Slice node) throws Exception {
-			return super.visitSlice(node);
+		public Void visit(None n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitExtSlice(ExtSlice node) throws Exception {
-			return super.visitExtSlice(node);
+		public Void visit(SetMaker n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitIndex(Index node) throws Exception {
-			return super.visitIndex(node);
+		public Void visit(Str n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		public Integer visitExceptHandler(ExceptHandler node) throws Exception {
-			return super.visitExceptHandler(node);
+		public Void visit(And n) {
+			this.visitChildren(n);
+			return null;
 		}
 
 		@Override
-		protected Integer visitChildren(PythonTree node) throws Exception {
-			return super.visitChildren(node);
+		public Void visit(Or n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(Xor n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(CompFor n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(CompIf n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(CondComprehension n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(EnumComprehension n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(ast.expression.logical.And n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(Not n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(ast.expression.logical.Or n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(ArgList n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(SliceBound n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(SubscriptIndex n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(SubscriptList n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(Invert n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(Minus n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(Plus n) {
+			this.visitChildren(n);
+			return null;
+		}
+
+		private Boolean amIInClass() {
+			return this.currentClass != null;
 		}
 	}
 }

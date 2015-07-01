@@ -3,7 +3,7 @@ package ast.expression;
 import ast.LocInfo;
 import ast.expression.logical.Logical;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class Comparison extends Logical {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

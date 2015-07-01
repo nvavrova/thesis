@@ -4,7 +4,7 @@ import ast.LocInfo;
 import ast.Path;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class Import extends Statement {
 	}
 
 	@Override
-    public <T> T accept(Py3TreeVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
     }
 }

@@ -33,7 +33,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -1131,7 +1131,6 @@ public class AstBuilder {
 			//      atom trailer* ( '**' factor )?
 
 			Atom atom = (Atom) ctx.atom().accept(this);
-
 			List<Expr> trailers = ctx.trailer() == null ? Collections.emptyList() :
 					ctx.trailer().stream()
 							.map(e -> (Expr) e.accept(this))
@@ -1174,11 +1173,10 @@ public class AstBuilder {
 				return ctx.number().accept(this);
 			}
 			if (ctx.string() != null) {
-				//TODO: check if this is OK
-				List<String> strs = ctx.string().stream()
+				List<String> strings = ctx.string().stream()
 						.map(e -> ((Str) e.accept(this)).getValue())
 						.collect(Collectors.toList());
-				return new Str(this.getLocInfo(ctx), StringUtils.join(strs, ""));
+				return this.getStr(this.getLocInfo(ctx), StringUtils.join(strings, ""));
 			}
 			if (ctx.ellipsis != null) {
 				return new Ellipsis(this.getLocInfo(ctx));
@@ -1193,6 +1191,14 @@ public class AstBuilder {
 				return new Bool(this.getLocInfo(ctx), false);
 			}
 			throw new IllegalArgumentException("Unknown context");
+		}
+
+		private Py3Node getStr(LocInfo locInfo, String str) {
+			//this hacky method is here because end line of ctx is not correct so it's necessary to calculate it manually
+			Integer endLine = locInfo.getStartLine() + StringUtils.splitString(str, "\n").length - 1;
+			LocInfo updatedLocInfo = new LocInfo(locInfo.getStartLine(), endLine);
+
+			return new Str(updatedLocInfo, str);
 		}
 
 		@Override
@@ -1481,11 +1487,11 @@ public class AstBuilder {
 
 			//TODO: strip out prefix + quotes?
 			if (ctx.STRING_LITERAL() != null) {
-				return new Str(this.getLocInfo(ctx), ctx.STRING_LITERAL().getText());
+				return this.getStr(this.getLocInfo(ctx), ctx.STRING_LITERAL().getText());
 			}
 			else if (ctx.BYTES_LITERAL() != null) {
 				//TODO: fix bytes into Bytes[] mb? or translate to normal string?
-				return new Str(this.getLocInfo(ctx), ctx.BYTES_LITERAL().getText());
+				return this.getStr(this.getLocInfo(ctx), ctx.BYTES_LITERAL().getText());
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1583,7 +1589,7 @@ public class AstBuilder {
 		}
 
 		private LocInfo getLocInfo(TerminalNode node) {
-			return new LocInfo(node.getSymbol().getStartIndex(), node.getSymbol().getStopIndex());
+			return new LocInfo(node.getSymbol().getLine(), node.getSymbol().getLine());
 		}
 
 		private LocInfo getLocInfo(ParserRuleContext ctx) {
@@ -1671,7 +1677,7 @@ public class AstBuilder {
 			}
 
 			@Override
-			public <T> T accept(Py3TreeVisitor<T> visitor) {
+			public <T> T accept(Visitor<T> visitor) {
 				throw new IllegalArgumentException("Cannot visit Wrapper");
 			}
 		}
@@ -1695,7 +1701,7 @@ public class AstBuilder {
 			}
 
 			@Override
-			public <T> T accept(Py3TreeVisitor<T> visitor) {
+			public <T> T accept(Visitor<T> visitor) {
 				throw new IllegalArgumentException("Cannot visit CollectionWrapper");
 			}
 		}

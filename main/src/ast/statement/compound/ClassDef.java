@@ -3,11 +3,12 @@ package ast.statement.compound;
 import ast.Decorator;
 import ast.LocInfo;
 import ast.Suite;
-import ast.expression.primary.ArgList;
 import ast.expression.atom.Identifier;
+import ast.expression.primary.ArgList;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Helper;
+import thesis.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -58,8 +59,21 @@ public class ClassDef extends Statement {
 		return this.inheritance != null;
 	}
 
+	public Boolean isController() {
+		for (String name : Helper.getControllerNames()) {
+			if (this.nameContains(name)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Boolean nameContains(String s) {
+		return this.name.contains(s);
+	}
+
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

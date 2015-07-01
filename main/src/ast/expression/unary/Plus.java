@@ -2,7 +2,7 @@ package ast.expression.unary;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 10-06-2015
@@ -13,7 +13,7 @@ public class Plus extends Unary {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

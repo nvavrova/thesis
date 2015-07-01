@@ -3,7 +3,7 @@ package ast.expression;
 import ast.LocInfo;
 import ast.param.Params;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 22-06-2015
@@ -28,7 +28,7 @@ public class LambdaNoCond extends ExprNoCond {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

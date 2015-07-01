@@ -4,7 +4,7 @@ import ast.LocInfo;
 import ast.expression.Expr;
 import ast.expression.comprehension.CompFor;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +48,7 @@ public class SetMaker extends Maker {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

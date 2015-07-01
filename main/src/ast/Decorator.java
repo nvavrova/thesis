@@ -2,7 +2,7 @@ package ast;
 
 import ast.expression.primary.ArgList;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 15-06-2015
@@ -31,7 +31,7 @@ public class Decorator extends Py3Node {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

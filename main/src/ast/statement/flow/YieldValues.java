@@ -3,7 +3,7 @@ package ast.statement.flow;
 
 import ast.LocInfo;
 import ast.statement.simple.ExprList;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 25-05-2015
@@ -30,7 +30,7 @@ public class YieldValues extends Yield {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

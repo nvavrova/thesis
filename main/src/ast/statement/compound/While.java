@@ -5,7 +5,7 @@ import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 17-06-2015
@@ -40,7 +40,7 @@ public class While extends Statement {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

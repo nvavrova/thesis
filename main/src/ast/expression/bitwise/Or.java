@@ -2,7 +2,7 @@ package ast.expression.bitwise;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class Or extends Bitwise {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

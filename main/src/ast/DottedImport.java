@@ -1,7 +1,7 @@
 package ast;
 
 import ast.statement.simple.Import;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class DottedImport extends Import {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

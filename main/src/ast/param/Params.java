@@ -3,7 +3,7 @@ package ast.param;
 import ast.LocInfo;
 import ast.Py3Node;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,8 +40,20 @@ public class Params extends Py3Node {
 		return this.kwargs;
 	}
 
+	public Boolean isEmpty() {
+		return this.positionalArgs.size() == 0 && this.args.size() == 0 && this.kwargs.size() == 0;
+	}
+
+	public Boolean isEmptyExceptForSelf() {
+		if (this.positionalArgs.size() == 1 && this.args.size() == 0 && this.kwargs.size() == 0) {
+			Param p = this.positionalArgs.get(0);
+			return p.isSelf();
+		}
+		return false;
+	}
+
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

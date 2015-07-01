@@ -2,7 +2,7 @@ package ast;
 
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class Module extends Py3Node {
     }
 
     @Override
-    public <T> T accept(Py3TreeVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
     }
 }

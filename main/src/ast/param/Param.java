@@ -5,7 +5,7 @@ import ast.Py3Node;
 import ast.expression.atom.Identifier;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 23-06-2015
@@ -20,10 +20,6 @@ public class Param extends Py3Node {
 		this.id = id;
 	}
 
-	public Boolean hasDefaultVal() {
-		return this.defaultVal != null;
-	}
-
 	public Identifier getId() {
 		return this.id;
 	}
@@ -36,8 +32,16 @@ public class Param extends Py3Node {
 		this.defaultVal = defaultVal;
 	}
 
+	public Boolean hasDefaultVal() {
+		return this.defaultVal != null;
+	}
+
+	public Boolean isSelf() {
+		return this.id.isSelf();
+	}
+
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

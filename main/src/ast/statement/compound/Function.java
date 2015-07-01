@@ -8,7 +8,8 @@ import ast.expression.atom.Identifier;
 import ast.param.Params;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Helper;
+import thesis.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,12 +58,36 @@ public class Function extends Statement {
 		this.decorators = decorators;
 	}
 
+	public String getNameString() {
+		return this.name.getValue();
+	}
+
 	public Boolean hasReturnType() {
 		return this.returnType != null;
 	}
 
+	public Boolean nameContains(String s) {
+		return this.name.contains(s);
+	}
+
+	public Boolean isAccessor() {
+		if (this.params.isEmptyExceptForSelf() && this.name.startsWith("get")) {
+			return this.body.isAccessorBody();
+		}
+		return false;
+	}
+
+	public Boolean isController() {
+		for (String name : Helper.getControllerNames()) {
+			if (this.nameContains(name)){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 

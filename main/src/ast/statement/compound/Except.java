@@ -3,7 +3,7 @@ package ast.statement.compound;
 import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 /**
  * Created by Nik on 24-06-2015
@@ -36,7 +36,7 @@ public class Except extends Statement {
 	}
 
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

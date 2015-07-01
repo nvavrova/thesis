@@ -1,8 +1,9 @@
 package ast;
 
 import ast.statement.Statement;
+import ast.statement.flow.Return;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Py3TreeVisitor;
+import thesis.Visitor;
 
 import java.util.List;
 
@@ -22,8 +23,19 @@ public class Suite extends Py3Node {
 		return this.statements;
 	}
 
+	public Boolean isAccessorBody() {
+		if (this.statements.size() != 1) {
+			return false;
+		}
+		if (this.statements.get(0) instanceof Return){
+			Return r = (Return) this.statements.get(0);
+			return r.hasSingleReturnValue();
+		}
+		return false;
+	}
+
 	@Override
-	public <T> T accept(Py3TreeVisitor<T> visitor) {
+	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }
