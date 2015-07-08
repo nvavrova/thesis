@@ -15,7 +15,7 @@ public class Global extends Statement {
 
 	private final List<Identifier> identifiers;
 
-	public Global(LocInfo locInfo, @NotNull List<Identifier> identifiers) {
+	public Global(@NotNull LocInfo locInfo, @NotNull List<Identifier> identifiers) {
 		super(locInfo);
 		this.identifiers = identifiers;
 	}

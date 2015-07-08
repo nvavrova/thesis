@@ -1,28 +1,32 @@
 package thesis;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import ast.arg.Arg;
+
+import java.util.*;
 
 /**
  * Created by Nik on 30-06-2015
  */
 public class Class {
-	private Integer loc;
-	private Boolean isController;
-	private Boolean hasControllerMethods;
-	private Map<String, Integer> methodLoc;
-	private List<String> attributes;
-	private Map<String, Integer> accessors;
 
-	public Class(Integer loc, Boolean isController) {
+	private final String name;
+	private final Integer loc;
+	private final Boolean isController;
+	private Boolean hasControllerMethods;
+	private final Map<String, Integer> methodLoc;
+	private final Map<String, Integer> accessors;
+	private final List<Arg> parents;
+	private final Set<String> variables;
+
+	public Class(String name, Integer loc, Boolean isController, List<Arg> parents) {
+		this.name = name;
 		this.loc = loc;
 		this.isController = isController;
 		this.hasControllerMethods = false;
 		this.methodLoc = new HashMap<>();
-		this.attributes = new ArrayList<>();
 		this.accessors = new HashMap<>();
+		this.parents = parents;
+		this.variables = new HashSet<>();
 	}
 
 	public void addAccessor(String name, Integer loc) {
@@ -36,8 +40,12 @@ public class Class {
 		this.methodLoc.put(name, loc);
 	}
 
-	public void addAttribute(String name) {
-		this.attributes.add(name);
+	public void addVariable(String name) {
+		this.variables.add(name);
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public Integer getLoc() {
@@ -52,8 +60,8 @@ public class Class {
 		return this.accessors.size();
 	}
 
-	public Integer getNumberOfAttributes() {
-		return this.attributes.size();
+	public Set<String> getVariables() {
+		return this.variables;
 	}
 
 	public Boolean hasLowCohesion() {
@@ -80,6 +88,10 @@ public class Class {
 	public Boolean isBlob() {
 		//TODO: add data class association
 		return (this.isLargeClass() || this.hasLowCohesion()) && (this.isController() || this.hasControllerMethods());
+	}
+
+	public Boolean hasMultipleInheritance() {
+		return this.parents.size() > 1;
 	}
 
 }

@@ -15,7 +15,7 @@ public class Nonlocal extends Statement {
 
 	private final List<Identifier> identifiers;
 
-	public Nonlocal(LocInfo locInfo, @NotNull List<Identifier> identifiers) {
+	public Nonlocal(@NotNull LocInfo locInfo, @NotNull List<Identifier> identifiers) {
 		super(locInfo);
 		this.identifiers = identifiers;
 	}

@@ -2,18 +2,26 @@ package ast.expression.primary;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.expression.ExprNoCond;
+import com.sun.deploy.util.StringUtils;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Nik on 17-06-2015
  */
-public class SliceBound extends Subscript {
+public class SliceBound extends ExprNoCond implements Trailer {
+
+	private final static String DELIMITER = ":";
 
 	private final Expr lowerBound;
 	private final Expr upperBound;
 	private final Expr stride;
 
-	public SliceBound(LocInfo locInfo, Expr lowerBound, Expr upperBound, Expr stride) {
+	public SliceBound(@NotNull LocInfo locInfo, Expr lowerBound, Expr upperBound, Expr stride) {
 		super(locInfo);
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
@@ -46,6 +54,44 @@ public class SliceBound extends Subscript {
 
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
+		return visitor.visit(this);
+	}
+
+	public String toString() {
+		List<String> bounds = new ArrayList<>();
+		if (this.hasStride()) {
+			bounds.add(this.stride.toString());
+		}
+		if (this.hasLowerBound()) {
+			bounds.add(this.lowerBound.toString());
+		}
+		if (this.hasUpperBound()) {
+			bounds.add(this.upperBound.toString());
+		}
+
+		if (bounds.size() == 0) {
+			return DELIMITER;
+		}
+		return StringUtils.join(bounds, DELIMITER);
+	}
+
+	@Override
+	public Boolean isCall() {
+		return false;
+	}
+
+	@Override
+	public Boolean isAttribute() {
+		return false;
+	}
+
+	@Override
+	public Boolean isSubscript() {
+		return true;
+	}
+
+	@Override
+	public <T> T accept(TrailerVisitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

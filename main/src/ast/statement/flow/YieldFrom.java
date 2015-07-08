@@ -12,7 +12,7 @@ public class YieldFrom extends Yield {
 
 	private final Expr from;
 
-	public YieldFrom(LocInfo locInfo, @NotNull Expr from) {
+	public YieldFrom(@NotNull LocInfo locInfo, @NotNull Expr from) {
 		super(locInfo);
 		this.from = from;
 	}

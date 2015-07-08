@@ -11,7 +11,7 @@ public class Imaginary extends Numeric {
 
 	private final Double value;
 
-	public Imaginary(LocInfo locInfo, @NotNull Double value) {
+	public Imaginary(@NotNull LocInfo locInfo, @NotNull Double value) {
 		super(locInfo);
 		this.value = value;
 	}

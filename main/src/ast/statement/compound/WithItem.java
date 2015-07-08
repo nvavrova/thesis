@@ -14,7 +14,7 @@ public class WithItem extends Statement {
 	private final Expr item;
 	private final Expr alias;
 
-	public WithItem(LocInfo locInfo, @NotNull Expr item, Expr alias) {
+	public WithItem(@NotNull LocInfo locInfo, @NotNull Expr item, Expr alias) {
 		super(locInfo);
 		this.item = item;
 		this.alias = alias;

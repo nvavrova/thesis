@@ -12,7 +12,7 @@ public class Delete extends Statement {
 
 	private final ExprList items;
 
-	public Delete(LocInfo locInfo, @NotNull ExprList items) {
+	public Delete(@NotNull LocInfo locInfo, @NotNull ExprList items) {
 		super(locInfo);
 		this.items = items;
 	}

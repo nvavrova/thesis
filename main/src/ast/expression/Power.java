@@ -5,30 +5,22 @@ import ast.expression.atom.Atom;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
-import java.util.List;
-
 /**
  * Created by Nik on 17-06-2015
  */
 public class Power extends ExprNoCond {
 
-	private final Atom atom;
-	private final List<Expr> trailers;
+	private final Atom base;
 	private final Expr exponent;
 
-	public Power(LocInfo locInfo, @NotNull Atom atom, @NotNull List<Expr> trailers, Expr exponent) {
+	public Power(LocInfo locInfo, @NotNull Atom base, @NotNull Expr exponent) {
 		super(locInfo);
-		this.atom = atom;
-		this.trailers = trailers;
+		this.base = base;
 		this.exponent = exponent;
 	}
 
-	public Atom getAtom() {
-		return this.atom;
-	}
-
-	public List<Expr> getTrailers() {
-		return this.trailers;
+	public Atom getBase() {
+		return this.base;
 	}
 
 	public Expr getExponent() {
@@ -42,5 +34,10 @@ public class Power extends ExprNoCond {
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return this.base.toString() + (this.hasExponent() ? "**" + this.exponent.toString() : "");
 	}
 }

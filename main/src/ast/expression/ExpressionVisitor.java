@@ -1,8 +1,7 @@
 package ast.expression;
 
+import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
-import ast.expression.atom.DictMaker;
-import ast.expression.atom.SetMaker;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
@@ -22,7 +21,7 @@ public interface ExpressionVisitor<T> {
 	T visit(Shift n);
 
 	//arithmetic
-	//TODO
+	T visit(Arithmetic n);
 
 	//atom
 	T visit(Bool n);

@@ -11,7 +11,7 @@ public class Str extends Atom {
 
 	private final String value;
 
-	public Str(LocInfo locInfo, @NotNull String value) {
+	public Str(@NotNull LocInfo locInfo, @NotNull String value) {
 		super(locInfo);
 		this.value = value;
 	}

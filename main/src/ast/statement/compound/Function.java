@@ -25,7 +25,7 @@ public class Function extends Statement {
 	private final Params params;
 	private List<Decorator> decorators;
 
-	public Function(LocInfo locInfo, @NotNull Identifier name, Expr returnType, @NotNull Suite body, @NotNull Params params) {
+	public Function(@NotNull LocInfo locInfo, @NotNull Identifier name, Expr returnType, @NotNull Suite body, @NotNull Params params) {
 		super(locInfo);
 		this.name = name;
 		this.returnType = returnType;

@@ -15,7 +15,7 @@ public class Param extends Py3Node {
 	private final Identifier id;
 	private Expr defaultVal;
 
-	public Param(LocInfo locInfo, @NotNull Identifier id) {
+	public Param(@NotNull LocInfo locInfo, @NotNull Identifier id) {
 		super(locInfo);
 		this.id = id;
 	}

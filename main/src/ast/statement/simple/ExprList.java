@@ -15,7 +15,7 @@ public class ExprList extends Statement {
 
 	private final List<Expr> values;
 
-	public ExprList(LocInfo locInfo, @NotNull List<Expr> values) {
+	public ExprList(@NotNull LocInfo locInfo, @NotNull List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}

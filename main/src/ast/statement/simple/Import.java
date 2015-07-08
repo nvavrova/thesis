@@ -15,7 +15,7 @@ public class Import extends Statement {
 
     private final List<Path> paths;
 
-    public Import(LocInfo locInfo, @NotNull List<Path> paths) {
+    public Import(@NotNull LocInfo locInfo, @NotNull List<Path> paths) {
         super(locInfo);
         this.paths = paths;
     }

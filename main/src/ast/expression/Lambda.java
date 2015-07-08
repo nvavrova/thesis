@@ -13,7 +13,7 @@ public class Lambda extends Expr {
 	private final Params parameters;
 	private final Expr expression;
 
-	public Lambda(LocInfo locInfo, @NotNull Expr expression, Params parameters) {
+	public Lambda(@NotNull LocInfo locInfo, @NotNull Expr expression, Params parameters) {
 		super(locInfo);
 		this.expression = expression;
 		this.parameters = parameters;

@@ -12,7 +12,7 @@ public class CompIf extends CompIter {
 
 	private final ExprNoCond expression;
 
-	public CompIf(LocInfo locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
+	public CompIf(@NotNull LocInfo locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
 		super(locInfo, nextLink);
 		this.expression = expression;
 	}

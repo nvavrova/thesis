@@ -11,7 +11,7 @@ public class Bool extends Literal {
 
 	private final Boolean value;
 
-	public Bool(LocInfo locInfo, @NotNull Boolean value) {
+	public Bool(@NotNull LocInfo locInfo, @NotNull Boolean value) {
 		super(locInfo);
 		this.value = value;
 	}

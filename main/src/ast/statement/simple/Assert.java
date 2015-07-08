@@ -14,11 +14,11 @@ public class Assert extends Statement {
 	private final Expr assertion;
 	private final Expr assertionError;
 
-	public Assert(LocInfo locInfo, @NotNull Expr assertion) {
+	public Assert(@NotNull LocInfo locInfo, @NotNull Expr assertion) {
 		this(locInfo, assertion, null);
 	}
 
-	public Assert(LocInfo locInfo, @NotNull Expr assertion, Expr assertionError) {
+	public Assert(@NotNull LocInfo locInfo, @NotNull Expr assertion, Expr assertionError) {
 		super(locInfo);
 		this.assertion = assertion;
 		this.assertionError = assertionError;

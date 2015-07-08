@@ -14,7 +14,7 @@ public class CompFor extends CompIter {
 	private final ExprList targets;
 	private final Expr source;
 
-	public CompFor(LocInfo locInfo, CompIter nextLink, @NotNull ExprList targets, @NotNull Expr source) {
+	public CompFor(@NotNull LocInfo locInfo, CompIter nextLink, @NotNull ExprList targets, @NotNull Expr source) {
 		super(locInfo, nextLink);
 		this.targets = targets;
 		this.source = source;

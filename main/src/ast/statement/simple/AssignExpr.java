@@ -11,7 +11,7 @@ public class AssignExpr extends Assign {
 
 	private final ExprList source;
 
-	public AssignExpr(LocInfo locInfo, String operator, ExprList targets, @NotNull ExprList source) {
+	public AssignExpr(@NotNull LocInfo locInfo, String operator, ExprList targets, @NotNull ExprList source) {
 		super(locInfo, operator, targets);
 		this.source = source;
 	}

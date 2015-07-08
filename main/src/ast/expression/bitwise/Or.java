@@ -2,6 +2,7 @@ package ast.expression.bitwise;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  * Created by Nik on 10-06-2015
  */
 public class Or extends Bitwise {
-	public Or(LocInfo locInfo, List<Expr> operands) {
+	public Or(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
 		super(locInfo, operands);
 	}
 

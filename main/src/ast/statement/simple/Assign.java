@@ -12,7 +12,7 @@ public abstract class Assign extends Statement {
 	private final String operator;
 	private final ExprList targets;
 
-	public Assign(LocInfo locInfo, @NotNull String operator, @NotNull ExprList targets) {
+	public Assign(@NotNull LocInfo locInfo, @NotNull String operator, @NotNull ExprList targets) {
 		super(locInfo);
 		this.operator = operator;
 		this.targets = targets;

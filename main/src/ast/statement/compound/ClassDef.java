@@ -3,8 +3,8 @@ package ast.statement.compound;
 import ast.Decorator;
 import ast.LocInfo;
 import ast.Suite;
+import ast.arg.Arg;
 import ast.expression.atom.Identifier;
-import ast.expression.primary.ArgList;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Helper;
@@ -20,14 +20,10 @@ public class ClassDef extends Statement {
 
 	private final Identifier name;
 	private final Suite body;
-	private final ArgList inheritance;
+	private final List<Arg> inheritance; //either power(a.b) or identifier(a)
 	private List<Decorator> decorators;
 
-	public ClassDef(LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body) {
-		this(locInfo, name, body, null);
-	}
-
-	public ClassDef(LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body, ArgList inheritance) {
+	public ClassDef(@NotNull LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body, @NotNull List<Arg> inheritance) {
 		super(locInfo);
 		this.name = name;
 		this.body = body;
@@ -43,7 +39,7 @@ public class ClassDef extends Statement {
 		return this.body;
 	}
 
-	public ArgList getInheritance() {
+	public List<Arg> getInheritance() {
 		return this.inheritance;
 	}
 
@@ -56,7 +52,7 @@ public class ClassDef extends Statement {
 	}
 
 	public Boolean hasInheritance() {
-		return this.inheritance != null;
+		return this.inheritance.size() > 0;
 	}
 
 	public Boolean isController() {

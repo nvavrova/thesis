@@ -12,7 +12,7 @@ public class Not extends Logical {
 
 	private final Expr expression;
 
-	public Not(LocInfo locInfo, @NotNull Expr expression) {
+	public Not(@NotNull LocInfo locInfo, @NotNull Expr expression) {
 		super(locInfo);
 		this.expression = expression;
 	}

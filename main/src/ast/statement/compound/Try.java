@@ -20,7 +20,7 @@ public class Try extends Statement {
 	private final Suite elseBlock;
 	private final Suite finallyBlock;
 
-	public Try(LocInfo locInfo, @NotNull Suite tryBlock, @NotNull List<Except> exceptions,
+	public Try(@NotNull LocInfo locInfo, @NotNull Suite tryBlock, @NotNull List<Except> exceptions,
 	           @NotNull Map<Except, Suite> exceptBlocks, Suite elseBlock, Suite finallyBlock) {
 		super(locInfo);
 		this.tryBlock = tryBlock;

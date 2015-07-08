@@ -1,13 +1,15 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import ast.expression.primary.Trailer;
+import ast.expression.primary.TrailerVisitor;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 /**
  * Created by Nik on 25-05-2015
  */
-public class Identifier extends Atom {
+public class Identifier extends Atom implements Trailer {
 
 	private final String value;
 
@@ -41,6 +43,31 @@ public class Identifier extends Atom {
 
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
+		return visitor.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return this.value;
+	}
+
+	@Override
+	public Boolean isCall() {
+		return false;
+	}
+
+	@Override
+	public Boolean isAttribute() {
+		return true;
+	}
+
+	@Override
+	public Boolean isSubscript() {
+		return false;
+	}
+
+	@Override
+	public <T> T accept(TrailerVisitor<T> visitor) {
 		return visitor.visit(this);
 	}
 }

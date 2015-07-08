@@ -1,11 +1,14 @@
 package thesis;
 
 import ast.*;
+import ast.arg.Arg;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
+import ast.expression.atom.Float;
+import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
@@ -14,10 +17,7 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
-import ast.expression.primary.ArgList;
-import ast.expression.primary.SliceBound;
-import ast.expression.primary.SubscriptIndex;
-import ast.expression.primary.SubscriptList;
+import ast.expression.primary.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -31,6 +31,451 @@ import ast.statement.simple.*;
  * Created by Nik on 29-06-2015
  */
 public abstract class DefaultVisitor<T> implements Visitor<T> {
+
+	@Override
+	public T visit(Decorator n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(DottedPath n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Module n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SimplePath n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Suite n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Kwarg n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SimpleArg n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Param n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Params n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Assert n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(AssignExpr n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(AssignYield n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Delete n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ExprList n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Global n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Import n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ImportFrom n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Nonlocal n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Pass n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Break n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Continue n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Raise n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Return n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(YieldValues n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(YieldFrom n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ClassDef n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Except n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(For n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Function n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(If n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Try n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(While n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(With n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(WithItem n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Comparison n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Conditional n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Lambda n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(LambdaNoCond n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Power n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Shift n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Arithmetic n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Bool n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(DictMaker n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Ellipsis n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Float n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Identifier n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Imaginary n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Int n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Literal n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(None n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SetMaker n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Str n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(AttributeRef n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Call n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(DirectCall n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Slice n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Subscription n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(And n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Or n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Xor n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(CompFor n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(CompIf n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(CondComprehension n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(EnumComprehension n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ast.expression.logical.And n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Not n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ast.expression.logical.Or n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ArgList n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SliceBound n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SubscriptIndex n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(SubscriptList n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Invert n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Minus n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Plus n) {
+		this.visitChildren(n);
+		return null;
+	}
+
 
 	public void visitChildren(Module n) {
 		n.getBody().forEach(s -> s.accept(this));
@@ -102,10 +547,9 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 		n.getName().accept(this);
 
-		if (n.hasInheritance()) {
-			n.getInheritance().accept(this);
+		for (Arg arg : n.getInheritance()) {
+			arg.accept(this);
 		}
-
 		n.getDecorators().forEach(d -> d.accept(this));
 	}
 
@@ -267,11 +711,10 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Power n) {
-		n.getAtom().accept(this);
+		n.getBase().accept(this);
 		if (n.hasExponent()) {
 			n.getExponent().accept(this);
 		}
-		n.getTrailers().forEach(e -> e.accept(this));
 	}
 
 	public void visitChildren(Shift n) {
@@ -283,10 +726,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Bool n) {
-	}
-
-	public void visitChildren(DottedImport n) {
-		n.getPaths().forEach(p -> p.accept(this));
 	}
 
 	public void visitChildren(Ellipsis n) {
@@ -324,6 +763,31 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 				n.getValues().get(expr).accept(this);
 			}
 		}
+	}
+
+	public void visitChildren(AttributeRef n) {
+		n.getBase().accept(this);
+		n.getAttribute().accept(this);
+	}
+
+	public void visitChildren(Call n) {
+		n.getBase().accept(this);
+		n.getArgs().accept(this);
+	}
+
+	public void visitChildren(DirectCall n) {
+		n.getBase().accept(this);
+		n.getCall().accept(this);
+	}
+
+	public void visitChildren(Slice n) {
+		n.getBase().accept(this);
+		n.getBound().accept(this);
+	}
+
+	public void visitChildren(Subscription n) {
+		n.getBase().accept(this);
+
 	}
 
 	public void visitChildren(SetMaker n) {

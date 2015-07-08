@@ -17,7 +17,7 @@ public class For extends Statement {
 	private final Suite body;
 	private final Suite elseBody;
 
-	public For(LocInfo locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
+	public For(@NotNull LocInfo locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
 		super(locInfo);
 		this.iterator = iterator;
 		this.source = source;

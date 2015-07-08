@@ -14,7 +14,7 @@ public abstract class Bitwise extends ExprNoCond {
 
 	protected final List<Expr> operands;
 
-	public Bitwise(LocInfo locInfo, @NotNull List<Expr> operands) {
+	public Bitwise(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
 		super(locInfo);
 		this.operands = operands;
 	}

@@ -7,6 +7,7 @@ import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
+import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
@@ -15,7 +16,10 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
-import ast.expression.primary.*;
+import ast.expression.primary.ArgList;
+import ast.expression.primary.SliceBound;
+import ast.expression.primary.SubscriptIndex;
+import ast.expression.primary.SubscriptList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -235,9 +239,9 @@ public class LocCoverageResolver {
 
 			this.visitIdentifier(locInfo, n.getName());
 
-			if (n.hasInheritance()) {
-				n.getInheritance().accept(this);
-				this.addLines(locInfo, n.getInheritance());
+			for (Arg arg : n.getInheritance()) {
+				arg.accept(this);
+				this.addLines(locInfo, arg);
 			}
 
 			this.visitDecorators(locInfo, n.getDecorators());
@@ -601,11 +605,10 @@ public class LocCoverageResolver {
 			this.print("Power");
 			LocInfo locInfo = n.getLocInfo();
 
-			this.visitExpr(locInfo, n.getAtom());
+			this.visitExpr(locInfo, n.getBase());
 			if (n.hasExponent()) {
 				this.visitExpr(locInfo, n.getExponent());
 			}
-			this.visitExprs(locInfo, n.getTrailers());
 
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
 			this.ident--;
@@ -637,16 +640,6 @@ public class LocCoverageResolver {
 			this.ident++;
 			this.print("Bool");
 			n.getLocInfo().setRangeCovered();
-			this.print("LOC: " + n.getLocInfo().getLocSpan());
-			this.ident--;
-			return null;
-		}
-
-		@Override
-		public Void visit(DottedImport n) {
-			this.ident++;
-			this.print("DottedImport");
-			this.visitPaths(n.getLocInfo(), n.getPaths());
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
 			this.ident--;
 			return null;
@@ -728,6 +721,76 @@ public class LocCoverageResolver {
 			this.print("Str");
 			n.getLocInfo().setRangeCovered();
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(AttributeRef n) {
+			this.ident++;
+			this.print("AttributeRef");
+
+			LocInfo locInfo = n.getLocInfo();
+			this.visitExpr(locInfo, n.getBase());
+			this.visitExpr(locInfo, n.getAttribute());
+
+			this.print("LOC: " + locInfo.getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(Call n) {
+			this.ident++;
+			this.print("Call");
+
+			LocInfo locInfo = n.getLocInfo();
+			this.visitExpr(locInfo, n.getBase());
+			this.visitExpr(locInfo, n.getArgs());
+
+			this.print("LOC: " + locInfo.getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(DirectCall n) {
+			this.ident++;
+			this.print("DirectCall");
+
+			LocInfo locInfo = n.getLocInfo();
+			this.visitExpr(locInfo, n.getBase());
+			this.visitExpr(locInfo, n.getCall());
+
+			this.print("LOC: " + locInfo.getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(Slice n) {
+			this.ident++;
+			this.print("Slice");
+
+			LocInfo locInfo = n.getLocInfo();
+			this.visitExpr(locInfo, n.getBase());
+			this.visitExpr(locInfo, n.getBound());
+
+			this.print("LOC: " + locInfo.getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(Subscription n) {
+			this.ident++;
+			this.print("Subscript");
+
+			LocInfo locInfo = n.getLocInfo();
+			this.visitExpr(locInfo, n.getBase());
+			this.visitExpr(locInfo, n.getSubscript());
+
+			this.print("LOC: " + locInfo.getLocSpan());
 			this.ident--;
 			return null;
 		}
@@ -949,7 +1012,7 @@ public class LocCoverageResolver {
 			this.print("SubscriptList");
 			LocInfo locInfo = n.getLocInfo();
 
-			for (Subscript subscript : n.getValues()) {
+			for (SubscriptIndex subscript : n.getValues()) {
 				this.visitExpr(locInfo, subscript);
 			}
 

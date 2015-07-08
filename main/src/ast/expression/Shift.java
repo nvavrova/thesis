@@ -14,7 +14,7 @@ public class Shift extends ExprNoCond {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Shift(LocInfo locInfo, @NotNull List<Expr> operands, List<String> operators) {
+	public Shift(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 		this.operands = operands;
 		this.operators = operators;

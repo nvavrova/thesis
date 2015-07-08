@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.misc.NotNull;
 public class TypedParam extends Param {
 	private final Expr returnVal;
 
-	public TypedParam(LocInfo locInfo, @NotNull Identifier id, @NotNull Expr returnVal) {
+	public TypedParam(@NotNull LocInfo locInfo, @NotNull Identifier id, @NotNull Expr returnVal) {
 		super(locInfo, id);
 		this.returnVal = returnVal;
 	}

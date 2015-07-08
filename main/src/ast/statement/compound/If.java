@@ -21,7 +21,7 @@ public class If extends Statement {
 	private final Map<Expr, Suite> bodies;
 	private final Suite elseBody;
 
-	public If(LocInfo locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
+	public If(@NotNull LocInfo locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
 		super(locInfo);
 
 		this.conditions = new ArrayList<>();
@@ -31,11 +31,11 @@ public class If extends Statement {
 		this.addClause(condition, condBody);
 	}
 
-	public void addElseIf(Expr condition, Suite condBody) {
+	public void addElseIf(@NotNull Expr condition, @NotNull Suite condBody) {
 		this.addClause(condition, condBody);
 	}
 
-	private void addClause(Expr condition, Suite condBody) {
+	private void addClause(@NotNull Expr condition, @NotNull Suite condBody) {
 		this.conditions.add(condition);
 		this.bodies.put(condition, condBody);
 	}

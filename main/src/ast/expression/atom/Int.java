@@ -13,7 +13,7 @@ public class Int extends Numeric {
 
 	private final BigInteger value;
 
-	public Int(LocInfo locInfo, @NotNull BigInteger value) {
+	public Int(@NotNull LocInfo locInfo, @NotNull BigInteger value) {
 		super(locInfo);
 		this.value = value;
 	}

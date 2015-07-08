@@ -1,26 +1,31 @@
 package thesis;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Nik on 17-05-2015
  */
-public class Classes implements Iterable<Class> {
+public class Classes implements Iterable<String> {
 
-	private final List<Class> classes;
+	private final Map<String, List<Class>> classes;
 
 	public Classes() {
-		this.classes = new ArrayList<>();
+		this.classes = new HashMap<>();
 	}
 
-	public void add(Class pyClass) {
-		this.classes.add(pyClass);
+	public void add(String fileName, Class pyClass) {
+		if (!this.classes.containsKey(fileName)) {
+			this.classes.put(fileName, new ArrayList<>());
+		}
+		this.classes.get(fileName).add(pyClass);
+	}
+
+	public List<Class> getClasses(String fileName) {
+		return this.classes.get(fileName);
 	}
 
 	@Override
-	public Iterator<Class> iterator() {
-		return this.classes.iterator();
+	public Iterator<String> iterator() {
+		return this.classes.keySet().iterator();
 	}
 }

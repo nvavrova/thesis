@@ -13,7 +13,7 @@ public class LambdaNoCond extends ExprNoCond {
 	private final Params parameters;
 	private final ExprNoCond expression;
 
-	public LambdaNoCond(LocInfo locInfo, @NotNull ExprNoCond expression, @NotNull Params parameters) {
+	public LambdaNoCond(@NotNull LocInfo locInfo, @NotNull ExprNoCond expression, @NotNull Params parameters) {
 		super(locInfo);
 		this.expression = expression;
 		this.parameters = parameters;

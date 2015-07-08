@@ -16,13 +16,13 @@ public class DictMaker extends Maker {
 	private final CompFor comprehension;
 	private final Map<Expr, Expr> values;
 
-	public DictMaker(LocInfo locInfo, @NotNull CompFor comprehension) {
+	public DictMaker(@NotNull LocInfo locInfo, @NotNull CompFor comprehension) {
 		super(locInfo);
 
 		this.comprehension = comprehension;
 		this.values = null;
 	}
-	public DictMaker(LocInfo locInfo, @NotNull Map<Expr, Expr> values) {
+	public DictMaker(@NotNull LocInfo locInfo, @NotNull Map<Expr, Expr> values) {
 		super(locInfo);
 
 		this.values = values;

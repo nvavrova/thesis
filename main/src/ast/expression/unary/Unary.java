@@ -12,7 +12,7 @@ public abstract class Unary extends ExprNoCond {
 
 	protected final Expr value;
 
-	public Unary(LocInfo locInfo, @NotNull Expr value) {
+	public Unary(@NotNull LocInfo locInfo, @NotNull Expr value) {
 		super(locInfo);
 		this.value = value;
 	}

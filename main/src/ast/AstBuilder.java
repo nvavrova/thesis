@@ -8,6 +8,7 @@ import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
 import ast.expression.atom.Float;
+import ast.expression.atom.trailed.TrailedAtomBuilder;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
@@ -52,8 +53,8 @@ public class AstBuilder {
 		this.context = context;
 	}
 
-	public Py3Node build() {
-		return this.context.accept(this.visitor);
+	public Module build() {
+		return (Module) this.context.accept(this.visitor);
 	}
 
 	private class AstBuilderVisitor implements Python3Visitor<Py3Node> {
@@ -1130,20 +1131,22 @@ public class AstBuilder {
 			this.print("visitPower");
 			//      atom trailer* ( '**' factor )?
 
-			Atom atom = (Atom) ctx.atom().accept(this);
-			List<Expr> trailers = ctx.trailer() == null ? Collections.emptyList() :
+			Atom base = (Atom) ctx.atom().accept(this);
+			List<Trailer> trailers = ctx.trailer() == null ? Collections.emptyList() :
 					ctx.trailer().stream()
-							.map(e -> (Expr) e.accept(this))
+							.map(e -> (Trailer) e.accept(this))
 							.collect(Collectors.toList());
 
-			if (trailers.size() == 0 && ctx.factor() == null) {
+			Atom transformedBase = TrailedAtomBuilder.attachTrailers(this.getLocInfo(ctx), base, trailers);
+
+			if (ctx.factor() == null) {
 				this.indent--;
-				return atom;
+				return transformedBase;
 			}
 
-			Expr exponent = ctx.factor() == null ? null : (Expr) ctx.factor().accept(this);
+			Expr exponent = (Expr) ctx.factor().accept(this);
 			this.indent--;
-			return new Power(this.getLocInfo(ctx), atom, trailers, exponent);
+			return new Power(this.getLocInfo(ctx), transformedBase, exponent);
 		}
 
 		@Override
@@ -1234,7 +1237,7 @@ public class AstBuilder {
 				return new ArgList(this.getLocInfo(ctx));
 			}
 			if (ctx.subscriptlist() != null) {
-				return ctx.subscriptlist().accept(this); //Subscript / Subscripts
+				return ctx.subscriptlist().accept(this); //SliceBound or SubscriptList
 			}
 			if (ctx.NAME() != null) {
 				return this.getIdentifier(ctx.NAME()); //Identifier
@@ -1249,14 +1252,17 @@ public class AstBuilder {
 			this.print("visitSubscriptlist");
 			//      subscript ( ',' subscript )* ','?
 
-			List<Subscript> subscripts = ctx.subscript().stream()
-					.map(e -> (Subscript) e.accept(this))
+			List<ExprNoCond> subscriptResults = ctx.subscript().stream()
+					.map(e -> (ExprNoCond) e.accept(this))
 					.collect(Collectors.toList());
 
-			if (subscripts.size() == 1) {
-				this.indent--;
-				return subscripts.get(0);
+			if (subscriptResults.size() == 1 && !(subscriptResults.get(0) instanceof SubscriptIndex)) {
+				return subscriptResults.get(0); //this is a SliceBound
 			}
+
+			List<SubscriptIndex> subscripts = subscriptResults.stream()
+					.map(s -> (SubscriptIndex) s)
+					.collect(Collectors.toList());
 			this.indent--;
 			return new SubscriptList(this.getLocInfo(ctx), subscripts);
 		}
@@ -1355,10 +1361,10 @@ public class AstBuilder {
 			if (ctx.arglist() != null) {
 				ArgList argList = (ArgList) ctx.arglist().accept(this);
 				this.indent--;
-				return new ClassDef(this.getLocInfo(ctx), id, suite, argList);
+				return new ClassDef(this.getLocInfo(ctx), id, suite, argList.getPositional());
 			}
 			this.indent--;
-			return new ClassDef(this.getLocInfo(ctx), id, suite);
+			return new ClassDef(this.getLocInfo(ctx), id, suite, Collections.emptyList());
 		}
 
 		@Override

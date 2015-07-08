@@ -2,17 +2,18 @@ package ast.expression.primary;
 
 import ast.LocInfo;
 import ast.expression.Expr;
+import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 /**
  * Created by Nik on 17-06-2015
  */
-public class SubscriptIndex extends Subscript {
+public class SubscriptIndex extends ExprNoCond {
 
 	private final Expr index;
 
-	public SubscriptIndex(LocInfo locInfo, @NotNull Expr index) {
+	public SubscriptIndex(@NotNull LocInfo locInfo, @NotNull Expr index) {
 		super(locInfo);
 		this.index = index;
 	}
@@ -24,5 +25,10 @@ public class SubscriptIndex extends Subscript {
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public String toString() {
+		return this.index.toString();
 	}
 }

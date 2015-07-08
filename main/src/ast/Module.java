@@ -13,7 +13,7 @@ public class Module extends Py3Node {
 
     private final List<Statement> body;
 
-    public Module(LocInfo locInfo, @NotNull List<Statement> body) {
+    public Module(@NotNull LocInfo locInfo, @NotNull List<Statement> body) {
         super(locInfo);
         this.body = body;
     }

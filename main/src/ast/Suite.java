@@ -14,7 +14,7 @@ public class Suite extends Py3Node {
 
 	private final List<Statement> statements;
 
-	public Suite(LocInfo locInfo, @NotNull List<Statement> statements) {
+	public Suite(@NotNull LocInfo locInfo, @NotNull List<Statement> statements) {
 		super(locInfo);
 		this.statements = statements;
 	}

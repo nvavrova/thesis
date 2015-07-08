@@ -11,7 +11,7 @@ public class Float extends Numeric {
 
 	private final Double value;
 
-	public Float(LocInfo locInfo, @NotNull Double value) {
+	public Float(@NotNull LocInfo locInfo, @NotNull Double value) {
 		super(locInfo);
 		this.value = value;
 	}

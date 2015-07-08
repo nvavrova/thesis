@@ -13,7 +13,7 @@ public abstract class Binary extends Logical {
 
 	private final List<Expr> operands;
 
-	public Binary(LocInfo locInfo, @NotNull List<Expr> operands) {
+	public Binary(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
 		super(locInfo);
 		this.operands = operands;
 	}

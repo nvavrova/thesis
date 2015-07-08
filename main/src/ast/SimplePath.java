@@ -10,7 +10,7 @@ public class SimplePath extends Path {
 
 	private final String path;
 
-	public SimplePath(LocInfo locInfo, @NotNull String path) {
+	public SimplePath(@NotNull LocInfo locInfo, @NotNull String path) {
 		super(locInfo);
 		this.path = path;
 	}

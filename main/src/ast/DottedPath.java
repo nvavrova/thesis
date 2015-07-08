@@ -14,7 +14,7 @@ public class DottedPath extends Path {
 	private static final String DELIMITER = ".";
 	private final List<String> path;
 
-	public DottedPath(LocInfo locInfo, @NotNull List<String> path) {
+	public DottedPath(@NotNull LocInfo locInfo, @NotNull List<String> path) {
 		super(locInfo);
 		this.path = path;
 	}

@@ -1,6 +1,7 @@
 package ast;
 
 import ast.expression.atom.Identifier;
+import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Created by Nik on 23-06-2015
@@ -9,7 +10,7 @@ public abstract class Path extends Py3Node {
 
 	private Identifier alias;
 
-	public Path(LocInfo locInfo) {
+	public Path(@NotNull LocInfo locInfo) {
 		super(locInfo);
 	}
 

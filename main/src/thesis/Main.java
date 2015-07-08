@@ -1,7 +1,7 @@
 package thesis;
 
 import ast.AstBuilder;
-import ast.Py3Node;
+import ast.Module;
 import gen.Python3Lexer;
 import gen.Python3Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -18,26 +18,31 @@ public class Main {
 		FileHelper fh = new FileHelper(folder);
 		List<String> filePaths = fh.getPythonFilePaths();
 
-		Map<String, Py3Node> trees = getTrees(filePaths);
+		Map<String, Module> trees = getTrees(filePaths);
 
-		ClassCollector collector = new ClassCollector(trees.values());
+		ClassCollector collector = new ClassCollector(trees);
 		Classes classes = collector.getClasses();
-		for (Class pyClass : classes) {
-			if (pyClass.isBlob()) {
-				System.out.println("FOUND BLOB");
+		for (String fileName : classes) {
+			List<Class> pyClasses = classes.getClasses(fileName);
+			for (Class pyClass : pyClasses) {
+				if (pyClass.isBlob()) {
+					System.out.println("FOUND BLOB: \n\tfile name: " + fileName + "\n\tclass: " + pyClass.getName());
+				}
+				System.out.println("IDENTIFIERS: ");
+				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));
 			}
 		}
 	}
 
-	public static Map<String, Py3Node> getTrees(List<String> filePaths) {
-		Map<String, Py3Node> trees = new HashMap<>();
+	public static Map<String, Module> getTrees(List<String> filePaths) {
+		Map<String, Module> trees = new HashMap<>();
 		System.out.println("start");
 		long startTime = System.nanoTime();
 		for (String filePath : filePaths) {
 			try {
-                System.out.println("------------------------------ Parse ------------------------------");
+				System.out.println("------------------------------ Parse ------------------------------");
 				System.out.println("FILE: \t" + filePath);
-                Py3Node tree = parse(filePath);
+				Module tree = parse(filePath);
 				LocCoverageResolver.resolve(tree);
 				trees.put(filePath, tree);
 				System.out.println("LOC: \t" + tree.getLocSpan());
@@ -54,7 +59,7 @@ public class Main {
 		return trees;
 	}
 
-	public static Py3Node parse(String fileName) throws Exception {
+	public static Module parse(String fileName) throws Exception {
 		org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
 		Python3Lexer lexer = new Python3Lexer(input);
 

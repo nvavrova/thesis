@@ -15,7 +15,7 @@ public class Comparison extends Logical {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Comparison(LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Comparison(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 
 		assert operands.size() - 1 == operators.size();

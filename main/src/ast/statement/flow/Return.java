@@ -3,6 +3,7 @@ package ast.statement.flow;
 import ast.LocInfo;
 import ast.statement.Statement;
 import ast.statement.simple.ExprList;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 /**
@@ -12,11 +13,11 @@ public class Return extends Statement {
 
 	private final ExprList values;
 
-	public Return(LocInfo locInfo) {
+	public Return(@NotNull LocInfo locInfo) {
 		this(locInfo, null);
 	}
 
-	public Return(LocInfo locInfo, ExprList values) {
+	public Return(@NotNull LocInfo locInfo, ExprList values) {
 		super(locInfo);
 		this.values = values;
 	}

@@ -17,11 +17,11 @@ public class Params extends Py3Node {
 	private final List<Param> args;
 	private final List<Param> kwargs;
 
-	public Params(LocInfo locInfo) {
+	public Params(@NotNull LocInfo locInfo) {
 		this(locInfo, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 	}
 
-	public Params(LocInfo locInfo, @NotNull List<Param> positionalArgs, @NotNull List<Param> args, @NotNull List<Param> kwargs) {
+	public Params(@NotNull LocInfo locInfo, @NotNull List<Param> positionalArgs, @NotNull List<Param> args, @NotNull List<Param> kwargs) {
 		super(locInfo);
 		this.positionalArgs = positionalArgs;
 		this.args = args;

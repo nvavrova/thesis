@@ -13,7 +13,7 @@ public class CondComprehension extends Comprehension {
 	private final Expr expression;
 	private final CompFor compFor;
 
-	public CondComprehension(LocInfo locInfo, @NotNull Expr expression, @NotNull CompFor compFor) {
+	public CondComprehension(@NotNull LocInfo locInfo, @NotNull Expr expression, @NotNull CompFor compFor) {
 		super(locInfo);
 		this.expression = expression;
 		this.compFor = compFor;

@@ -6,17 +6,13 @@ import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.atom.*;
-import ast.expression.atom.DictMaker;
-import ast.expression.atom.SetMaker;
+import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
-import ast.expression.primary.ArgList;
-import ast.expression.primary.SliceBound;
-import ast.expression.primary.SubscriptIndex;
-import ast.expression.primary.SubscriptList;
+import ast.expression.primary.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -33,7 +29,6 @@ public interface Visitor<T> {
 
 	//--------------------------------------------- TOP LEVEL ---------------------------------------------\\
 	T visit(Decorator n);
-	T visit(DottedImport n);
 	T visit(DottedPath n);
 	T visit(Module n);
 	T visit(SimplePath n);
@@ -103,6 +98,11 @@ public interface Visitor<T> {
 	T visit(None n);
 	T visit(SetMaker n);
 	T visit(Str n);
+	T visit(AttributeRef n);
+	T visit(Call n);
+	T visit(DirectCall n);
+	T visit(Slice n);
+	T visit(Subscription n);
 
 	//bitwise
 	T visit(ast.expression.bitwise.And n);

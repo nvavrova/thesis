@@ -16,7 +16,7 @@ public class Arithmetic extends ExprNoCond {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Arithmetic(LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Arithmetic(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 
 		this.operands = operands;

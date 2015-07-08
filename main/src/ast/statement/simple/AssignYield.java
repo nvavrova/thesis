@@ -12,7 +12,7 @@ public class AssignYield extends Assign {
 
 	public final Yield yield;
 
-	public AssignYield(LocInfo locInfo, String operator, ExprList targets, @NotNull Yield yield) {
+	public AssignYield(@NotNull LocInfo locInfo, @NotNull String operator, @NotNull ExprList targets, @NotNull Yield yield) {
 		super(locInfo, operator, targets);
 		this.yield = yield;
 	}

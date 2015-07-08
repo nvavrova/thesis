@@ -14,7 +14,7 @@ public class EnumComprehension extends Comprehension {
 
 	private final List<Expr> values;
 
-	public EnumComprehension(LocInfo locInfo, @NotNull List<Expr> values) {
+	public EnumComprehension(@NotNull LocInfo locInfo, @NotNull List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}

@@ -1,13 +1,15 @@
 package ast.expression.atom;
 
 import ast.LocInfo;
+import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 /**
  * Created by Nik on 15-06-2015
  */
 public class Ellipsis extends Atom {
-	public Ellipsis(LocInfo locInfo) {
+
+	public Ellipsis(@NotNull LocInfo locInfo) {
 		super(locInfo);
 	}
 

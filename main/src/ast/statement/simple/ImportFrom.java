@@ -14,7 +14,7 @@ public class ImportFrom extends Import {
 
     private final Path module;
 
-    public ImportFrom(LocInfo locInfo, @NotNull List<Path> paths, Path module) {
+    public ImportFrom(@NotNull LocInfo locInfo, @NotNull List<Path> paths, Path module) {
         super(locInfo, paths);
         this.module = module;
     }

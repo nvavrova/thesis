@@ -16,7 +16,7 @@ public class With extends Statement {
 	private final List<WithItem> items;
 	private final Suite body;
 
-	public With(LocInfo locInfo, @NotNull List<WithItem> items, @NotNull Suite body) {
+	public With(@NotNull LocInfo locInfo, @NotNull List<WithItem> items, @NotNull Suite body) {
 		super(locInfo);
 		this.items = items;
 		this.body = body;
