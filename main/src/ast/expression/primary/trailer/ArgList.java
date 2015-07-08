@@ -1,4 +1,4 @@
-package ast.expression.primary;
+package ast.expression.primary.trailer;
 
 import ast.LocInfo;
 import ast.arg.Arg;
@@ -94,21 +94,6 @@ public class ArgList extends ExprNoCond implements Trailer {
 
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public Boolean isCall() {
-		return true;
-	}
-
-	@Override
-	public Boolean isAttribute() {
-		return false;
-	}
-
-	@Override
-	public Boolean isSubscript() {
-		return false;
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import ast.Decorator;
 import ast.LocInfo;
 import ast.Suite;
 import ast.expression.Expr;
-import ast.expression.atom.Identifier;
+import ast.expression.primary.atom.Identifier;
 import ast.param.Params;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;

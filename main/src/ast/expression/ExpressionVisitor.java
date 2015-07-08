@@ -1,11 +1,11 @@
 package ast.expression;
 
 import ast.expression.arithmetic.Arithmetic;
-import ast.expression.atom.*;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
 import ast.expression.logical.Not;
+import ast.expression.primary.atom.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -26,7 +26,7 @@ public interface ExpressionVisitor<T> {
 	//atom
 	T visit(Bool n);
 	T visit(Ellipsis n);
-	T visit(ast.expression.atom.Float n);
+	T visit(ast.expression.primary.atom.Float n);
 	T visit(Identifier n);
 	T visit(Imaginary n);
 	T visit(Int n);

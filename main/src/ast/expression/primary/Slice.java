@@ -1,8 +1,8 @@
-package ast.expression.atom.trailed;
+package ast.expression.primary;
 
 import ast.LocInfo;
-import ast.expression.atom.Atom;
-import ast.expression.primary.SliceBound;
+import ast.expression.primary.atom.Atom;
+import ast.expression.primary.trailer.SubscriptSliceList;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
@@ -11,14 +11,14 @@ import thesis.Visitor;
  */
 public class Slice extends TrailedAtom {
 
-	private final SliceBound bound;
+	private final SubscriptSliceList bound;
 
-	public Slice(@NotNull LocInfo locInfo, @NotNull Atom base, @NotNull SliceBound bound) {
+	public Slice(@NotNull LocInfo locInfo, @NotNull Atom base, @NotNull SubscriptSliceList bound) {
 		super(locInfo, base);
 		this.bound = bound;
 	}
 
-	public SliceBound getBound() {
+	public SubscriptSliceList getBounds() {
 		return this.bound;
 	}
 

@@ -6,9 +6,6 @@ import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
-import ast.expression.atom.*;
-import ast.expression.atom.Float;
-import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
@@ -18,6 +15,12 @@ import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
 import ast.expression.primary.*;
+import ast.expression.primary.atom.*;
+import ast.expression.primary.atom.Float;
+import ast.expression.primary.trailer.ArgList;
+import ast.expression.primary.trailer.SliceBound;
+import ast.expression.primary.trailer.SubscriptIndex;
+import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -447,13 +450,13 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(SubscriptIndex n) {
+	public T visit(SubscriptSliceList n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
-	public T visit(SubscriptList n) {
+	public T visit(SubscriptIndex n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -731,7 +734,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	public void visitChildren(Ellipsis n) {
 	}
 
-	public void visitChildren(ast.expression.atom.Float n) {
+	public void visitChildren(Float n) {
 	}
 
 	public void visitChildren(Identifier n) {
@@ -782,7 +785,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	public void visitChildren(Slice n) {
 		n.getBase().accept(this);
-		n.getBound().accept(this);
+		n.getBounds().accept(this);
 	}
 
 	public void visitChildren(Subscription n) {
@@ -870,8 +873,8 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		}
 	}
 
-	public void visitChildren(SubscriptList n) {
-		n.getValues().forEach(s -> s.accept(this));
+	public void visitChildren(SubscriptSliceList n) {
+		n.getIndexes().forEach(s -> s.accept(this));
 	}
 
 	public void visitChildren(Invert n) {

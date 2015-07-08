@@ -1,7 +1,7 @@
-package ast.expression.atom.trailed;
+package ast.expression.primary;
 
 import ast.LocInfo;
-import ast.expression.atom.Atom;
+import ast.expression.primary.atom.Atom;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**

@@ -1,6 +1,6 @@
 package ast;
 
-import ast.expression.primary.ArgList;
+import ast.expression.primary.trailer.ArgList;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 

@@ -6,8 +6,6 @@ import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
-import ast.expression.atom.*;
-import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
@@ -16,10 +14,12 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
-import ast.expression.primary.ArgList;
-import ast.expression.primary.SliceBound;
-import ast.expression.primary.SubscriptIndex;
-import ast.expression.primary.SubscriptList;
+import ast.expression.primary.*;
+import ast.expression.primary.atom.*;
+import ast.expression.primary.trailer.ArgList;
+import ast.expression.primary.trailer.SliceBound;
+import ast.expression.primary.trailer.SubscriptIndex;
+import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -656,7 +656,7 @@ public class LocCoverageResolver {
 		}
 
 		@Override
-		public Void visit(ast.expression.atom.Float n) {
+		public Void visit(ast.expression.primary.atom.Float n) {
 			this.ident++;
 			this.print("ast");
 			n.getLocInfo().setRangeCovered();
@@ -774,7 +774,7 @@ public class LocCoverageResolver {
 
 			LocInfo locInfo = n.getLocInfo();
 			this.visitExpr(locInfo, n.getBase());
-			this.visitExpr(locInfo, n.getBound());
+			this.visitExpr(locInfo, n.getBounds());
 
 			this.print("LOC: " + locInfo.getLocSpan());
 			this.ident--;
@@ -1007,15 +1007,11 @@ public class LocCoverageResolver {
 		}
 
 		@Override
-		public Void visit(SubscriptList n) {
+		public Void visit(SubscriptSliceList n) {
 			this.ident++;
-			this.print("SubscriptList");
+			this.print("SliceList");
 			LocInfo locInfo = n.getLocInfo();
-
-			for (SubscriptIndex subscript : n.getValues()) {
-				this.visitExpr(locInfo, subscript);
-			}
-
+			n.getIndexes().forEach(sb -> this.visitExpr(locInfo, sb));
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
 			this.ident--;
 			return null;

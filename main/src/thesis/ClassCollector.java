@@ -1,12 +1,10 @@
 package thesis;
 
 import ast.Module;
-import ast.expression.atom.Identifier;
-import ast.expression.atom.trailed.AttributeRef;
+import ast.expression.primary.atom.Identifier;
+import ast.expression.primary.AttributeRef;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
-import ast.statement.simple.AssignExpr;
-import ast.statement.simple.AssignYield;
 
 import java.util.Map;
 import java.util.Stack;
@@ -69,22 +67,6 @@ public class ClassCollector {
 			}
 			this.visitChildren(n);
 			this.currentFunction = null;
-			return null;
-		}
-
-		@Override
-		public Void visit(AssignExpr n) {
-//			if (this.amIInClass() && !this.amIInFunction()) {
-//				this.getCurrentClass().addVariable(n.toString());
-//			}
-			return null;
-		}
-
-		@Override
-		public Void visit(AssignYield n) {
-//			if (this.amIInClass() && !this.amIInFunction()) {
-//				this.getCurrentClass().addVariable(n.toString());
-//			}
 			return null;
 		}
 

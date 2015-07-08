@@ -1,4 +1,4 @@
-package ast.expression.atom;
+package ast.expression.primary.atom;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;

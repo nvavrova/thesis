@@ -1,8 +1,7 @@
-package ast.expression.primary;
+package ast.expression.primary.trailer;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import ast.expression.ExprNoCond;
 import com.sun.deploy.util.StringUtils;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
@@ -13,7 +12,7 @@ import java.util.List;
 /**
  * Created by Nik on 17-06-2015
  */
-public class SliceBound extends ExprNoCond implements Trailer {
+public class SliceBound extends SubscriptSliceListElem {
 
 	private final static String DELIMITER = ":";
 
@@ -73,25 +72,5 @@ public class SliceBound extends ExprNoCond implements Trailer {
 			return DELIMITER;
 		}
 		return StringUtils.join(bounds, DELIMITER);
-	}
-
-	@Override
-	public Boolean isCall() {
-		return false;
-	}
-
-	@Override
-	public Boolean isAttribute() {
-		return false;
-	}
-
-	@Override
-	public Boolean isSubscript() {
-		return true;
-	}
-
-	@Override
-	public <T> T accept(TrailerVisitor<T> visitor) {
-		return visitor.visit(this);
 	}
 }

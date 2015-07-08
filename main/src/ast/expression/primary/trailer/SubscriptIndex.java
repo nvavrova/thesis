@@ -1,15 +1,14 @@
-package ast.expression.primary;
+package ast.expression.primary.trailer;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
 /**
  * Created by Nik on 17-06-2015
  */
-public class SubscriptIndex extends ExprNoCond {
+public class SubscriptIndex extends SubscriptSliceListElem {
 
 	private final Expr index;
 

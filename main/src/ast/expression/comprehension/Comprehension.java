@@ -1,6 +1,6 @@
 package ast.expression.comprehension;
 
-import ast.expression.atom.Atom;
+import ast.expression.primary.atom.Atom;
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 

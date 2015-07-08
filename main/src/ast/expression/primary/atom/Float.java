@@ -1,4 +1,4 @@
-package ast.expression.atom;
+package ast.expression.primary.atom;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -7,16 +7,16 @@ import thesis.Visitor;
 /**
  * Created by Nik on 25-05-2015
  */
-public class Bool extends Literal {
+public class Float extends Numeric {
 
-	private final Boolean value;
+	private final Double value;
 
-	public Bool(@NotNull LocInfo locInfo, @NotNull Boolean value) {
+	public Float(@NotNull LocInfo locInfo, @NotNull Double value) {
 		super(locInfo);
 		this.value = value;
 	}
 
-	public Boolean getValue() {
+	public Double getValue() {
 		return this.value;
 	}
 

@@ -2,7 +2,7 @@ package ast.param;
 
 import ast.LocInfo;
 import ast.Py3Node;
-import ast.expression.atom.Identifier;
+import ast.expression.primary.atom.Identifier;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;

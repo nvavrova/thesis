@@ -1,9 +1,12 @@
-package ast.expression.atom.trailed;
+package ast.expression.primary;
 
 import ast.LocInfo;
-import ast.expression.atom.Atom;
-import ast.expression.atom.Identifier;
-import ast.expression.primary.*;
+import ast.expression.primary.atom.Atom;
+import ast.expression.primary.atom.Identifier;
+import ast.expression.primary.trailer.ArgList;
+import ast.expression.primary.trailer.SubscriptSliceList;
+import ast.expression.primary.trailer.Trailer;
+import ast.expression.primary.trailer.TrailerVisitor;
 
 import java.util.List;
 
@@ -94,13 +97,8 @@ public class TrailedAtomBuilder {
 		}
 
 		@Override
-		public TrailedAtom visit(SliceBound n) {
+		public TrailedAtom visit(SubscriptSliceList n) {
 			return new Slice(this.locInfo, this.base, n);
-		}
-
-		@Override
-		public TrailedAtom visit(SubscriptList n) {
-			return new Subscription(this.locInfo, this.base, n);
 		}
 	}
 

@@ -6,15 +6,15 @@ import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
-import ast.expression.atom.*;
-import ast.expression.atom.Float;
-import ast.expression.atom.trailed.TrailedAtomBuilder;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
-import ast.expression.primary.*;
+import ast.expression.primary.TrailedAtomBuilder;
+import ast.expression.primary.atom.*;
+import ast.expression.primary.atom.Float;
+import ast.expression.primary.trailer.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -1237,7 +1237,7 @@ public class AstBuilder {
 				return new ArgList(this.getLocInfo(ctx));
 			}
 			if (ctx.subscriptlist() != null) {
-				return ctx.subscriptlist().accept(this); //SliceBound or SubscriptList
+				return ctx.subscriptlist().accept(this); //SubscriptSliceList
 			}
 			if (ctx.NAME() != null) {
 				return this.getIdentifier(ctx.NAME()); //Identifier
@@ -1252,19 +1252,11 @@ public class AstBuilder {
 			this.print("visitSubscriptlist");
 			//      subscript ( ',' subscript )* ','?
 
-			List<ExprNoCond> subscriptResults = ctx.subscript().stream()
-					.map(e -> (ExprNoCond) e.accept(this))
-					.collect(Collectors.toList());
-
-			if (subscriptResults.size() == 1 && !(subscriptResults.get(0) instanceof SubscriptIndex)) {
-				return subscriptResults.get(0); //this is a SliceBound
-			}
-
-			List<SubscriptIndex> subscripts = subscriptResults.stream()
-					.map(s -> (SubscriptIndex) s)
+			List<SubscriptSliceListElem> values = ctx.subscript().stream()
+					.map(e -> (SubscriptSliceListElem) e.accept(this))
 					.collect(Collectors.toList());
 			this.indent--;
-			return new SubscriptList(this.getLocInfo(ctx), subscripts);
+			return new SubscriptSliceList(this.getLocInfo(ctx), values);
 		}
 
 		@Override
@@ -1279,11 +1271,11 @@ public class AstBuilder {
 				return new SubscriptIndex(this.getLocInfo(ctx), index);
 			}
 
-			Expr startIndex = ctx.lowerBound == null ? null : (Expr) ctx.lowerBound.accept(this);
-			Expr endIndex = ctx.upperBound == null ? null : (Expr) ctx.upperBound.accept(this);
+			Expr lowerBound = ctx.lowerBound == null ? null : (Expr) ctx.lowerBound.accept(this);
+			Expr upperBound = ctx.upperBound == null ? null : (Expr) ctx.upperBound.accept(this);
 			Expr stride = ctx.stride == null ? null : (Expr) ctx.stride.accept(this);
 			this.indent--;
-			return new SliceBound(this.getLocInfo(ctx), startIndex, endIndex, stride);
+			return new SliceBound(this.getLocInfo(ctx), lowerBound, upperBound, stride);
 		}
 
 		@Override

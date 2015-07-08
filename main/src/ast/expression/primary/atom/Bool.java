@@ -1,24 +1,22 @@
-package ast.expression.atom;
+package ast.expression.primary.atom;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
-import java.math.BigInteger;
-
 /**
  * Created by Nik on 25-05-2015
  */
-public class Int extends Numeric {
+public class Bool extends Literal {
 
-	private final BigInteger value;
+	private final Boolean value;
 
-	public Int(@NotNull LocInfo locInfo, @NotNull BigInteger value) {
+	public Bool(@NotNull LocInfo locInfo, @NotNull Boolean value) {
 		super(locInfo);
 		this.value = value;
 	}
 
-	public BigInteger getValue() {
+	public Boolean getValue() {
 		return this.value;
 	}
 

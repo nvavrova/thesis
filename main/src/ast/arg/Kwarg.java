@@ -1,7 +1,7 @@
 package ast.arg;
 
 import ast.LocInfo;
-import ast.expression.atom.Identifier;
+import ast.expression.primary.atom.Identifier;
 import ast.expression.Expr;
 import thesis.Visitor;
 

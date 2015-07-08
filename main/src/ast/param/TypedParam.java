@@ -2,7 +2,7 @@ package ast.param;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import ast.expression.atom.Identifier;
+import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**

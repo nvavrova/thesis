@@ -1,8 +1,8 @@
-package ast.expression.atom;
+package ast.expression.primary.atom;
 
 import ast.LocInfo;
-import ast.expression.primary.Trailer;
-import ast.expression.primary.TrailerVisitor;
+import ast.expression.primary.trailer.Trailer;
+import ast.expression.primary.trailer.TrailerVisitor;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.Visitor;
 
@@ -49,21 +49,6 @@ public class Identifier extends Atom implements Trailer {
 	@Override
 	public String toString() {
 		return this.value;
-	}
-
-	@Override
-	public Boolean isCall() {
-		return false;
-	}
-
-	@Override
-	public Boolean isAttribute() {
-		return true;
-	}
-
-	@Override
-	public Boolean isSubscript() {
-		return false;
 	}
 
 	@Override

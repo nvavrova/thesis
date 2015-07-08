@@ -5,14 +5,20 @@ import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
-import ast.expression.atom.*;
-import ast.expression.atom.trailed.*;
 import ast.expression.bitwise.Xor;
-import ast.expression.comprehension.*;
+import ast.expression.comprehension.CompFor;
+import ast.expression.comprehension.CompIf;
+import ast.expression.comprehension.CondComprehension;
+import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.And;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
 import ast.expression.primary.*;
+import ast.expression.primary.atom.*;
+import ast.expression.primary.trailer.ArgList;
+import ast.expression.primary.trailer.SliceBound;
+import ast.expression.primary.trailer.SubscriptIndex;
+import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
@@ -90,7 +96,7 @@ public interface Visitor<T> {
 	T visit(Bool n);
 	T visit(DictMaker n);
 	T visit(Ellipsis n);
-	T visit(ast.expression.atom.Float n);
+	T visit(ast.expression.primary.atom.Float n);
 	T visit(Identifier n);
 	T visit(Imaginary n);
 	T visit(Int n);
@@ -123,8 +129,8 @@ public interface Visitor<T> {
 	//primary
 	T visit(ArgList n);
 	T visit(SliceBound n);
+	T visit(SubscriptSliceList n);
 	T visit(SubscriptIndex n);
-	T visit(SubscriptList n);
 
 	//unary
 	T visit(Invert n);
