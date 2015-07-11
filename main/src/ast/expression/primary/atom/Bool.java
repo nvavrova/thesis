@@ -7,7 +7,7 @@ import thesis.Visitor;
 /**
  * Created by Nik on 25-05-2015
  */
-public class Bool extends Literal {
+public class Bool extends Atom {
 
 	private final Boolean value;
 

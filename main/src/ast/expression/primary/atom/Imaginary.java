@@ -7,7 +7,7 @@ import thesis.Visitor;
 /**
  * Created by Nik on 12-06-2015
  */
-public class Imaginary extends Numeric {
+public class Imaginary extends Atom {
 
 	private final Double value;
 

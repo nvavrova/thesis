@@ -8,7 +8,6 @@ import ast.expression.primary.atom.Identifier;
 import ast.param.Params;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Helper;
 import thesis.Visitor;
 
 import java.util.Collections;
@@ -66,22 +65,10 @@ public class Function extends Statement {
 		return this.returnType != null;
 	}
 
-	public Boolean nameContains(String s) {
-		return this.name.contains(s);
-	}
-
 	public Boolean isAccessor() {
+		//TODO: fix this
 		if (this.params.isEmptyExceptForSelf() && this.name.startsWith("get")) {
 			return this.body.isAccessorBody();
-		}
-		return false;
-	}
-
-	public Boolean isController() {
-		for (String name : Helper.getControllerNames()) {
-			if (this.nameContains(name)){
-				return true;
-			}
 		}
 		return false;
 	}

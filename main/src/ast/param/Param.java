@@ -2,15 +2,14 @@ package ast.param;
 
 import ast.LocInfo;
 import ast.Py3Node;
-import ast.expression.primary.atom.Identifier;
 import ast.expression.Expr;
+import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
 
 /**
- * Created by Nik on 23-06-2015
+ * Created by Nik on 08-07-2015
  */
-public class Param extends Py3Node {
+public abstract class Param extends Py3Node {
 
 	private final Identifier id;
 	private Expr defaultVal;
@@ -38,10 +37,5 @@ public class Param extends Py3Node {
 
 	public Boolean isSelf() {
 		return this.id.isSelf();
-	}
-
-	@Override
-	public <T> T accept(Visitor<T> visitor) {
-		return visitor.visit(this);
 	}
 }

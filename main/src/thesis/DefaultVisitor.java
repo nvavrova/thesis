@@ -7,6 +7,7 @@ import ast.arg.SimpleArg;
 import ast.expression.*;
 import ast.expression.arithmetic.Arithmetic;
 import ast.expression.bitwise.And;
+import ast.expression.bitwise.Bitwise;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.CompFor;
@@ -24,8 +25,10 @@ import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.param.Param;
+import ast.expression.unary.Unary;
 import ast.param.Params;
+import ast.param.SimpleParam;
+import ast.param.TypedParam;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;
@@ -33,7 +36,7 @@ import ast.statement.simple.*;
 /**
  * Created by Nik on 29-06-2015
  */
-public abstract class DefaultVisitor<T> implements Visitor<T> {
+public class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Decorator n) {
@@ -43,7 +46,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(DottedPath n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -55,7 +57,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(SimplePath n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -78,13 +79,19 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(Param n) {
+	public T visit(SimpleParam n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Params n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(TypedParam n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -126,7 +133,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(Import n) {
+	public T visit(SimpleImport n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -145,19 +152,16 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Pass n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Break n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Continue n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -283,7 +287,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Bool n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -295,43 +298,31 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Ellipsis n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Float n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Identifier n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Imaginary n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Int n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
-	public T visit(Literal n) {
-		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(None n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -343,7 +334,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Str n) {
-		this.visitChildren(n);
 		return null;
 	}
 
@@ -503,13 +493,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		}
 	}
 
-	public void visitChildren(SimplePath n) {
-	}
-
-	public void visitChildren(DottedPath n) {
-	}
-
-	public void visitChildren(Param n) {
+	public void visitChildren(SimpleParam n) {
 		n.getId().accept(this);
 
 		if (n.hasDefaultVal()) {
@@ -521,6 +505,17 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		n.getArgs().forEach(p -> p.accept(this));
 		n.getKwargs().forEach(p -> p.accept(this));
 		n.getPositionalArgs().forEach(p -> p.accept(this));
+	}
+
+	public void visitChildren(TypedParam n) {
+		n.getId().accept(this);
+
+		if (n.hasDefaultVal()) {
+			n.getDefaultVal().accept(this);
+		}
+		if (n.hasReturnVal()) {
+			n.getReturnVal().accept(this);
+		}
 	}
 
 	public void visitChildren(Suite n) {
@@ -568,7 +563,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		n.getIdentifiers().forEach(i -> i.accept(this));
 	}
 
-	public void visitChildren(Import n) {
+	public void visitChildren(SimpleImport n) {
 		n.getPaths().forEach(p -> p.accept(this));
 	}
 
@@ -577,19 +572,11 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 			n.getModule().accept(this);
 		}
 		n.getPaths().forEach(p -> p.accept(this));
+
 	}
 
 	public void visitChildren(Nonlocal n) {
 		n.getIdentifiers().forEach(i -> i.accept(this));
-	}
-
-	public void visitChildren(Pass n) {
-	}
-
-	public void visitChildren(Break n) {
-	}
-
-	public void visitChildren(Continue n) {
 	}
 
 	public void visitChildren(Raise n) {
@@ -728,33 +715,6 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 
-	public void visitChildren(Bool n) {
-	}
-
-	public void visitChildren(Ellipsis n) {
-	}
-
-	public void visitChildren(Float n) {
-	}
-
-	public void visitChildren(Identifier n) {
-	}
-
-	public void visitChildren(Imaginary n) {
-	}
-
-	public void visitChildren(Int n) {
-	}
-
-	public void visitChildren(Literal n) {
-	}
-
-	public void visitChildren(None n) {
-	}
-
-	public void visitChildren(Str n) {
-	}
-
 	public void visitChildren(DictMaker n) {
 		if (n.hasComprehension()) {
 			n.getComprehension().accept(this);
@@ -802,13 +762,8 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		}
 	}
 
-	public void visitChildren(And n) {
-	}
-
-	public void visitChildren(Or n) {
-	}
-
-	public void visitChildren(Xor n) {
+	public void visitChildren(Bitwise n) {
+		n.getOperands().forEach(o -> o.accept(this));
 	}
 
 	public void visitChildren(CompFor n) {
@@ -840,6 +795,7 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Not n) {
+		n.getExpression().accept(this);
 	}
 
 	public void visitChildren(ast.expression.logical.Or n) {
@@ -877,13 +833,8 @@ public abstract class DefaultVisitor<T> implements Visitor<T> {
 		n.getIndexes().forEach(s -> s.accept(this));
 	}
 
-	public void visitChildren(Invert n) {
-	}
-
-	public void visitChildren(Minus n) {
-	}
-
-	public void visitChildren(Plus n) {
+	public void visitChildren(Unary n) {
+		n.getValue().accept(this);
 	}
 
 }

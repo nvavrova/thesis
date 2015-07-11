@@ -11,7 +11,6 @@ public interface AtomVisitor <T> {
 	T visit(Identifier n);
 	T visit(Imaginary n);
 	T visit(Int n);
-	T visit(Literal n);
 	T visit(None n);
 	T visit(SetMaker n);
 	T visit(Str n);

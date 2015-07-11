@@ -16,4 +16,8 @@ public abstract class Unary extends ExprNoCond {
 		super(locInfo);
 		this.value = value;
 	}
+
+	public Expr getValue() {
+		return this.value;
+	}
 }

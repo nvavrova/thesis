@@ -30,7 +30,6 @@ public interface ExpressionVisitor<T> {
 	T visit(Identifier n);
 	T visit(Imaginary n);
 	T visit(Int n);
-	T visit(Literal n);
 	T visit(None n);
 	T visit(Str n);
 

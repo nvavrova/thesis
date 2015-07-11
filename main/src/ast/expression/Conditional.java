@@ -13,7 +13,8 @@ public class Conditional extends Expr {
 	private final Expr condition;
 	private final Expr conditionFalseValue;
 
-	public Conditional(@NotNull LocInfo locInfo, @NotNull Expr value, @NotNull Expr condition, @NotNull Expr conditionFalseValue) {
+	public Conditional(@NotNull LocInfo locInfo, @NotNull Expr value, @NotNull Expr condition,
+	                   @NotNull Expr conditionFalseValue) {
 		super(locInfo);
 		this.value = value;
 		this.condition = condition;

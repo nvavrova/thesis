@@ -962,8 +962,8 @@ UNKNOWN_CHAR
 /// shortstringitem ::=  shortstringchar | stringescapeseq
 /// shortstringchar ::=  <any source character except "\" or newline or the quote>
 fragment SHORT_STRING
- : '\'' ( STRING_ESCAPE_SEQ | ~[\\\r\n'] )* '\''
- | '"' ( STRING_ESCAPE_SEQ | ~[\\\r\n"] )* '"'
+ : '\'' ( STRING_ESCAPE_SEQ | LINE_JOINING | ~[\\\r\n'] )* '\''
+ | '"' ( STRING_ESCAPE_SEQ | LINE_JOINING | ~[\\\r\n"] )* '"'
  ;
 
 /// longstring      ::=  "'''" longstringitem* "'''" | '"""' longstringitem* '"""'

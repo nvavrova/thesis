@@ -23,8 +23,9 @@ import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.param.Param;
+import ast.param.SimpleParam;
 import ast.param.Params;
+import ast.param.TypedParam;
 import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
@@ -143,7 +144,7 @@ public class LocCoverageResolver {
 		}
 
 		@Override
-		public Void visit(Param n) {
+		public Void visit(SimpleParam n) {
 			this.ident++;
 			this.print("Param");
 			LocInfo locInfo = n.getLocInfo();
@@ -152,6 +153,26 @@ public class LocCoverageResolver {
 
 			if (n.hasDefaultVal()) {
 				this.visitExpr(locInfo, n.getDefaultVal());
+			}
+
+			this.print("LOC: " + n.getLocInfo().getLocSpan());
+			this.ident--;
+			return null;
+		}
+
+		@Override
+		public Void visit(TypedParam n) {
+			this.ident++;
+			this.print("TypedParam");
+			LocInfo locInfo = n.getLocInfo();
+
+			this.visitExpr(locInfo, n.getId());
+
+			if (n.hasDefaultVal()) {
+				this.visitExpr(locInfo, n.getDefaultVal());
+			}
+			if (n.hasReturnVal()) {
+				this.visitExpr(locInfo, n.getReturnVal());
 			}
 
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
@@ -282,7 +303,7 @@ public class LocCoverageResolver {
 		}
 
 		@Override
-		public Void visit(Import n) {
+		public Void visit(SimpleImport n) {
 			this.ident++;
 			this.print("Import");
 			this.visitPaths(n.getLocInfo(), n.getPaths());
@@ -689,16 +710,6 @@ public class LocCoverageResolver {
 		public Void visit(Int n) {
 			this.ident++;
 			this.print("Int");
-			n.getLocInfo().setRangeCovered();
-			this.print("LOC: " + n.getLocInfo().getLocSpan());
-			this.ident--;
-			return null;
-		}
-
-		@Override
-		public Void visit(Literal n) {
-			this.ident++;
-			this.print("Literal");
 			n.getLocInfo().setRangeCovered();
 			this.print("LOC: " + n.getLocInfo().getLocSpan());
 			this.ident--;
@@ -1116,10 +1127,10 @@ public class LocCoverageResolver {
 		}
 
 
-		private void visitParams(LocInfo locInfo, List<Param> params) {
-			for (Param param : params) {
-				param.accept(this);
-				this.addLines(locInfo, param);
+		private void visitParams(LocInfo locInfo, List<SimpleParam> simpleParams) {
+			for (SimpleParam simpleParam : simpleParams) {
+				simpleParam.accept(this);
+				this.addLines(locInfo, simpleParam);
 			}
 		}
 

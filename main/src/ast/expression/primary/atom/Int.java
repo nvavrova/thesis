@@ -9,7 +9,7 @@ import java.math.BigInteger;
 /**
  * Created by Nik on 25-05-2015
  */
-public class Int extends Numeric {
+public class Int extends Atom {
 
 	private final BigInteger value;
 

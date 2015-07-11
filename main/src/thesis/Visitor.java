@@ -22,8 +22,9 @@ import ast.expression.primary.trailer.SubscriptSliceList;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.param.Param;
 import ast.param.Params;
+import ast.param.SimpleParam;
+import ast.param.TypedParam;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;
@@ -33,35 +34,42 @@ import ast.statement.simple.*;
  */
 public interface Visitor<T> {
 
-	//--------------------------------------------- TOP LEVEL ---------------------------------------------\\
 	T visit(Decorator n);
 	T visit(DottedPath n);
 	T visit(Module n);
 	T visit(SimplePath n);
 	T visit(Suite n);
 
-	//arg
+	//-----------------------------------------------------------------------------------------------------\\
+	//------------------------------------------------ ARG ------------------------------------------------\\
+	//-----------------------------------------------------------------------------------------------------\\
 	T visit(Kwarg n);
 	T visit(SimpleArg n);
 
-	//param
-	T visit(Param n);
+	//-----------------------------------------------------------------------------------------------------\\
+	//----------------------------------------------- PARAM -----------------------------------------------\\
+	//-----------------------------------------------------------------------------------------------------\\
 	T visit(Params n);
+	T visit(SimpleParam n);
+	T visit(TypedParam n);
 
+	//-----------------------------------------------------------------------------------------------------\\
 	//--------------------------------------------- STATEMENTS --------------------------------------------\\
-	//simple
+	//-----------------------------------------------------------------------------------------------------\\
+
+	//............................................... SIMPLE ..............................................\\
 	T visit(Assert n);
 	T visit(AssignExpr n);
 	T visit(AssignYield n);
 	T visit(Delete n);
 	T visit(ExprList n);
 	T visit(Global n);
-	T visit(Import n);
 	T visit(ImportFrom n);
 	T visit(Nonlocal n);
 	T visit(Pass n);
+	T visit(SimpleImport n);
 
-	//flow
+	//............................................... FLOW ................................................\\
 	T visit(Break n);
 	T visit(Continue n);
 	T visit(Raise n);
@@ -69,7 +77,7 @@ public interface Visitor<T> {
 	T visit(YieldValues n);
 	T visit(YieldFrom n);
 
-	//compound
+	//.............................................. COMPOUND .............................................\\
 	T visit(ClassDef n);
 	T visit(Except n);
 	T visit(For n);
@@ -80,7 +88,9 @@ public interface Visitor<T> {
 	T visit(With n);
 	T visit(WithItem n);
 
+	//-----------------------------------------------------------------------------------------------------\\
 	//-------------------------------------------- EXPRESSIONS --------------------------------------------\\
+	//-----------------------------------------------------------------------------------------------------\\
 	T visit(Comparison n);
 	T visit(Conditional n);
 	T visit(Lambda n);
@@ -88,10 +98,32 @@ public interface Visitor<T> {
 	T visit(Power n);
 	T visit(Shift n);
 
-	//arithmetic
+	//............................................. ARITHMETIC ............................................\\
 	T visit(Arithmetic n);
 
+	//.............................................. BITWISE ..............................................\\
+	T visit(ast.expression.bitwise.And n);
+	T visit(ast.expression.bitwise.Or n);
+	T visit(Xor n);
 
+	//........................................... COMPREHENSION ...........................................\\
+	T visit(CompFor n);
+	T visit(CompIf n);
+	T visit(CondComprehension n);
+	T visit(EnumComprehension n);
+
+	//............................................... LOGICAL .............................................\\
+	T visit(And n);
+	T visit(Not n);
+	T visit(Or n);
+
+	//............................................... PRIMARY .............................................\\
+	T visit(AttributeRef n);
+	T visit(Call n);
+	T visit(DirectCall n);
+	T visit(Slice n);
+	T visit(Subscription n);
+	
 	//atom
 	T visit(Bool n);
 	T visit(DictMaker n);
@@ -100,39 +132,17 @@ public interface Visitor<T> {
 	T visit(Identifier n);
 	T visit(Imaginary n);
 	T visit(Int n);
-	T visit(Literal n);
 	T visit(None n);
 	T visit(SetMaker n);
 	T visit(Str n);
-	T visit(AttributeRef n);
-	T visit(Call n);
-	T visit(DirectCall n);
-	T visit(Slice n);
-	T visit(Subscription n);
-
-	//bitwise
-	T visit(ast.expression.bitwise.And n);
-	T visit(ast.expression.bitwise.Or n);
-	T visit(Xor n);
-
-	//comprehension
-	T visit(CompFor n);
-	T visit(CompIf n);
-	T visit(CondComprehension n);
-	T visit(EnumComprehension n);
-
-	//logical
-	T visit(And n);
-	T visit(Not n);
-	T visit(Or n);
-
-	//primary
+	
+	//trailer
 	T visit(ArgList n);
 	T visit(SliceBound n);
-	T visit(SubscriptSliceList n);
 	T visit(SubscriptIndex n);
-
-	//unary
+	T visit(SubscriptSliceList n);
+	
+	//................................................ UNARY ..............................................\\
 	T visit(Invert n);
 	T visit(Minus n);
 	T visit(Plus n);

@@ -1,6 +1,8 @@
 // Generated from D:/intellij_projects/thesis/main/grammar\Python3.g4 by ANTLR 4.5
 package gen;
 
+    import java.util.List;
+    import java.util.ArrayList;
     import java.util.Map;
     import java.util.HashMap;
 
@@ -10,7 +12,8 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
-    import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Python3Parser extends Parser {

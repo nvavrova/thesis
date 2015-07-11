@@ -18,7 +18,7 @@ import ast.expression.primary.trailer.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.param.Param;
+import ast.param.SimpleParam;
 import ast.param.Params;
 import ast.param.TypedParam;
 import ast.statement.Statement;
@@ -203,9 +203,9 @@ public class AstBuilder {
 			//		| '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
 			//		| '**' tfpdef
 
-			List<Param> positional = this.getTfpParams(ctx.positional);
-			List<Param> args = this.getTfpParams(ctx.args);
-			List<Param> kwargs = this.getTfpParams(ctx.kwargs);
+			List<SimpleParam> positional = this.getTfpParams(ctx.positional);
+			List<SimpleParam> args = this.getTfpParams(ctx.args);
+			List<SimpleParam> kwargs = this.getTfpParams(ctx.kwargs);
 			this.indent--;
 			return new Params(this.getLocInfo(ctx), positional, args, kwargs);
 		}
@@ -223,7 +223,7 @@ public class AstBuilder {
 				return new TypedParam(this.getLocInfo(ctx), id, returnType);
 			}
 			this.indent--;
-			return new Param(this.getLocInfo(ctx), id);
+			return new SimpleParam(this.getLocInfo(ctx), id);
 		}
 
 		@Override
@@ -237,9 +237,9 @@ public class AstBuilder {
 			//		| '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
 			//		| '**' vfpdef
 
-			List<Param> positional = this.getVfpParams(ctx.positional);
-			List<Param> args = this.getVfpParams(ctx.args);
-			List<Param> kwargs = this.getVfpParams(ctx.kwargs);
+			List<SimpleParam> positional = this.getVfpParams(ctx.positional);
+			List<SimpleParam> args = this.getVfpParams(ctx.args);
+			List<SimpleParam> kwargs = this.getVfpParams(ctx.kwargs);
 			this.indent--;
 			return new Params(this.getLocInfo(ctx), positional, args, kwargs);
 		}
@@ -252,7 +252,7 @@ public class AstBuilder {
 
 			Identifier id = this.getIdentifier(ctx.NAME());
 			this.indent--;
-			return new Param(this.getLocInfo(ctx), id);
+			return new SimpleParam(this.getLocInfo(ctx), id);
 		}
 
 		@Override
@@ -517,7 +517,7 @@ public class AstBuilder {
 
 			CollectionWrapper<Path> wrap = (CollectionWrapper<Path>) ctx.dotted_as_names().accept(this);
 			this.indent--;
-			return new Import(this.getLocInfo(ctx), wrap.getItems());
+			return new SimpleImport(this.getLocInfo(ctx), wrap.getItems());
 		}
 
 		@Override
@@ -844,6 +844,9 @@ public class AstBuilder {
 				return ctx.lambdef().accept(this);
 			}
 
+			if (ctx.value == null) {
+				System.out.println("");
+			}
 			Expr value = (Expr) ctx.value.accept(this);
 			if (ctx.condition == null) {
 				this.indent--;
@@ -1601,38 +1604,38 @@ public class AstBuilder {
 			return new Identifier(this.getLocInfo(name), name.getText());
 		}
 
-		private List<Param> getVfpParams(Map<Python3Parser.VfpdefContext, Python3Parser.TestContext> params) {
+		private List<SimpleParam> getVfpParams(Map<Python3Parser.VfpdefContext, Python3Parser.TestContext> params) {
 			Map<ParserRuleContext, Python3Parser.TestContext> upcasted = new HashMap<>();
 			upcasted.putAll(params);
 			return this.getParameters(upcasted);
 		}
 
-		private List<Param> getTfpParams(Map<Python3Parser.TfpdefContext, Python3Parser.TestContext> params) {
+		private List<SimpleParam> getTfpParams(Map<Python3Parser.TfpdefContext, Python3Parser.TestContext> params) {
 			Map<ParserRuleContext, Python3Parser.TestContext> upcasted = new HashMap<>();
 			upcasted.putAll(params);
 			return this.getParameters(upcasted);
 		}
 
-		private List<Param> getParameters(Map<ParserRuleContext, Python3Parser.TestContext> params) {
-			Map<Param, Expr> paramMap = this.extractParams(params);
-			List<Param> result = new ArrayList<>();
-			for (Param p : paramMap.keySet()) {
+		private List<SimpleParam> getParameters(Map<ParserRuleContext, Python3Parser.TestContext> params) {
+			Map<SimpleParam, Expr> paramMap = this.extractParams(params);
+			List<SimpleParam> result = new ArrayList<>();
+			for (SimpleParam p : paramMap.keySet()) {
 				this.setParamDefaultValue(p, paramMap.get(p));
 				result.add(p);
 			}
 			return result;
 		}
 
-		private void setParamDefaultValue(Param param, Expr defaultVal) {
+		private void setParamDefaultValue(SimpleParam simpleParam, Expr defaultVal) {
 			if (defaultVal != null) {
-				param.setDefaultVal(defaultVal);
+				simpleParam.setDefaultVal(defaultVal);
 			}
 		}
 
-		private Map<Param, Expr> extractParams(Map<ParserRuleContext, Python3Parser.TestContext> params) {
-			Map<Param, Expr> parameters = new HashMap<>();
+		private Map<SimpleParam, Expr> extractParams(Map<ParserRuleContext, Python3Parser.TestContext> params) {
+			Map<SimpleParam, Expr> parameters = new HashMap<>();
 			for (ParserRuleContext key : params.keySet()) {
-				Param keyNode = (Param) key.accept(this);
+				SimpleParam keyNode = (SimpleParam) key.accept(this);
 				Python3Parser.TestContext value = params.get(key);
 				Expr valueNode = value == null ? null : (Expr) value.accept(this);
 				parameters.put(keyNode, valueNode);

@@ -30,14 +30,13 @@ public class ClassCollector {
 		private String currentFileName;
 		private final Classes pyClasses;
 		private final Stack<Class> classes;
-		private Function currentFunction;
-		private Boolean collectIdentifier;
+		private final Stack<Function> functions;
 
 		public ClassVisitor(Map<String, Module> trees) {
 			super();
 			this.pyClasses = new Classes();
 			this.classes = new Stack<>();
-			this.collectIdentifier = false;
+			this.functions = new Stack<>();
 			for (String fileName : trees.keySet()) {
 				this.currentFileName = fileName;
 				Module n = trees.get(this.currentFileName);
@@ -56,8 +55,8 @@ public class ClassCollector {
 
 		@Override
 		public Void visit(Function n) {
-			this.currentFunction = n;
-			if (this.amIInClass()) {
+			this.functions.push(n);
+			if (this.inClass()) {
 				if (n.isAccessor()) {
 					this.getCurrentClass().addAccessor(n.getNameString(), n.getLocSpan());
 				}
@@ -66,7 +65,7 @@ public class ClassCollector {
 				}
 			}
 			this.visitChildren(n);
-			this.currentFunction = null;
+			this.functions.pop();
 			return null;
 		}
 
@@ -74,8 +73,11 @@ public class ClassCollector {
 		public Void visit(AttributeRef n) {
 			if (n.getBase() instanceof Identifier) {
 				Identifier id = (Identifier) n.getBase();
-				if (this.amIInFunction() && this.isClassOrInstanceVar(id.getValue())) {
-					this.getCurrentClass().addVariable(n.toString());
+				if (this.inMethod() && this.isClassOrInstanceVar(id.getValue())) {
+					this.getCurrentClass().addVariable(n.toString(), this.getCurrentFunction().getNameString());
+				}
+				else if (this.inClass() && !this.inFunction()) {
+					this.getCurrentClass().addVariable("self." + n.toString());
 				}
 			}
 			this.visitChildren(n);
@@ -83,23 +85,31 @@ public class ClassCollector {
 		}
 
 		public Boolean isClassOrInstanceVar(String name) {
-			return this.amIInClass() && (name.equals(this.getCurrentClass().getName()) || name.equals("self"));
+			return this.inClass() && (name.equals(this.getCurrentClass().getName()) || name.equals("self"));
 		}
 
 		public Class getCurrentClass() {
 			return this.classes.peek();
 		}
 
+		public Function getCurrentFunction() {
+			return this.functions.peek();
+		}
+
 		public Classes getClasses() {
 			return this.pyClasses;
 		}
 
-		private Boolean amIInClass() {
+		private boolean inClass() {
 			return !this.classes.isEmpty();
 		}
 
-		private Boolean amIInFunction() {
-			return this.currentFunction != null;
+		private boolean inFunction() {
+			return !this.functions.isEmpty();
+		}
+
+		private boolean inMethod() {
+			return this.inClass() && this.inFunction();
 		}
 	}
 }

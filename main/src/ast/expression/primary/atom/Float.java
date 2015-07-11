@@ -7,7 +7,7 @@ import thesis.Visitor;
 /**
  * Created by Nik on 25-05-2015
  */
-public class Float extends Numeric {
+public class Float extends Atom {
 
 	private final Double value;
 
