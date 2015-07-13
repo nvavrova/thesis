@@ -4,46 +4,45 @@ import ast.LocInfo;
 import ast.arg.Arg;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 30-06-2015
  */
 //TODO: decide on the constants, limits, etc.
 public class Class {
-	private final static Set<String> NO_OCCURRENCE = Collections.emptySet();
 
 	private final String name;
 	private final LocInfo loc;
-	private final Boolean isController;
-	private Boolean hasControllerMethods;
-	private final Map<String, Integer> methodLoc;
-	private final Map<String, Integer> accessors;
 	private final List<Arg> parents;
 	private final Set<String> variables;
-	private final Map<String, Set<String>> varOccurrence;
+	private final List<Method> methods;
+	private final Map<String, Integer> methodPosition;
+	private Boolean usesGlobals;
 
-	public Class(String name, LocInfo loc, Boolean isController, List<Arg> parents) {
+	public Class(String name, LocInfo loc, List<Arg> parents) {
 		this.name = name;
 		this.loc = loc;
-		this.isController = isController;
-		this.hasControllerMethods = false;
-		this.methodLoc = new HashMap<>();
-		this.accessors = new HashMap<>();
 		this.parents = parents;
 		this.variables = new HashSet<>();
-		this.varOccurrence = new HashMap<>();
+		this.methods = new ArrayList<>();
+		this.methodPosition = new HashMap<>();
+		this.usesGlobals = false;
 	}
 
-	public void addAccessor(String name, Integer loc) {
-		this.accessors.put(name, loc);
+	public Method addAccessor(String name, LocInfo loc, List<String> params) {
+		return this.addMethod(name, loc, params, true);
 	}
 
-	public void addMethod(String name, Integer loc, Boolean isController) {
-		if (isController) {
-			this.hasControllerMethods = true;
-		}
-		this.methodLoc.put(name, loc);
+	public Method addMethod(String name, LocInfo loc, List<String> params) {
+		return this.addMethod(name, loc, params, false);
+	}
+
+	public Boolean hasNoMethods() {
+		return this.methods.size() == 0;
+	}
+
+	public Method getLastAddedMethod() {
+		return this.methods.get(this.methods.size() - 1);
 	}
 
 	public void addVariable(String varName) {
@@ -51,10 +50,8 @@ public class Class {
 	}
 
 	public void addVariable(String varName, String methodName) {
-		if (!this.varOccurrence.containsKey(methodName)) {
-			this.varOccurrence.put(methodName, new HashSet<>());
-		}
-		this.varOccurrence.get(methodName).add(varName);
+		Method method = this.getMethod(methodName);
+		method.addVarUse(varName);
 		this.addVariable(varName);
 	}
 
@@ -62,20 +59,50 @@ public class Class {
 		return this.name;
 	}
 
+	public Boolean isBlob() {
+		//TODO: add data class association?
+		return (this.isLargeClass() || this.hasLowCohesion()) &&
+				(this.hasControllerName() || this.hasControllerMethods());
+	}
+
+	public Boolean isSwissArmyKnife() {
+		return this.hasTooManyParents();
+	}
+
+	public Boolean isFunctionalDecomposition() {
+		return false; //TODO
+	}
+
+	public Boolean isSpaghettiCode() {
+		return this.noInheritance() && this.hasProceduralName() && this.hasLongMethod()
+				&& this.hasTooManyMethodsWithNoParams() && this.usesGlobals();
+	}
+
 	public Integer getLoc() {
 		return this.loc.getLocSpan();
 	}
 
-	public Integer getNumberOfMethods() {
-		return this.methodLoc.size() + this.accessors.size();
-	}
-
 	public Integer getNumberOfAccessors() {
-		return this.accessors.size();
+		Long count = this.methods.stream()
+				.filter(m -> m.isAccessor())
+				.count();
+		return count.intValue();
 	}
 
 	public Set<String> getVariables() {
 		return this.variables;
+	}
+
+	public String getFilePath() {
+		return this.loc.getFilePath();
+	}
+
+	public Boolean usesGlobals() {
+		return this.usesGlobals;
+	}
+
+	public void registerGlobalUse() {
+		this.usesGlobals = true;
 	}
 
 	public Boolean hasLowCohesion() {
@@ -90,47 +117,84 @@ public class Class {
 		return this.getNumberOfAccessors() > 10;
 	}
 
-	public Boolean isController() {
-		return this.isController;
+	public Boolean hasControllerName() {
+		return Helper.isControllerName(this.name);
+	}
+
+	public Boolean hasProceduralName() {
+		return Helper.isProceduralName(this.name);
 	}
 
 	public Boolean hasControllerMethods() {
-		return this.hasControllerMethods;
+		for (Method m : this.methods) {
+			if (m.isController()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	public Boolean isBlob() {
-		//TODO: add data class association
-		return (this.isLargeClass() || this.hasLowCohesion()) && (this.isController() || this.hasControllerMethods());
+	public Boolean noInheritance() {
+		return this.parents.size() == 0;
 	}
 
-	public Boolean hasMultipleInheritance() {
-		return this.parents.size() > 1;
+	public Boolean lowAmountOfMethods() {
+		return this.methods.size() <= 4;
+	}
+
+	public Boolean hasTooManyParents() {
+		return this.parents.size() > 2;
+	}
+
+	public Boolean hasLongMethod() {
+		for (Method m : this.methods) {
+			if (m.isLongMethod()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public Integer getNrOfMethodsWithNoParams() {
+		Long count = this.methods.stream()
+				.filter(e -> e.hasNoParams())
+				.count();
+		return count.intValue();
+	}
+
+	public Boolean hasTooManyMethodsWithNoParams() {
+		return this.getNrOfMethodsWithNoParams() > 8;
+	}
+
+	private Method addMethod(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
+		Method method = new Method(name, loc, params, isAccessor);
+		this.methodPosition.put(name, this.methods.size());
+		this.methods.add(method);
+		return method;
+	}
+
+	private Method getMethod(String name) {
+		assert (this.methodPosition.containsKey(name));
+
+		Integer pos = this.methodPosition.get(name);
+		return this.methods.get(pos);
 	}
 
 	private Integer calculateLcom() {
-		List<String> methods = this.methodLoc.keySet().stream().collect(Collectors.toList());
 		int intersect = 0;
 		int nonIntersect = 0;
-		for (int i = 0; i < methods.size(); i++) {
+		for (int i = 0; i < this.methods.size(); i++) {
 			for (int j = i + 1; j > i && j < methods.size(); j++) {
-				Set<String> varsA = this.getVarOccurrenceForMethod(methods.get(i));
-				Set<String> varsB = this.getVarOccurrenceForMethod(methods.get(j));
-				if (Helper.areSetsDisjoint(varsA, varsB)) {
-					nonIntersect++;
+				Method a = this.methods.get(i);
+				Method b = this.methods.get(j);
+				if (a.hasVariableIntersection(b)) {
+					intersect++;
 				}
 				else {
-					intersect++;
+					nonIntersect++;
 				}
 			}
 		}
 		return Math.max(0, nonIntersect - intersect);
 	}
-
-	private Set<String> getVarOccurrenceForMethod(String methodName) {
-		if (this.varOccurrence.containsKey(methodName)) {
-			return this.varOccurrence.get(methodName);
-		}
-		return NO_OCCURRENCE;
-	}
-
 }

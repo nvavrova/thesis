@@ -7,7 +7,6 @@ import ast.arg.Arg;
 import ast.expression.primary.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Helper;
 import thesis.Visitor;
 
 import java.util.Collections;
@@ -53,15 +52,6 @@ public class ClassDef extends Statement {
 
 	public Boolean hasInheritance() {
 		return this.inheritance.size() > 0;
-	}
-
-	public Boolean isController() {
-		for (String name : Helper.getControllerNames()) {
-			if (this.nameContains(name)){
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public Boolean nameContains(String s) {

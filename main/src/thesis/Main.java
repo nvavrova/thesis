@@ -25,13 +25,26 @@ public class Main {
 		for (String fileName : classes) {
 			List<Class> pyClasses = classes.getClasses(fileName);
 			for (Class pyClass : pyClasses) {
-				if (pyClass.isBlob()) {
-					System.out.println("FOUND BLOB: \n\tfile name: " + fileName + "\n\tclass: " + pyClass.getName());
+				Map<String, Boolean> antipatterns = new HashMap<>();
+				antipatterns.put("BLOB", pyClass.isBlob());
+				antipatterns.put("FUNCTIONAL DECOMPOSITION", pyClass.isFunctionalDecomposition());
+				antipatterns.put("SPAGHETTI CODE", pyClass.isSpaghettiCode());
+				antipatterns.put("SWISS ARMY KNIFE", pyClass.isSwissArmyKnife());
+
+				for (String name : antipatterns.keySet()) {
+					if (antipatterns.get(name)) {
+						printAntipattern(name, fileName, pyClass.getName());
+					}
 				}
-				System.out.println("IDENTIFIERS: ");
-				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));
+
+//				System.out.println("IDENTIFIERS: ");
+//				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));
 			}
 		}
+	}
+
+	private static void printAntipattern(String antipatternName, String fileName, String className) {
+		System.out.println("FOUND " + antipatternName + ": \n\tfile name: " + fileName + "\n\tclass: " + className);
 	}
 
 	public static Map<String, Module> getTrees(List<String> filePaths) {

@@ -12,6 +12,7 @@ public class LocInfo {
 	private final Integer startLine;
 	private final Integer endLine;
 	private final Set<Integer> lines;
+	private String filePath;
 
 	public LocInfo(@NotNull Integer startLine, @NotNull Integer endLine) {
 		assert (startLine <= endLine);
@@ -27,6 +28,14 @@ public class LocInfo {
 
 	public Integer getEndLine() {
 		return this.endLine;
+	}
+
+	public String getFilePath() {
+		return this.filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
 	public Set<Integer> getLines() {

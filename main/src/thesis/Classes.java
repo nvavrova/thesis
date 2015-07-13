@@ -13,11 +13,12 @@ public class Classes implements Iterable<String> {
 		this.classes = new HashMap<>();
 	}
 
-	public void add(String fileName, Class pyClass) {
-		if (!this.classes.containsKey(fileName)) {
-			this.classes.put(fileName, new ArrayList<>());
+	public void add(Class pyClass) {
+		String filePath = pyClass.getFilePath();
+		if (!this.classes.containsKey(filePath)) {
+			this.classes.put(filePath, new ArrayList<>());
 		}
-		this.classes.get(fileName).add(pyClass);
+		this.classes.get(filePath).add(pyClass);
 	}
 
 	public List<Class> getClasses(String fileName) {
@@ -28,4 +29,5 @@ public class Classes implements Iterable<String> {
 	public Iterator<String> iterator() {
 		return this.classes.keySet().iterator();
 	}
+
 }

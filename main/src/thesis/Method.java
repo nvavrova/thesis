@@ -3,6 +3,7 @@ package thesis;
 import ast.LocInfo;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,10 +14,12 @@ public class Method {
 	private final LocInfo loc;
 	private final Boolean isAccessor;
 	private final Set<String> usedClassVars;
+	private final List<String> params;
 
-	public Method(String name, LocInfo loc, Boolean isAccessor) {
+	public Method(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
 		this.name = name;
 		this.loc = loc;
+		this.params = params;
 		this.isAccessor = isAccessor;
 		this.usedClassVars = new HashSet<>();
 	}
@@ -42,15 +45,18 @@ public class Method {
 	}
 
 	public Boolean isController() {
-		for (String name : Helper.getControllerNames()) {
-			if (this.name.contains(name)){
-				return true;
-			}
-		}
-		return false;
+		return Helper.isControllerName(this.name);
 	}
 
 	public Boolean hasVariableIntersection(Method m) {
 		return !Helper.areSetsDisjoint(this.usedClassVars, m.getUsedClassVars());
+	}
+
+	public Boolean isLongMethod() {
+		return this.loc.getLocSpan() > 100;
+	}
+
+	public Boolean hasNoParams() {
+		return this.params.size() == 0;
 	}
 }
