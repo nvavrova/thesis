@@ -35,11 +35,11 @@ public class Main {
 //					System.out.println(a.getValue().getClass());
 //				}
 
-//				for (String name : antipatterns.keySet()) {
-//					if (antipatterns.get(name)) {
-//						printAntipattern(name, fileName, pyClass.getName());
-//					}
-//				}
+				for (String name : antipatterns.keySet()) {
+					if (antipatterns.get(name)) {
+						printAntipattern(name, fileName, pyClass.getName());
+					}
+				}
 //
 //				if (pyClass.noInheritance()) {
 //					System.out.println("noInheritance " + pyClass.getName() + "  " + fileName);

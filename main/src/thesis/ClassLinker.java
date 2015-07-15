@@ -6,11 +6,15 @@ import java.util.*;
 /**
  * Created by Nik on 11-07-2015
  */
+//TODO: solve imports from the same folder, when referring to that folder by name
 public class ClassLinker {
+	
+	private final static String MODULE_DELIMITER = ".";
+	private final static String FILE_DELIMITER = "\\";
+	
 	private final Map<String, Map<String, Class>> resolvedImports;
 
 	private final Map<String, Set<Class>> classesByModule;
-	private final Map<String, Set<Class>> classesByName;
 	private final Map<Class, List<String>> classParents;
 	private final ModuleImports moduleImports;
 	private final ClassImports classImports;
@@ -18,7 +22,6 @@ public class ClassLinker {
 
 	public ClassLinker() {
 		this.classesByModule = new HashMap<>();
-		this.classesByName = new HashMap<>();
 		this.classParents = new HashMap<>();
 		this.moduleImports = new ModuleImports();
 		this.classImports = new ClassImports();
@@ -31,6 +34,8 @@ public class ClassLinker {
 		this.linkClassImports();
 		this.linkModuleImports();
 		this.linkParents();
+		this.resolveDependencies();
+		System.out.println("linked");
 	}
 
 	public void addIdentifier(Class c, String id) {
@@ -45,6 +50,7 @@ public class ClassLinker {
 			alias = importedClass;
 		}
 
+
 		String importedModule = this.getImportedClassModule(importingModule, importedClass);
 		String importedClassName = this.getImportedClassName(importedClass);
 
@@ -56,9 +62,9 @@ public class ClassLinker {
 			alias = importedModule;
 		}
 
-		String importedModuleFullPath = StringHelper.swapDelimiter(importedModule, ".", "\\") + FileHelper.PYTHON_EXTENSION;
+		String importedModuleFullPath = StringHelper.swapDelimiter(importedModule, MODULE_DELIMITER, FILE_DELIMITER) + FileHelper.PYTHON_EXTENSION;
 
-		String importedFullPath = this.getModuleFolder(importingModule) + "\\" + importedModuleFullPath;
+		String importedFullPath = this.getModuleFolder(importingModule) + FILE_DELIMITER + importedModuleFullPath;
 
 		this.moduleImports.add(importingModule, importedFullPath, alias);
 	}
@@ -69,11 +75,6 @@ public class ClassLinker {
 		}
 		this.classesByModule.get(c.getFilePath()).add(c);
 
-		if (!this.classesByName.containsKey(c.getName())) {
-			this.classesByName.put(c.getName(), new HashSet<>());
-		}
-		this.classesByName.get(c.getName()).add(c);
-
 		this.classParents.put(c, parents);
 	}
 
@@ -82,8 +83,10 @@ public class ClassLinker {
 			Set<String> importedModules = this.moduleImports.getImports(importingModule);
 			for (String importedModule : importedModules) {
 				String alias = this.moduleImports.getAlias(importingModule, importedModule);
-				for (Class c : this.classesByModule.get(importedModule)) {
-					this.addResolvedImport(importingModule, alias + "." + c.getName(), c);
+				if (this.classesByModule.containsKey(importedModule)) {
+					for (Class c : this.classesByModule.get(importedModule)) {
+						this.addResolvedImport(importingModule, alias + MODULE_DELIMITER + c.getName(), c);
+					}
 				}
 			}
 		}
@@ -99,14 +102,16 @@ public class ClassLinker {
 
 	private void linkClassImports(String importingModule, String importedModule) {
 		Set<String> classes = this.classImports.getClasses(importingModule, importedModule);
-		Set<Class> importedModuleClasses = this.classesByModule.get(importedModule);
-		for (String className : classes) {
-			String alias = this.classImports.getAlias(importingModule, importedModule, className);
+		if (this.classesByModule.containsKey(importedModule)) {
+			Set<Class> importedModuleClasses = this.classesByModule.get(importedModule);
+			for (String className : classes) {
+				String alias = this.classImports.getAlias(importingModule, importedModule, className);
 
-			for (Class c : importedModuleClasses) {
-				if (c.getName().equals(className)) {
-					this.addResolvedImport(importingModule, alias, c);
-					break;
+				for (Class c : importedModuleClasses) {
+					if (c.getName().equals(className)) {
+						this.addResolvedImport(importingModule, alias, c);
+						break;
+					}
 				}
 			}
 		}
@@ -129,27 +134,44 @@ public class ClassLinker {
 
 	private void linkParent(Class c, String parent) {
 		if (this.resolvedImports.containsKey(c.getFilePath())) {
-			Map<String, Class> imp = this.resolvedImports.get(c.getFilePath());
-			for (String alias : imp.keySet()) {
+			Map<String, Class> imports = this.resolvedImports.get(c.getFilePath());
+			for (String alias : imports.keySet()) {
 				if (alias.equals(parent)) {
-					c.addParent(imp.get(alias));
+					c.addParent(imports.get(alias));
 					break;
 				}
 			}
 		}
 	}
 
+	private void resolveDependencies() {
+		for (Class c : this.identifierUse.keySet()) {
+			Set<String> ids = this.identifierUse.get(c);
+			if (this.resolvedImports.containsKey(c.getFilePath())) { //TODO: remove this check? should it always be resolved?
+				Map<String, Class> imports = this.resolvedImports.get(c.getFilePath());
+				for (String id : ids) {
+					for (String importAlias : imports.keySet()) {
+						if (id.startsWith(importAlias)) {
+							c.addDependency(imports.get(importAlias));
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private String getImportedClassModule(String importingModule, String classPath) {
-		List<String> s = StringHelper.explode(classPath, ".");
+		List<String> s = StringHelper.explode(classPath, MODULE_DELIMITER);
 		List<String> pathList = s.subList(0, s.size() - 1);
 
 		String importingModuleFolder = this.getModuleFolder(importingModule);
 
-		return importingModuleFolder + "\\" + StringHelper.implode(pathList, "\\") + FileHelper.PYTHON_EXTENSION;
+		return importingModuleFolder + FILE_DELIMITER + StringHelper.implode(pathList, FILE_DELIMITER) + FileHelper.PYTHON_EXTENSION;
 	}
 
 	private String getImportedClassName(String classPath) {
-		List<String> s = StringHelper.explode(classPath, ".");
+		List<String> s = StringHelper.explode(classPath, MODULE_DELIMITER);
 		return s.get(s.size() - 1);
 	}
 
@@ -157,6 +179,4 @@ public class ClassLinker {
 		File f = new File(module);
 		return f.getParent();
 	}
-
-
 }

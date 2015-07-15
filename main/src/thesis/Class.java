@@ -19,6 +19,7 @@ public class Class {
 	}
 
 	private final List<Class> parents;
+	private final Set<Class> dependentOn;
 	private final List<SimpleArg> oldparents;
 	private final Set<String> variables;
 	private final List<Method> methods;
@@ -29,6 +30,7 @@ public class Class {
 		this.name = name;
 		this.loc = loc;
 		this.parents = new ArrayList<>();
+		this.dependentOn = new HashSet<>();
 		this.oldparents = oldparents;
 		this.variables = new HashSet<>();
 		this.methods = new ArrayList<>();
@@ -38,6 +40,10 @@ public class Class {
 
 	public void addParent(Class c) {
 		this.parents.add(c);
+	}
+
+	public void addDependency(Class c) {
+		this.dependentOn.add(c);
 	}
 
 	public void addAccessor(String name, LocInfo loc, List<String> params) {
@@ -71,9 +77,9 @@ public class Class {
 	}
 
 	public Boolean isBlob() {
-		//TODO: add data class association?
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
-				(this.hasControllerName() || this.hasControllerMethods());
+				(this.hasControllerName() || this.hasControllerMethods()) &&
+				this.amountOfRelatedDataClasses() > 1;
 	}
 
 	public Boolean isSwissArmyKnife() {
@@ -175,6 +181,13 @@ public class Class {
 
 	public Boolean hasTooManyMethodsWithNoParams() {
 		return this.getNrOfMethodsWithNoParams() > 8;
+	}
+
+	public Integer amountOfRelatedDataClasses() {
+		Long count = this.dependentOn.stream()
+				.filter(c -> c.isDataClass())
+				.count();
+		return count.intValue();
 	}
 
 	private void addMethod(String name, LocInfo loc, List<String> params, Boolean isAccessor) {

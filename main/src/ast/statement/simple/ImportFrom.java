@@ -37,8 +37,9 @@ public class ImportFrom extends Import {
 	@Override
 	public Map<String, String> getFullPaths() {
 		Map<String, String> paths = new HashMap<>();
+		String modulePath = this.hasModule() ? this.module.getPath() + "." : "";
 		for (Path p : this.getPaths()) {
-			String key = this.module.getPath() + "." + p.getPath();
+			String key = modulePath + p.getPath();
 			String val = p.hasAlias() ? p.getAlias().toString() : null;
 			paths.put(key, val);
 		}
