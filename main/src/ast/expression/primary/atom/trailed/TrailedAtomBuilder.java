@@ -1,4 +1,4 @@
-package ast.expression.primary;
+package ast.expression.primary.atom.trailed;
 
 import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
@@ -64,8 +64,13 @@ public class TrailedAtomBuilder {
 		Atom targetBase = target.getBase();
 		if (targetBase instanceof AttributeRef) {
 			AttributeRef attrRef = (AttributeRef) targetBase;
-			Call newCall = new Call(target.getLocInfo(), attrRef.getAttribute(), target.getArgs());
-			return new DirectCall(target.getLocInfo(), attrRef.getBase(), newCall);
+
+			List<Identifier> attributes = attrRef.getAttributes();
+			Identifier lastId = attributes.remove(attributes.size() - 1);
+			Call newCall = new Call(target.getLocInfo(), lastId, target.getArgs());
+
+			Atom base = attributes.size() == 0 ? attrRef.getBase() : attrRef;
+			return new DirectCall(target.getLocInfo(), base, newCall);
 		}
 		return target;
 	}
@@ -88,6 +93,10 @@ public class TrailedAtomBuilder {
 
 		@Override
 		public TrailedAtom visit(Identifier n) {
+			if (this.base instanceof AttributeRef) {
+				//TODO: cast?
+				return new AttributeRef(this.locInfo, (AttributeRef) this.base, n);
+			}
 			return new AttributeRef(this.locInfo, this.base, n);
 		}
 

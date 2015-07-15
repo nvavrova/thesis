@@ -1,9 +1,11 @@
 package ast.expression.primary.atom;
 
+import ast.expression.primary.atom.trailed.TrailedAtomVisitor;
+
 /**
  * Created by Nik on 30-06-2015
  */
-public interface AtomVisitor <T> {
+public interface AtomVisitor <T> extends TrailedAtomVisitor<T> {
 	T visit(Bool n);
 	T visit(DictMaker n);
 	T visit(Ellipsis n);

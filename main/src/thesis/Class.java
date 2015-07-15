@@ -1,7 +1,7 @@
 package thesis;
 
 import ast.LocInfo;
-import ast.arg.Arg;
+import ast.arg.SimpleArg;
 
 import java.util.*;
 
@@ -13,28 +13,39 @@ public class Class {
 
 	private final String name;
 	private final LocInfo loc;
-	private final List<Arg> parents;
+
+	public List<SimpleArg> getOldparents() {
+		return this.oldparents;
+	}
+
+	private final List<Class> parents;
+	private final List<SimpleArg> oldparents;
 	private final Set<String> variables;
 	private final List<Method> methods;
 	private final Map<String, Integer> methodPosition;
 	private Boolean usesGlobals;
 
-	public Class(String name, LocInfo loc, List<Arg> parents) {
+	public Class(String name, LocInfo loc, List<SimpleArg> oldparents) {
 		this.name = name;
 		this.loc = loc;
-		this.parents = parents;
+		this.parents = new ArrayList<>();
+		this.oldparents = oldparents;
 		this.variables = new HashSet<>();
 		this.methods = new ArrayList<>();
 		this.methodPosition = new HashMap<>();
 		this.usesGlobals = false;
 	}
 
-	public Method addAccessor(String name, LocInfo loc, List<String> params) {
-		return this.addMethod(name, loc, params, true);
+	public void addParent(Class c) {
+		this.parents.add(c);
 	}
 
-	public Method addMethod(String name, LocInfo loc, List<String> params) {
-		return this.addMethod(name, loc, params, false);
+	public void addAccessor(String name, LocInfo loc, List<String> params) {
+		this.addMethod(name, loc, params, true);
+	}
+
+	public void addMethod(String name, LocInfo loc, List<String> params) {
+		this.addMethod(name, loc, params, false);
 	}
 
 	public Boolean hasNoMethods() {
@@ -70,7 +81,7 @@ public class Class {
 	}
 
 	public Boolean isFunctionalDecomposition() {
-		return false; //TODO
+		return this.hasProceduralName() && this.noInheritance(); //TODO
 	}
 
 	public Boolean isSpaghettiCode() {
@@ -135,7 +146,7 @@ public class Class {
 	}
 
 	public Boolean noInheritance() {
-		return this.parents.size() == 0;
+		return this.oldparents.size() == 0;
 	}
 
 	public Boolean lowAmountOfMethods() {
@@ -143,7 +154,7 @@ public class Class {
 	}
 
 	public Boolean hasTooManyParents() {
-		return this.parents.size() > 2;
+		return this.oldparents.size() > 2;
 	}
 
 	public Boolean hasLongMethod() {
@@ -166,11 +177,10 @@ public class Class {
 		return this.getNrOfMethodsWithNoParams() > 8;
 	}
 
-	private Method addMethod(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
+	private void addMethod(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
 		Method method = new Method(name, loc, params, isAccessor);
 		this.methodPosition.put(name, this.methods.size());
 		this.methods.add(method);
-		return method;
 	}
 
 	private Method getMethod(String name) {

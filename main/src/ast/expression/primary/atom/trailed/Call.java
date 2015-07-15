@@ -1,4 +1,4 @@
-package ast.expression.primary;
+package ast.expression.primary.atom.trailed;
 
 import ast.LocInfo;
 import ast.expression.primary.atom.Atom;

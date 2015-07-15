@@ -15,9 +15,9 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
-import ast.expression.primary.*;
 import ast.expression.primary.atom.*;
 import ast.expression.primary.atom.Float;
+import ast.expression.primary.atom.trailed.*;
 import ast.expression.primary.trailer.ArgList;
 import ast.expression.primary.trailer.SliceBound;
 import ast.expression.primary.trailer.SubscriptIndex;
@@ -730,7 +730,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 	public void visitChildren(AttributeRef n) {
 		n.getBase().accept(this);
-		n.getAttribute().accept(this);
+		n.getAttributes().forEach(a -> a.accept(this));
 	}
 
 	public void visitChildren(Call n) {

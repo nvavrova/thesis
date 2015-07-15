@@ -1,7 +1,7 @@
 package ast;
 
-import com.sun.deploy.util.StringUtils;
 import org.antlr.v4.runtime.misc.NotNull;
+import thesis.StringHelper;
 import thesis.Visitor;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public class DottedPath extends Path {
 
 	@Override
 	public String getPath() {
-		return StringUtils.join(this.path, DELIMITER);
+		return StringHelper.implode(this.path, DELIMITER);
 	}
 
 	@Override

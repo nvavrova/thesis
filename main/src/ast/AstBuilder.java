@@ -11,21 +11,20 @@ import ast.expression.comprehension.*;
 import ast.expression.logical.And;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
-import ast.expression.primary.TrailedAtomBuilder;
 import ast.expression.primary.atom.*;
 import ast.expression.primary.atom.Float;
+import ast.expression.primary.atom.trailed.TrailedAtomBuilder;
 import ast.expression.primary.trailer.*;
 import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
-import ast.param.SimpleParam;
 import ast.param.Params;
+import ast.param.SimpleParam;
 import ast.param.TypedParam;
 import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;
-import com.sun.deploy.util.StringUtils;
 import gen.Python3Parser;
 import gen.Python3Visitor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -34,6 +33,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import thesis.StringHelper;
 import thesis.Visitor;
 
 import java.math.BigInteger;
@@ -1182,7 +1182,7 @@ public class AstBuilder {
 				List<String> strings = ctx.string().stream()
 						.map(e -> ((Str) e.accept(this)).getValue())
 						.collect(Collectors.toList());
-				return this.getStr(this.getLocInfo(ctx), StringUtils.join(strings, ""));
+				return this.getStr(this.getLocInfo(ctx), StringHelper.implode(strings, ""));
 			}
 			if (ctx.ellipsis != null) {
 				return new Ellipsis(this.getLocInfo(ctx));
@@ -1201,7 +1201,7 @@ public class AstBuilder {
 
 		private Py3Node getStr(LocInfo locInfo, String str) {
 			//this hacky method is here because end line of ctx is not correct so it's necessary to calculate it manually
-			Integer endLine = locInfo.getStartLine() + StringUtils.splitString(str, "\n").length - 1;
+			Integer endLine = locInfo.getStartLine() + StringHelper.explode(str, "\n").size() - 1;
 			LocInfo updatedLocInfo = new LocInfo(locInfo.getStartLine(), endLine);
 
 			return new Str(updatedLocInfo, str);
@@ -1355,8 +1355,11 @@ public class AstBuilder {
 			Suite suite = (Suite) ctx.suite().accept(this);
 			if (ctx.arglist() != null) {
 				ArgList argList = (ArgList) ctx.arglist().accept(this);
+				List<SimpleArg> args = argList.getPositional().stream()
+						.map(a -> (SimpleArg) a)
+						.collect(Collectors.toList());
 				this.indent--;
-				return new ClassDef(this.getLocInfo(ctx), id, suite, argList.getPositional());
+				return new ClassDef(this.getLocInfo(ctx), id, suite, args);
 			}
 			this.indent--;
 			return new ClassDef(this.getLocInfo(ctx), id, suite, Collections.emptyList());

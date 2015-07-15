@@ -3,7 +3,7 @@ package ast.statement.compound;
 import ast.Decorator;
 import ast.LocInfo;
 import ast.Suite;
-import ast.arg.Arg;
+import ast.arg.SimpleArg;
 import ast.expression.primary.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -19,10 +19,10 @@ public class ClassDef extends Statement {
 
 	private final Identifier name;
 	private final Suite body;
-	private final List<Arg> inheritance; //either power(a.b) or identifier(a)
+	private final List<SimpleArg> inheritance; //either power(a.b) or identifier(a)
 	private List<Decorator> decorators;
 
-	public ClassDef(@NotNull LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body, @NotNull List<Arg> inheritance) {
+	public ClassDef(@NotNull LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body, @NotNull List<SimpleArg> inheritance) {
 		super(locInfo);
 		this.name = name;
 		this.body = body;
@@ -38,7 +38,7 @@ public class ClassDef extends Statement {
 		return this.body;
 	}
 
-	public List<Arg> getInheritance() {
+	public List<SimpleArg> getInheritance() {
 		return this.inheritance;
 	}
 

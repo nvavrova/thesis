@@ -14,8 +14,8 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
-import ast.expression.primary.*;
 import ast.expression.primary.atom.*;
+import ast.expression.primary.atom.trailed.*;
 import ast.expression.primary.trailer.ArgList;
 import ast.expression.primary.trailer.SliceBound;
 import ast.expression.primary.trailer.SubscriptIndex;
@@ -743,7 +743,7 @@ public class LocCoverageResolver {
 
 			LocInfo locInfo = n.getLocInfo();
 			this.visitExpr(locInfo, n.getBase());
-			this.visitExpr(locInfo, n.getAttribute());
+			n.getAttributes().forEach(a -> this.visitExpr(locInfo, a));
 
 			this.print("LOC: " + locInfo.getLocSpan());
 			this.ident--;

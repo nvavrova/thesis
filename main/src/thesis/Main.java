@@ -31,11 +31,31 @@ public class Main {
 				antipatterns.put("SPAGHETTI CODE", pyClass.isSpaghettiCode());
 				antipatterns.put("SWISS ARMY KNIFE", pyClass.isSwissArmyKnife());
 
-				for (String name : antipatterns.keySet()) {
-					if (antipatterns.get(name)) {
-						printAntipattern(name, fileName, pyClass.getName());
-					}
-				}
+//				for (Arg a : pyClass.getOldparents()) {
+//					System.out.println(a.getValue().getClass());
+//				}
+
+//				for (String name : antipatterns.keySet()) {
+//					if (antipatterns.get(name)) {
+//						printAntipattern(name, fileName, pyClass.getName());
+//					}
+//				}
+//
+//				if (pyClass.noInheritance()) {
+//					System.out.println("noInheritance " + pyClass.getName() + "  " + fileName);
+//				}
+//				if (pyClass.hasProceduralName()) {
+//					System.out.println("hasProceduralName " + pyClass.getName() + "  " + fileName);
+//				}
+//				if (pyClass.hasLongMethod()) {
+//					System.out.println("hasLongMethod " + pyClass.getName() + "  " + fileName);
+//				}
+//				if (pyClass.hasTooManyMethodsWithNoParams()) {
+//					System.out.println("hasTooManyMethodsWithNoParams " + pyClass.getName() + "  " + fileName);
+//				}
+//				if (pyClass.usesGlobals()) {
+//					System.out.println("usesGlobals " + pyClass.getName() + "  " + fileName);
+//				}
 
 //				System.out.println("IDENTIFIERS: ");
 //				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));

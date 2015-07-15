@@ -2,8 +2,8 @@ package ast.expression.primary.trailer;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import com.sun.deploy.util.StringUtils;
 import org.antlr.v4.runtime.misc.NotNull;
+import thesis.StringHelper;
 import thesis.Visitor;
 
 import java.util.ArrayList;
@@ -71,6 +71,6 @@ public class SliceBound extends SubscriptSliceListElem {
 		if (bounds.size() == 0) {
 			return DELIMITER;
 		}
-		return StringUtils.join(bounds, DELIMITER);
+		return StringHelper.implode(bounds, DELIMITER);
 	}
 }

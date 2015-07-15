@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
  */
 public class FileHelper {
 
+	public static final String PYTHON_EXTENSION = ".py";
+
 	private final File folder;
 
 	public FileHelper(File folder) {
@@ -43,6 +45,6 @@ public class FileHelper {
 	}
 
 	private boolean isPythonFile(String filePath) {
-		return filePath.endsWith(".py");
+		return filePath.endsWith(PYTHON_EXTENSION);
 	}
 }
