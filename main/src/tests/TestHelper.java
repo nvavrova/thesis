@@ -4,14 +4,12 @@ import ast.AstBuilder;
 import ast.Module;
 import gen.Python3Lexer;
 import gen.Python3Parser;
+import model.Class;
 import org.antlr.v4.runtime.ParserRuleContext;
-import thesis.Class;
-import thesis.ClassCollector;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nik on 08-07-2015
@@ -32,15 +30,17 @@ public class TestHelper {
 		Python3Parser parser = new Python3Parser(tokens);
 
 		ParserRuleContext context = parser.file_input();
-		AstBuilder astBuilder = new AstBuilder(context);
+		AstBuilder astBuilder = new AstBuilder(context, fileName);
 		return astBuilder.build();
 	}
 
 	public static List<Class> getClasses(String fileName) {
 		Module m = parseFile(fileName);
-		Map<String, Module> trees = new HashMap<>();
-		trees.put(fileName, m);
-		ClassCollector collector = new ClassCollector(trees);
-		return collector.getClasses().getClasses(fileName);
+		List<Module> trees = new ArrayList<>();
+		trees.add(m);
+//		ModelBuilder collector = new ModelBuilder(trees);
+//		return collector.getModules().getClasses(fileName);
+		//TODO
+		return null;
 	}
 }

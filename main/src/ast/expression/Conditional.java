@@ -2,7 +2,7 @@ package ast.expression;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 14-06-2015

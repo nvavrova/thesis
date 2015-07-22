@@ -3,7 +3,7 @@ package ast.expression.primary.trailer;
 import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 17-06-2015

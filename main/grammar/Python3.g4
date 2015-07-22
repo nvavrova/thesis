@@ -348,9 +348,12 @@ import_name
 /// # note below: the ('.' | '...') is necessary because '...' is tokenized as ELLIPSIS
 /// import_from: ('from' (('.' | '...')* dotted_name | ('.' | '...')+)
 ///               'import' ('*' | '(' import_as_names ')' | import_as_names))
-import_from
- : FROM ( ( '.' | '...' )* dotted_name
-        | ('.' | '...')+
+import_from returns [List<String> prefixes]
+@init{
+    $prefixes = new ArrayList<>();
+}
+ : FROM ( ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )* dotted_name
+        | ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )+
         )
    IMPORT ( '*'
           | '(' import_as_names ')'

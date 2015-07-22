@@ -26,6 +26,9 @@ import ast.expression.unary.Plus;
 import ast.param.SimpleParam;
 import ast.param.Params;
 import ast.param.TypedParam;
+import ast.path.DottedPath;
+import ast.path.Path;
+import ast.path.SimplePath;
 import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
@@ -42,7 +45,7 @@ public class LocCoverageResolver {
 
 	private final LCRVisitor visitor;
 
-	public static void resolve(Py3Node root) {
+	public static void resolve(AstNode root) {
 		LocCoverageResolver lr = new LocCoverageResolver();
 		root.accept(lr.visitor);
 	}
@@ -1134,7 +1137,7 @@ public class LocCoverageResolver {
 			}
 		}
 
-		private void addLines(LocInfo locInfo, Py3Node node) {
+		private void addLines(LocInfo locInfo, AstNode node) {
 			node.getLocInfo().getLines().forEach(line -> locInfo.addLine(line));
 		}
 

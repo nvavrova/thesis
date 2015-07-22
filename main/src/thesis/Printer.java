@@ -1,16 +1,16 @@
 package thesis;
 
-import ast.Py3Node;
+import ast.AstNode;
 
 /**
  * Created by Nik on 17-06-2015
  */
 public class Printer {
 
-	private final Py3Node tree;
+	private final AstNode tree;
 	private final PrinterVisitor visitor;
 
-	public Printer(Py3Node tree) {
+	public Printer(AstNode tree) {
 		this.tree = tree;
 		this.visitor = new PrinterVisitor();
 	}

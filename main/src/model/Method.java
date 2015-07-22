@@ -1,6 +1,7 @@
-package thesis;
+package model;
 
 import ast.LocInfo;
+import thesis.Helper;
 
 import java.util.HashSet;
 import java.util.List;

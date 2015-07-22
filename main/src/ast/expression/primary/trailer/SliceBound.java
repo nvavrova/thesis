@@ -4,7 +4,7 @@ import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.StringHelper;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;

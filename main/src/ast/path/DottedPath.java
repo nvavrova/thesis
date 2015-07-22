@@ -1,8 +1,9 @@
-package ast;
+package ast.path;
 
+import ast.LocInfo;
+import ast.Visitor;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.StringHelper;
-import thesis.Visitor;
 
 import java.util.List;
 
@@ -12,11 +13,16 @@ import java.util.List;
 public class DottedPath extends Path {
 
 	private static final String DELIMITER = ".";
-	private final List<String> path;
+	private List<String> path;
 
 	public DottedPath(@NotNull LocInfo locInfo, @NotNull List<String> path) {
 		super(locInfo);
 		this.path = path;
+	}
+
+	public void addPrefixes(List<String> prefixes) {
+		prefixes.addAll(this.path);
+		this.path = prefixes;
 	}
 
 	@Override

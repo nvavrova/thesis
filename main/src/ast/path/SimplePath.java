@@ -1,7 +1,8 @@
-package ast;
+package ast.path;
 
+import ast.LocInfo;
+import ast.Visitor;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
 
 /**
  * Created by Nik on 23-06-2015

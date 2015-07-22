@@ -1,14 +1,14 @@
 package ast.arg;
 
 import ast.LocInfo;
-import ast.Py3Node;
+import ast.AstNode;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Created by Nik on 23-06-2015
  */
-public abstract class Arg extends Py3Node {
+public abstract class Arg extends AstNode {
 
 	private final Expr value;
 

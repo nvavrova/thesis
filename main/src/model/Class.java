@@ -1,7 +1,7 @@
-package thesis;
+package model;
 
 import ast.LocInfo;
-import ast.arg.SimpleArg;
+import thesis.Helper;
 
 import java.util.*;
 
@@ -12,34 +12,28 @@ import java.util.*;
 public class Class {
 
 	private final String name;
+	private final Module module;
 	private final LocInfo loc;
 
-	public List<SimpleArg> getOldparents() {
-		return this.oldparents;
-	}
-
-	private final List<Class> parents;
 	private final Set<Class> dependentOn;
-	private final List<SimpleArg> oldparents;
+
+	private final List<String> parents;
 	private final Set<String> variables;
 	private final List<Method> methods;
 	private final Map<String, Integer> methodPosition;
 	private Boolean usesGlobals;
 
-	public Class(String name, LocInfo loc, List<SimpleArg> oldparents) {
+	public Class(String name, Module module, LocInfo loc, List<String> parents) {
 		this.name = name;
+		this.module = module;
 		this.loc = loc;
-		this.parents = new ArrayList<>();
+
 		this.dependentOn = new HashSet<>();
-		this.oldparents = oldparents;
+		this.parents = parents;
 		this.variables = new HashSet<>();
 		this.methods = new ArrayList<>();
 		this.methodPosition = new HashMap<>();
 		this.usesGlobals = false;
-	}
-
-	public void addParent(Class c) {
-		this.parents.add(c);
 	}
 
 	public void addDependency(Class c) {
@@ -62,6 +56,10 @@ public class Class {
 		return this.methods.get(this.methods.size() - 1);
 	}
 
+	public List<String> getParents() {
+		return this.parents;
+	}
+
 	public void addVariable(String varName) {
 		this.variables.add(varName);
 	}
@@ -77,9 +75,10 @@ public class Class {
 	}
 
 	public Boolean isBlob() {
+		//TODO: add relations to Data Classes
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
-				(this.hasControllerName() || this.hasControllerMethods()) &&
-				this.amountOfRelatedDataClasses() > 1;
+				(this.hasControllerName() || this.hasControllerMethods());
+		// && this.amountOfRelatedDataClasses() > 1;
 	}
 
 	public Boolean isSwissArmyKnife() {
@@ -115,6 +114,7 @@ public class Class {
 	}
 
 	public Boolean usesGlobals() {
+		//TODO: add the vars that are not declared global by a keyword but still are?
 		return this.usesGlobals;
 	}
 
@@ -130,8 +130,32 @@ public class Class {
 		return this.loc.getLocSpan() > 800;
 	}
 
+	public Integer getAmountOfMethods() {
+		return this.methods.size();
+	}
+
+	public Integer getAmountOfVariables() {
+		return this.variables.size();
+	}
+
+	public Integer getAmountOfPublicVariables() {
+		Long count = this.variables.stream()
+				.filter(v -> !v.startsWith("_"))
+				.count();
+		return count.intValue();
+	}
+
+	public Integer getAmountOfPrivateVariables() {
+		Long count = this.variables.stream()
+				.filter(v -> v.startsWith("_"))
+				.count();
+		return count.intValue();
+	}
+
 	public Boolean isDataClass() {
-		return this.getNumberOfAccessors() > 10;
+		//TODO: figure out how to redefine a DataClass for Python
+		return this.getAmountOfPublicVariables() > 10;
+//		return this.getNumberOfAccessors() > 5;
 	}
 
 	public Boolean hasControllerName() {
@@ -152,7 +176,7 @@ public class Class {
 	}
 
 	public Boolean noInheritance() {
-		return this.oldparents.size() == 0;
+		return this.parents.size() == 0;
 	}
 
 	public Boolean lowAmountOfMethods() {
@@ -160,7 +184,7 @@ public class Class {
 	}
 
 	public Boolean hasTooManyParents() {
-		return this.oldparents.size() > 2;
+		return this.parents.size() > 2;
 	}
 
 	public Boolean hasLongMethod() {

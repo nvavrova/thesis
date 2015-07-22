@@ -1,13 +1,13 @@
 package ast;
 
 import ast.expression.primary.trailer.ArgList;
+import ast.path.DottedPath;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
 
 /**
  * Created by Nik on 15-06-2015
  */
-public class Decorator extends Py3Node {
+public class Decorator extends AstNode {
 
 	private final DottedPath name;
 	private final ArgList argList;

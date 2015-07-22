@@ -2,7 +2,7 @@ package ast.expression;
 
 import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.List;
 

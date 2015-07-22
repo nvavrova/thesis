@@ -3,14 +3,13 @@ package ast;
 import ast.statement.Statement;
 import ast.statement.flow.Return;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
 
 import java.util.List;
 
 /**
  * Created by Nik on 25-06-2015
  */
-public class Suite extends Py3Node {
+public class Suite extends AstNode {
 
 	private final List<Statement> statements;
 

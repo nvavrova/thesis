@@ -8,7 +8,7 @@ import ast.expression.primary.atom.Identifier;
 import ast.param.Params;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.Collections;
 import java.util.List;

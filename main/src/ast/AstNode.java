@@ -1,16 +1,15 @@
 package ast;
 
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
 
 /**
  * Created by Nik on 19-05-2015
  */
-public abstract class Py3Node {
+public abstract class AstNode {
 
     protected final LocInfo locInfo;
 
-    public Py3Node(@NotNull LocInfo locInfo) {
+    public AstNode(@NotNull LocInfo locInfo) {
         this.locInfo = locInfo;
     }
 

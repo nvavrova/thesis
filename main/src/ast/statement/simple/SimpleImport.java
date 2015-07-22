@@ -1,9 +1,9 @@
 package ast.statement.simple;
 
 import ast.LocInfo;
-import ast.Path;
+import ast.path.Path;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.HashMap;
 import java.util.List;

@@ -5,7 +5,7 @@ import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 17-06-2015

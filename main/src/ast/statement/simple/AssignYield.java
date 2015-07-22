@@ -3,7 +3,7 @@ package ast.statement.simple;
 import ast.LocInfo;
 import ast.statement.flow.Yield;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 24-06-2015

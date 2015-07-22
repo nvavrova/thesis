@@ -1,9 +1,9 @@
 package ast.statement.simple;
 
 import ast.LocInfo;
-import ast.Path;
+import ast.path.Path;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +16,7 @@ public class ImportFrom extends Import {
 
 	private final Path module;
 
-	public ImportFrom(@NotNull LocInfo locInfo, @NotNull List<Path> paths, Path module) {
+	public ImportFrom(@NotNull LocInfo locInfo, @NotNull List<Path> paths, @NotNull Path module) {
 		super(locInfo, paths);
 		this.module = module;
 	}

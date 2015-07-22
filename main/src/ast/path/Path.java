@@ -1,12 +1,14 @@
-package ast;
+package ast.path;
 
+import ast.LocInfo;
+import ast.AstNode;
 import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Created by Nik on 23-06-2015
  */
-public abstract class Path extends Py3Node {
+public abstract class Path extends AstNode {
 
 	private Identifier alias;
 

@@ -2,7 +2,7 @@ package ast.arg;
 
 import ast.LocInfo;
 import ast.expression.Expr;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 23-06-2015

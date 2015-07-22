@@ -21,6 +21,9 @@ import ast.expression.unary.Plus;
 import ast.param.Params;
 import ast.param.SimpleParam;
 import ast.param.TypedParam;
+import ast.path.DottedPath;
+import ast.path.Path;
+import ast.path.SimplePath;
 import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
@@ -34,7 +37,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import thesis.StringHelper;
-import thesis.Visitor;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -48,8 +50,8 @@ public class AstBuilder {
 	private final AstBuilderVisitor visitor;
 	private final ParserRuleContext context;
 
-	public AstBuilder(ParserRuleContext context) {
-		this.visitor = new AstBuilderVisitor();
+	public AstBuilder(ParserRuleContext context, String filePath) {
+		this.visitor = new AstBuilderVisitor(filePath);
 		this.context = context;
 	}
 
@@ -57,16 +59,18 @@ public class AstBuilder {
 		return (Module) this.context.accept(this.visitor);
 	}
 
-	private class AstBuilderVisitor implements Python3Visitor<Py3Node> {
+	private class AstBuilderVisitor implements Python3Visitor<AstNode> {
 
-		public AstBuilderVisitor() {
+		private final String filePath;
 
+		public AstBuilderVisitor(String filePath) {
+			this.filePath = filePath;
 		}
 
 		private int indent = 0;
 
 		@Override
-		public Py3Node visitSingle_input(@NotNull Python3Parser.Single_inputContext ctx) {
+		public AstNode visitSingle_input(@NotNull Python3Parser.Single_inputContext ctx) {
 			this.indent++;
 			this.print("visitSingle_input");
 			this.indent--;
@@ -85,7 +89,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitFile_input(@NotNull Python3Parser.File_inputContext ctx) {
+		public AstNode visitFile_input(@NotNull Python3Parser.File_inputContext ctx) {
 			this.indent++;
 			this.print("visitFile_input");
 			//      ( NEWLINE | stmt )* EOF
@@ -103,7 +107,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitEval_input(@NotNull Python3Parser.Eval_inputContext ctx) {
+		public AstNode visitEval_input(@NotNull Python3Parser.Eval_inputContext ctx) {
 			this.indent++;
 			this.print("visitEval_input");
 			//      testlist NEWLINE* EOF
@@ -113,7 +117,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDecorator(@NotNull Python3Parser.DecoratorContext ctx) {
+		public AstNode visitDecorator(@NotNull Python3Parser.DecoratorContext ctx) {
 			this.indent++;
 			this.print("visitDecorator");
 			//      '@' dotted_name ( '(' arglist? ')' )? NEWLINE
@@ -125,7 +129,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDecorators(@NotNull Python3Parser.DecoratorsContext ctx) {
+		public AstNode visitDecorators(@NotNull Python3Parser.DecoratorsContext ctx) {
 			this.indent++;
 			this.print("visitDecorators");
 			//      decorator+
@@ -143,7 +147,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDecorated(@NotNull Python3Parser.DecoratedContext ctx) {
+		public AstNode visitDecorated(@NotNull Python3Parser.DecoratedContext ctx) {
 			this.indent++;
 			this.print("visitDecorated");
 			//      decorators ( classdef | funcdef )
@@ -166,7 +170,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitFuncdef(@NotNull Python3Parser.FuncdefContext ctx) {
+		public AstNode visitFuncdef(@NotNull Python3Parser.FuncdefContext ctx) {
 			this.indent++;
 			this.print("visitFuncdef");
 			//      DEF NAME parameters ( '->' test )? ':' suite
@@ -179,7 +183,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitParameters(@NotNull Python3Parser.ParametersContext ctx) {
+		public AstNode visitParameters(@NotNull Python3Parser.ParametersContext ctx) {
 			this.indent++;
 			this.print("visitParameters");
 			//      '(' typedargslist? ')'
@@ -193,7 +197,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTypedargslist(@NotNull Python3Parser.TypedargslistContext ctx) {
+		public AstNode visitTypedargslist(@NotNull Python3Parser.TypedargslistContext ctx) {
 			this.indent++;
 			this.print("visitTypedargslist");
 			//		tfpdef ( '=' test )? ( ',' tfpdef ( '=' test )? )* ( ',' ( '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
@@ -211,7 +215,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTfpdef(@NotNull Python3Parser.TfpdefContext ctx) {
+		public AstNode visitTfpdef(@NotNull Python3Parser.TfpdefContext ctx) {
 			this.indent++;
 			this.print("visitTfpdef");
 			//      NAME ( ':' test )?
@@ -227,7 +231,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitVarargslist(@NotNull Python3Parser.VarargslistContext ctx) {
+		public AstNode visitVarargslist(@NotNull Python3Parser.VarargslistContext ctx) {
 			this.indent++;
 			this.print("visitVarargslist");
 			//		vfpdef ( '=' test )? ( ',' vfpdef ( '=' test )? )* ( ',' ( '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
@@ -245,7 +249,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitVfpdef(@NotNull Python3Parser.VfpdefContext ctx) {
+		public AstNode visitVfpdef(@NotNull Python3Parser.VfpdefContext ctx) {
 			this.indent++;
 			this.print("visitVfpdef");
 			//      NAME
@@ -256,7 +260,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitStmt(@NotNull Python3Parser.StmtContext ctx) {
+		public AstNode visitStmt(@NotNull Python3Parser.StmtContext ctx) {
 			this.indent++;
 			this.print("visitStmt " + ctx.getText());
 			//      simple_stmt | compound_stmt
@@ -275,7 +279,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSimple_stmt(@NotNull Python3Parser.Simple_stmtContext ctx) {
+		public AstNode visitSimple_stmt(@NotNull Python3Parser.Simple_stmtContext ctx) {
 			this.indent++;
 			this.print("visitSimple_stmt");
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
@@ -288,7 +292,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSmall_stmt(@NotNull Python3Parser.Small_stmtContext ctx) {
+		public AstNode visitSmall_stmt(@NotNull Python3Parser.Small_stmtContext ctx) {
 			this.indent++;
 			this.print("visitSmall_stmt");
 			this.indent--;
@@ -322,7 +326,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitExpr_stmt(@NotNull Python3Parser.Expr_stmtContext ctx) {
+		public AstNode visitExpr_stmt(@NotNull Python3Parser.Expr_stmtContext ctx) {
 			this.indent++;
 			this.print("visitExpr_stmt");
 			//      testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr | testlist_star_expr ) )* )
@@ -357,7 +361,7 @@ public class AstBuilder {
 
 
 		@Override
-		public Py3Node visitTestlist_star_expr(@NotNull Python3Parser.Testlist_star_exprContext ctx) {
+		public AstNode visitTestlist_star_expr(@NotNull Python3Parser.Testlist_star_exprContext ctx) {
 			this.indent++;
 			this.print("visitTestlist_star_expr");
 			//      ( test | star_expr ) ( ',' ( test |  star_expr ) )* ','?
@@ -378,7 +382,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitAugassign(@NotNull Python3Parser.AugassignContext ctx) {
+		public AstNode visitAugassign(@NotNull Python3Parser.AugassignContext ctx) {
 			this.indent++;
 			this.print("visitAugassign");
 			this.indent--;
@@ -388,7 +392,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDel_stmt(@NotNull Python3Parser.Del_stmtContext ctx) {
+		public AstNode visitDel_stmt(@NotNull Python3Parser.Del_stmtContext ctx) {
 			this.indent++;
 			this.print("visitDel_stmt");
 			//      DEL exprlist
@@ -399,7 +403,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitPass_stmt(@NotNull Python3Parser.Pass_stmtContext ctx) {
+		public AstNode visitPass_stmt(@NotNull Python3Parser.Pass_stmtContext ctx) {
 			this.indent++;
 			this.print("visitPass_stmt");
 			this.indent--;
@@ -409,7 +413,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitFlow_stmt(@NotNull Python3Parser.Flow_stmtContext ctx) {
+		public AstNode visitFlow_stmt(@NotNull Python3Parser.Flow_stmtContext ctx) {
 			this.indent++;
 			this.print("visitFlow_stmt");
 			//      break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
@@ -438,7 +442,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitBreak_stmt(@NotNull Python3Parser.Break_stmtContext ctx) {
+		public AstNode visitBreak_stmt(@NotNull Python3Parser.Break_stmtContext ctx) {
 			this.indent++;
 			this.print("visitBreak_stmt");
 			this.indent--;
@@ -448,7 +452,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitContinue_stmt(@NotNull Python3Parser.Continue_stmtContext ctx) {
+		public AstNode visitContinue_stmt(@NotNull Python3Parser.Continue_stmtContext ctx) {
 			this.indent++;
 			this.print("visitContinue_stmt");
 			this.indent--;
@@ -458,7 +462,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitReturn_stmt(@NotNull Python3Parser.Return_stmtContext ctx) {
+		public AstNode visitReturn_stmt(@NotNull Python3Parser.Return_stmtContext ctx) {
 			this.indent++;
 			this.print("visitReturn_stmt");
 			//      RETURN testlist?
@@ -473,14 +477,14 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitYield_stmt(@NotNull Python3Parser.Yield_stmtContext ctx) {
+		public AstNode visitYield_stmt(@NotNull Python3Parser.Yield_stmtContext ctx) {
 			//      yield_expr
 
 			return ctx.yield_expr().accept(this);
 		}
 
 		@Override
-		public Py3Node visitRaise_stmt(@NotNull Python3Parser.Raise_stmtContext ctx) {
+		public AstNode visitRaise_stmt(@NotNull Python3Parser.Raise_stmtContext ctx) {
 			this.indent++;
 			this.print("visitRaise_stmt");
 			//      RAISE ( test ( FROM test )? )?
@@ -492,7 +496,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitImport_stmt(@NotNull Python3Parser.Import_stmtContext ctx) {
+		public AstNode visitImport_stmt(@NotNull Python3Parser.Import_stmtContext ctx) {
 			this.indent++;
 			this.print("visitImport_stmt");
 			//      import_name | import_from
@@ -510,7 +514,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitImport_name(@NotNull Python3Parser.Import_nameContext ctx) {
+		public AstNode visitImport_name(@NotNull Python3Parser.Import_nameContext ctx) {
 			this.indent++;
 			this.print("visitImport_name");
 			//      IMPORT dotted_as_names
@@ -521,7 +525,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitImport_from(@NotNull Python3Parser.Import_fromContext ctx) {
+		public AstNode visitImport_from(@NotNull Python3Parser.Import_fromContext ctx) {
 			this.indent++;
 			this.print("visitImport_from");
 			//		FROM ( ( '.' | '...' )* dotted_name
@@ -531,9 +535,10 @@ public class AstBuilder {
 			//				| '(' import_as_names ')'
 			//				| import_as_names
 			//		)
-
-			//TODO: include the '.' and '...' ?
-			DottedPath module = ctx.dotted_name() == null ? null : (DottedPath) ctx.dotted_name().accept(this);
+			DottedPath module = ctx.dotted_name() == null ? new DottedPath(this.getLocInfo(ctx), new ArrayList<>()) : (DottedPath) ctx.dotted_name().accept(this);
+			if (ctx.prefixes != null) {
+				module.addPrefixes(ctx.prefixes);
+			}
 
 			List<Path> items = new ArrayList<>();
 			if (ctx.import_as_names() != null) {
@@ -546,7 +551,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitImport_as_name(@NotNull Python3Parser.Import_as_nameContext ctx) {
+		public AstNode visitImport_as_name(@NotNull Python3Parser.Import_as_nameContext ctx) {
 			this.indent++;
 			this.print("visitImport_as_name");
 			//      NAME ( AS NAME )?
@@ -560,7 +565,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDotted_as_name(@NotNull Python3Parser.Dotted_as_nameContext ctx) {
+		public AstNode visitDotted_as_name(@NotNull Python3Parser.Dotted_as_nameContext ctx) {
 			this.indent++;
 			this.print("visitDotted_as_name");
 			//      dotted_name ( AS NAME )?
@@ -575,7 +580,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitImport_as_names(@NotNull Python3Parser.Import_as_namesContext ctx) {
+		public AstNode visitImport_as_names(@NotNull Python3Parser.Import_as_namesContext ctx) {
 			this.indent++;
 			this.print("visitImport_as_names");
 			//      import_as_name ( ',' import_as_name )* ','?
@@ -589,7 +594,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDotted_as_names(@NotNull Python3Parser.Dotted_as_namesContext ctx) {
+		public AstNode visitDotted_as_names(@NotNull Python3Parser.Dotted_as_namesContext ctx) {
 			this.indent++;
 			this.print("visitDotted_as_names");
 			//      dotted_as_name ( ',' dotted_as_name )*
@@ -603,7 +608,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDotted_name(@NotNull Python3Parser.Dotted_nameContext ctx) {
+		public AstNode visitDotted_name(@NotNull Python3Parser.Dotted_nameContext ctx) {
 			this.indent++;
 			this.print("visitDotted_name");
 			this.indent--;
@@ -613,7 +618,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitGlobal_stmt(@NotNull Python3Parser.Global_stmtContext ctx) {
+		public AstNode visitGlobal_stmt(@NotNull Python3Parser.Global_stmtContext ctx) {
 			this.indent++;
 			this.print("visitGlobal_stmt");
 			//      GLOBAL NAME ( ',' NAME )*
@@ -626,7 +631,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitNonlocal_stmt(@NotNull Python3Parser.Nonlocal_stmtContext ctx) {
+		public AstNode visitNonlocal_stmt(@NotNull Python3Parser.Nonlocal_stmtContext ctx) {
 			this.indent++;
 			this.print("visitNonlocal_stmt");
 			//      NONLOCAL NAME ( ',' otherName = NAME )*
@@ -639,7 +644,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitAssert_stmt(@NotNull Python3Parser.Assert_stmtContext ctx) {
+		public AstNode visitAssert_stmt(@NotNull Python3Parser.Assert_stmtContext ctx) {
 			this.indent++;
 			this.print("visitAssert_stmt");
 			//      ASSERT test ( ',' test )?
@@ -655,7 +660,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitCompound_stmt(@NotNull Python3Parser.Compound_stmtContext ctx) {
+		public AstNode visitCompound_stmt(@NotNull Python3Parser.Compound_stmtContext ctx) {
 			this.indent++;
 			this.print("visitCompound_stmt " + ctx.getText());
 			//      if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
@@ -697,7 +702,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitIf_stmt(@NotNull Python3Parser.If_stmtContext ctx) {
+		public AstNode visitIf_stmt(@NotNull Python3Parser.If_stmtContext ctx) {
 			this.indent++;
 			this.print("visitIf_stmt");
 			//      IF test ':' suite ( ELIF test ':' suite )* ( ELSE ':' suite )?
@@ -718,7 +723,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitWhile_stmt(@NotNull Python3Parser.While_stmtContext ctx) {
+		public AstNode visitWhile_stmt(@NotNull Python3Parser.While_stmtContext ctx) {
 			this.indent++;
 			this.print("visitWhile_stmt");
 			//      WHILE test ':' suite ( ELSE ':' suite )?
@@ -732,7 +737,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitFor_stmt(@NotNull Python3Parser.For_stmtContext ctx) {
+		public AstNode visitFor_stmt(@NotNull Python3Parser.For_stmtContext ctx) {
 			this.indent++;
 			this.print("visitFor_stmt");
 			//      FOR exprlist IN testlist ':' suite ( ELSE ':' suite )?
@@ -747,7 +752,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTry_stmt(@NotNull Python3Parser.Try_stmtContext ctx) {
+		public AstNode visitTry_stmt(@NotNull Python3Parser.Try_stmtContext ctx) {
 			this.indent++;
 			this.print("visitTry_stmt");
 			//		TRY ':' suite ( ( except_clause ':' suite )+
@@ -774,7 +779,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitWith_stmt(@NotNull Python3Parser.With_stmtContext ctx) {
+		public AstNode visitWith_stmt(@NotNull Python3Parser.With_stmtContext ctx) {
 			this.indent++;
 			this.print("visitWith_stmt");
 			//      WITH with_item ( ',' with_item )* ':' suite
@@ -788,7 +793,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitWith_item(@NotNull Python3Parser.With_itemContext ctx) {
+		public AstNode visitWith_item(@NotNull Python3Parser.With_itemContext ctx) {
 			this.indent++;
 			this.print("visitWith_item");
 			//      test ( AS expr )?
@@ -800,7 +805,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitExcept_clause(@NotNull Python3Parser.Except_clauseContext ctx) {
+		public AstNode visitExcept_clause(@NotNull Python3Parser.Except_clauseContext ctx) {
 			this.indent++;
 			this.print("visitExcept_clause");
 			//      EXCEPT ( test ( AS NAME )? )?
@@ -812,7 +817,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSuite(@NotNull Python3Parser.SuiteContext ctx) {
+		public AstNode visitSuite(@NotNull Python3Parser.SuiteContext ctx) {
 			this.indent++;
 			this.print("visitSuite");
 			//      simple_stmt | NEWLINE INDENT stmt+ DEDENT
@@ -834,7 +839,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTest(@NotNull Python3Parser.TestContext ctx) {
+		public AstNode visitTest(@NotNull Python3Parser.TestContext ctx) {
 			this.indent++;
 			this.print("visitTest");
 			//      value=or_test ( IF condition=or_test ELSE test )? | lambdef
@@ -860,7 +865,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTest_nocond(@NotNull Python3Parser.Test_nocondContext ctx) {
+		public AstNode visitTest_nocond(@NotNull Python3Parser.Test_nocondContext ctx) {
 			this.indent++;
 			this.print("visitTest_nocond");
 			//      or_test | lambdef_nocond
@@ -877,7 +882,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitLambdef(@NotNull Python3Parser.LambdefContext ctx) {
+		public AstNode visitLambdef(@NotNull Python3Parser.LambdefContext ctx) {
 			this.indent++;
 			this.print("visitLambdef");
 			//      LAMBDA varargslist? ':' test
@@ -889,7 +894,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitLambdef_nocond(@NotNull Python3Parser.Lambdef_nocondContext ctx) {
+		public AstNode visitLambdef_nocond(@NotNull Python3Parser.Lambdef_nocondContext ctx) {
 			this.indent++;
 			this.print("visitLambdef_nocond");
 			//      LAMBDA varargslist? ':' test_nocond
@@ -901,7 +906,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitOr_test(@NotNull Python3Parser.Or_testContext ctx) {
+		public AstNode visitOr_test(@NotNull Python3Parser.Or_testContext ctx) {
 			this.indent++;
 			this.print("visitOr_test");
 			//      and_test ( OR and_test )*
@@ -918,7 +923,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitAnd_test(@NotNull Python3Parser.And_testContext ctx) {
+		public AstNode visitAnd_test(@NotNull Python3Parser.And_testContext ctx) {
 			this.indent++;
 			this.print("visitAnd_test");
 			//      not_test ( AND not_test )*
@@ -936,7 +941,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitNot_test(@NotNull Python3Parser.Not_testContext ctx) {
+		public AstNode visitNot_test(@NotNull Python3Parser.Not_testContext ctx) {
 			this.indent++;
 			this.print("visitNot_test");
 			//      NOT not_test | comparison
@@ -954,7 +959,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitComparison(@NotNull Python3Parser.ComparisonContext ctx) {
+		public AstNode visitComparison(@NotNull Python3Parser.ComparisonContext ctx) {
 			this.indent++;
 			this.print("visitComparison");
 			//      star_expr ( comp_op star_expr )*
@@ -980,7 +985,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitComp_op(@NotNull Python3Parser.Comp_opContext ctx) {
+		public AstNode visitComp_op(@NotNull Python3Parser.Comp_opContext ctx) {
 			this.indent++;
 			this.print("visitComp_op " + ctx.getText());
 			this.indent--;
@@ -990,7 +995,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitStar_expr(@NotNull Python3Parser.Star_exprContext ctx) {
+		public AstNode visitStar_expr(@NotNull Python3Parser.Star_exprContext ctx) {
 			this.indent++;
 			this.print("visitStar_expr " + ctx.getText());
 			this.indent--;
@@ -1000,7 +1005,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitExpr(@NotNull Python3Parser.ExprContext ctx) {
+		public AstNode visitExpr(@NotNull Python3Parser.ExprContext ctx) {
 			this.indent++;
 			this.print("visitExpr");
 			//      xor_expr ( '|' xor_expr )*
@@ -1015,7 +1020,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitXor_expr(@NotNull Python3Parser.Xor_exprContext ctx) {
+		public AstNode visitXor_expr(@NotNull Python3Parser.Xor_exprContext ctx) {
 			this.indent++;
 			this.print("visitXor_expr");
 			//      and_expr ( '^' and_expr )*
@@ -1031,7 +1036,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitAnd_expr(@NotNull Python3Parser.And_exprContext ctx) {
+		public AstNode visitAnd_expr(@NotNull Python3Parser.And_exprContext ctx) {
 			this.indent++;
 			this.print("visitAnd_expr");
 			//      shift_expr ( '&' shift_expr )*
@@ -1047,7 +1052,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitShift_expr(@NotNull Python3Parser.Shift_exprContext ctx) {
+		public AstNode visitShift_expr(@NotNull Python3Parser.Shift_exprContext ctx) {
 			this.indent++;
 			this.print("visitShift_expr");
 			//      arith_expr ( '<<' arith_expr | '>>' arith_expr )*
@@ -1063,7 +1068,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitArith_expr(@NotNull Python3Parser.Arith_exprContext ctx) {
+		public AstNode visitArith_expr(@NotNull Python3Parser.Arith_exprContext ctx) {
 			this.indent++;
 			this.print("visitArith_expr");
 			//      term ( '+' term | '-' term )*
@@ -1080,7 +1085,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTerm(@NotNull Python3Parser.TermContext ctx) {
+		public AstNode visitTerm(@NotNull Python3Parser.TermContext ctx) {
 			this.indent++;
 			this.print("visitTerm");
 			//      factor ( '*' factor | '/' factor | '%' factor | '//' factor | '@' factor // PEP 465 )
@@ -1098,7 +1103,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitFactor(@NotNull Python3Parser.FactorContext ctx) {
+		public AstNode visitFactor(@NotNull Python3Parser.FactorContext ctx) {
 			this.indent++;
 			this.print("visitFactor");
 			//      '+' factor | '-' factor | '~' factor | power
@@ -1129,7 +1134,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitPower(@NotNull Python3Parser.PowerContext ctx) {
+		public AstNode visitPower(@NotNull Python3Parser.PowerContext ctx) {
 			this.indent++;
 			this.print("visitPower");
 			//      atom trailer* ( '**' factor )?
@@ -1153,7 +1158,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitAtom(@NotNull Python3Parser.AtomContext ctx) {
+		public AstNode visitAtom(@NotNull Python3Parser.AtomContext ctx) {
 			this.indent++;
 			this.print("visitAtom");
 			//		'(' ( yield_expr | testlist_comp )? ')'
@@ -1199,16 +1204,16 @@ public class AstBuilder {
 			throw new IllegalArgumentException("Unknown context");
 		}
 
-		private Py3Node getStr(LocInfo locInfo, String str) {
+		private AstNode getStr(LocInfo locInfo, String str) {
 			//this hacky method is here because end line of ctx is not correct so it's necessary to calculate it manually
 			Integer endLine = locInfo.getStartLine() + StringHelper.explode(str, "\n").size() - 1;
-			LocInfo updatedLocInfo = new LocInfo(locInfo.getStartLine(), endLine);
+			LocInfo updatedLocInfo = new LocInfo(this.filePath, locInfo.getStartLine(), endLine);
 
 			return new Str(updatedLocInfo, str);
 		}
 
 		@Override
-		public Py3Node visitTestlist_comp(@NotNull Python3Parser.Testlist_compContext ctx) {
+		public AstNode visitTestlist_comp(@NotNull Python3Parser.Testlist_compContext ctx) {
 			this.indent++;
 			this.print("visitTestlist_comp");
 			//      test ( comp_for | ( ',' test )* ','? )
@@ -1228,7 +1233,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTrailer(@NotNull Python3Parser.TrailerContext ctx) {
+		public AstNode visitTrailer(@NotNull Python3Parser.TrailerContext ctx) {
 			this.indent++;
 			this.print("visitTrailer");
 			//      '(' arglist? ')' | '[' subscriptlist ']' | '.' NAME
@@ -1250,7 +1255,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSubscriptlist(@NotNull Python3Parser.SubscriptlistContext ctx) {
+		public AstNode visitSubscriptlist(@NotNull Python3Parser.SubscriptlistContext ctx) {
 			this.indent++;
 			this.print("visitSubscriptlist");
 			//      subscript ( ',' subscript )* ','?
@@ -1263,7 +1268,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSubscript(@NotNull Python3Parser.SubscriptContext ctx) {
+		public AstNode visitSubscript(@NotNull Python3Parser.SubscriptContext ctx) {
 			this.indent++;
 			this.print("visitSubscript");
 			//      index=test | lowerBound=test? ':' upperBound=test? stride=sliceop?
@@ -1282,7 +1287,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitSliceop(@NotNull Python3Parser.SliceopContext ctx) {
+		public AstNode visitSliceop(@NotNull Python3Parser.SliceopContext ctx) {
 			this.indent++;
 			this.print("visitSliceop");
 			//      ':' test?
@@ -1292,7 +1297,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitExprlist(@NotNull Python3Parser.ExprlistContext ctx) {
+		public AstNode visitExprlist(@NotNull Python3Parser.ExprlistContext ctx) {
 			this.indent++;
 			this.print("visitExprlist");
 			//      star_expr ( ',' star_expr )* ','?
@@ -1304,7 +1309,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTestlist(@NotNull Python3Parser.TestlistContext ctx) {
+		public AstNode visitTestlist(@NotNull Python3Parser.TestlistContext ctx) {
 			this.indent++;
 			this.print("visitTestlist");
 			//      test ( ',' test )* ','?
@@ -1317,7 +1322,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitDictorsetmaker(@NotNull Python3Parser.DictorsetmakerContext ctx) {
+		public AstNode visitDictorsetmaker(@NotNull Python3Parser.DictorsetmakerContext ctx) {
 			this.indent++;
 			this.print("visitDictorsetmaker");
 			this.indent--;
@@ -1346,7 +1351,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitClassdef(@NotNull Python3Parser.ClassdefContext ctx) {
+		public AstNode visitClassdef(@NotNull Python3Parser.ClassdefContext ctx) {
 			this.indent++;
 			this.print("visitClassdef");
 			//      CLASS NAME ( '(' arglist? ')' )? ':' suite
@@ -1366,7 +1371,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitArglist(@NotNull Python3Parser.ArglistContext ctx) {
+		public AstNode visitArglist(@NotNull Python3Parser.ArglistContext ctx) {
 			this.indent++;
 			this.print("visitArglist");
 			//      ( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
@@ -1381,7 +1386,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitArgument(@NotNull Python3Parser.ArgumentContext ctx) {
+		public AstNode visitArgument(@NotNull Python3Parser.ArgumentContext ctx) {
 			this.indent++;
 			this.print("visitArgument");
 			//      test comp_for? | test '=' test
@@ -1407,7 +1412,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitComp_iter(@NotNull Python3Parser.Comp_iterContext ctx) {
+		public AstNode visitComp_iter(@NotNull Python3Parser.Comp_iterContext ctx) {
 			this.indent++;
 			this.print("visitComp_iter");
 			//      comp_for | comp_if
@@ -1425,7 +1430,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitComp_for(@NotNull Python3Parser.Comp_forContext ctx) {
+		public AstNode visitComp_for(@NotNull Python3Parser.Comp_forContext ctx) {
 			this.indent++;
 			this.print("visitComp_for");
 			//      FOR exprlist IN or_test comp_iter?
@@ -1438,7 +1443,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitComp_if(@NotNull Python3Parser.Comp_ifContext ctx) {
+		public AstNode visitComp_if(@NotNull Python3Parser.Comp_ifContext ctx) {
 			this.indent++;
 			this.print("visitComp_if");
 			//      IF test_nocond comp_iter?
@@ -1450,7 +1455,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitYield_expr(@NotNull Python3Parser.Yield_exprContext ctx) {
+		public AstNode visitYield_expr(@NotNull Python3Parser.Yield_exprContext ctx) {
 			this.indent++;
 			this.print("visitYield_expr");
 			//      YIELD yield_arg?
@@ -1464,7 +1469,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitYield_arg(@NotNull Python3Parser.Yield_argContext ctx) {
+		public AstNode visitYield_arg(@NotNull Python3Parser.Yield_argContext ctx) {
 			this.indent++;
 			this.print("visitYield_arg");
 			//      FROM test | testlist
@@ -1483,7 +1488,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitString(@NotNull Python3Parser.StringContext ctx) {
+		public AstNode visitString(@NotNull Python3Parser.StringContext ctx) {
 			this.indent++;
 			this.print("visitString");
 			this.indent--;
@@ -1501,7 +1506,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitNumber(@NotNull Python3Parser.NumberContext ctx) {
+		public AstNode visitNumber(@NotNull Python3Parser.NumberContext ctx) {
 			this.indent++;
 			this.print("visitNumber");
 			//      integer | FLOAT_NUMBER | IMAG_NUMBER
@@ -1526,7 +1531,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitInteger(@NotNull Python3Parser.IntegerContext ctx) {
+		public AstNode visitInteger(@NotNull Python3Parser.IntegerContext ctx) {
 			this.indent++;
 			this.print("visitInteger");
 			//      DECIMAL_INTEGER | OCT_INTEGER | HEX_INTEGER | BIN_INTEGER
@@ -1561,7 +1566,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visit(@NotNull ParseTree parseTree) {
+		public AstNode visit(@NotNull ParseTree parseTree) {
 			this.indent++;
 			this.print("visit");
 			this.indent--;
@@ -1569,7 +1574,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitChildren(@NotNull RuleNode ruleNode) {
+		public AstNode visitChildren(@NotNull RuleNode ruleNode) {
 			this.indent++;
 			this.print("visitChildren");
 			this.indent--;
@@ -1577,7 +1582,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitTerminal(@NotNull TerminalNode terminalNode) {
+		public AstNode visitTerminal(@NotNull TerminalNode terminalNode) {
 			this.indent++;
 			this.print("visitTerminal");
 			this.indent--;
@@ -1585,7 +1590,7 @@ public class AstBuilder {
 		}
 
 		@Override
-		public Py3Node visitErrorNode(@NotNull ErrorNode errorNode) {
+		public AstNode visitErrorNode(@NotNull ErrorNode errorNode) {
 			this.indent++;
 			this.print("visitErrorNode");
 			this.indent--;
@@ -1593,14 +1598,14 @@ public class AstBuilder {
 		}
 
 		private LocInfo getLocInfo(TerminalNode node) {
-			return new LocInfo(node.getSymbol().getLine(), node.getSymbol().getLine());
+			return new LocInfo(this.filePath, node.getSymbol().getLine(), node.getSymbol().getLine());
 		}
 
 		private LocInfo getLocInfo(ParserRuleContext ctx) {
 			if (ctx.getStop() == null) {
-				return new LocInfo(ctx.getStart().getLine(), ctx.getStart().getLine());
+				return new LocInfo(this.filePath, ctx.getStart().getLine(), ctx.getStart().getLine());
 			}
-			return new LocInfo(ctx.getStart().getLine(), ctx.getStop().getLine());
+			return new LocInfo(this.filePath, ctx.getStart().getLine(), ctx.getStop().getLine());
 		}
 
 		private Identifier getIdentifier(TerminalNode name) {
@@ -1668,7 +1673,7 @@ public class AstBuilder {
 			return (CollectionWrapper<Statement>) node.accept(this);
 		}
 
-		private class Wrapper<T> extends Py3Node {
+		private class Wrapper<T> extends AstNode {
 			private final T item;
 
 			public Wrapper(LocInfo locInfo, T item) {
@@ -1686,7 +1691,7 @@ public class AstBuilder {
 			}
 		}
 
-		private class CollectionWrapper<T> extends Py3Node {
+		private class CollectionWrapper<T> extends AstNode {
 			private final List<T> items;
 
 			public CollectionWrapper(LocInfo locInfo, List<T> items) {

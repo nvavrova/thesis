@@ -1,6 +1,5 @@
-package thesis;
+package ast;
 
-import ast.*;
 import ast.arg.Arg;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
@@ -29,6 +28,8 @@ import ast.expression.unary.Unary;
 import ast.param.Params;
 import ast.param.SimpleParam;
 import ast.param.TypedParam;
+import ast.path.DottedPath;
+import ast.path.SimplePath;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;

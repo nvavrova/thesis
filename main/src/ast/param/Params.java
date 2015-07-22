@@ -1,9 +1,9 @@
 package ast.param;
 
 import ast.LocInfo;
-import ast.Py3Node;
+import ast.AstNode;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Nik on 23-06-2015
  */
-public class Params extends Py3Node {
+public class Params extends AstNode {
 
 	private final List<SimpleParam> positionalArgs;
 	private final List<SimpleParam> args;

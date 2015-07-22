@@ -3,7 +3,7 @@ package ast.expression.bitwise;
 import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.List;
 

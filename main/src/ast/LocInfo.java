@@ -12,11 +12,12 @@ public class LocInfo {
 	private final Integer startLine;
 	private final Integer endLine;
 	private final Set<Integer> lines;
-	private String filePath;
+	private final String filePath;
 
-	public LocInfo(@NotNull Integer startLine, @NotNull Integer endLine) {
+	public LocInfo(@NotNull String filePath, @NotNull Integer startLine, @NotNull Integer endLine) {
 		assert (startLine <= endLine);
 
+		this.filePath = filePath;
 		this.startLine = startLine;
 		this.endLine = endLine;
 		this.lines = new HashSet<>();
@@ -34,9 +35,9 @@ public class LocInfo {
 		return this.filePath;
 	}
 
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
-	}
+//	public void setFilePath(String filePath) {
+//		this.filePath = filePath;
+//	}
 
 	public Set<Integer> getLines() {
 		return this.lines;

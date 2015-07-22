@@ -4,7 +4,7 @@ import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;

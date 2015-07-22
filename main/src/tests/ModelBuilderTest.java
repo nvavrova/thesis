@@ -1,7 +1,7 @@
 package tests;
 
 import org.junit.Test;
-import thesis.Class;
+import model.Class;
 
 import java.util.List;
 import java.util.Set;
@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by Nik on 08-07-2015
  */
-public class ClassCollectorTest {
+public class ModelBuilderTest {
 
 	@Test
 	public void collectAttributes() {

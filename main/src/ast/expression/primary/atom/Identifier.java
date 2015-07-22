@@ -4,7 +4,7 @@ import ast.LocInfo;
 import ast.expression.primary.trailer.Trailer;
 import ast.expression.primary.trailer.TrailerVisitor;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.Visitor;
+import ast.Visitor;
 
 /**
  * Created by Nik on 25-05-2015

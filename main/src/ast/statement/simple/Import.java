@@ -1,7 +1,7 @@
 package ast.statement.simple;
 
 import ast.LocInfo;
-import ast.Path;
+import ast.path.Path;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 
