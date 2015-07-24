@@ -7,19 +7,19 @@ import org.antlr.v4.runtime.misc.NotNull;
  */
 public abstract class AstNode {
 
-    protected final LocInfo locInfo;
+    protected final Integer locInfo;
 
-    public AstNode(@NotNull LocInfo locInfo) {
+    public AstNode(@NotNull Integer locInfo) {
         this.locInfo = locInfo;
     }
 
-	public LocInfo getLocInfo() {
+	public Integer getLocInfo() {
 		return this.locInfo;
 	}
 
 	public abstract <T> T accept(Visitor<T> visitor);
 
     public Integer getLocSpan() {
-        return this.locInfo.getLocSpan();
+        return this.locInfo;
     }
 }

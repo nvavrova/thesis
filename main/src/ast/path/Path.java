@@ -1,6 +1,5 @@
 package ast.path;
 
-import ast.LocInfo;
 import ast.AstNode;
 import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -12,7 +11,7 @@ public abstract class Path extends AstNode {
 
 	private Identifier alias;
 
-	public Path(@NotNull LocInfo locInfo) {
+	public Path(@NotNull Integer locInfo) {
 		super(locInfo);
 	}
 

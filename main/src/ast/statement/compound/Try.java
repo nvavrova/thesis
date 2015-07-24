@@ -1,6 +1,5 @@
 package ast.statement.compound;
 
-import ast.LocInfo;
 import ast.Suite;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -20,7 +19,7 @@ public class Try extends Statement {
 	private final Suite elseBlock;
 	private final Suite finallyBlock;
 
-	public Try(@NotNull LocInfo locInfo, @NotNull Suite tryBlock, @NotNull List<Except> exceptions,
+	public Try(@NotNull Integer locInfo, @NotNull Suite tryBlock, @NotNull List<Except> exceptions,
 	           @NotNull Map<Except, Suite> exceptBlocks, Suite elseBlock, Suite finallyBlock) {
 		super(locInfo);
 		this.tryBlock = tryBlock;

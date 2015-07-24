@@ -1,6 +1,5 @@
 package ast.expression.primary.atom.trailed;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import ast.expression.primary.trailer.SubscriptSliceList;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -13,7 +12,7 @@ public class Slice extends TrailedAtom {
 
 	private final SubscriptSliceList bound;
 
-	public Slice(@NotNull LocInfo locInfo, @NotNull Atom base, @NotNull SubscriptSliceList bound) {
+	public Slice(@NotNull Integer locInfo, @NotNull Atom base, @NotNull SubscriptSliceList bound) {
 		super(locInfo, base);
 		this.bound = bound;
 	}

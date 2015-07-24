@@ -1,6 +1,5 @@
 package ast.statement.compound;
 
-import ast.LocInfo;
 import ast.Suite;
 import ast.statement.Statement;
 import ast.statement.simple.ExprList;
@@ -17,7 +16,7 @@ public class For extends Statement {
 	private final Suite body;
 	private final Suite elseBody;
 
-	public For(@NotNull LocInfo locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
+	public For(@NotNull Integer locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
 		super(locInfo);
 		this.iterator = iterator;
 		this.source = source;

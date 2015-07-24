@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import ast.expression.primary.trailer.Trailer;
 import ast.expression.primary.trailer.TrailerVisitor;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -13,7 +12,7 @@ public class Identifier extends Atom implements Trailer {
 
 	private final String value;
 
-	public Identifier(LocInfo locInfo, @NotNull String value) {
+	public Identifier(Integer locInfo, @NotNull String value) {
 		super(locInfo);
 		this.value = value;
 	}

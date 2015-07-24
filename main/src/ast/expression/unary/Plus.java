@@ -1,6 +1,5 @@
 package ast.expression.unary;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -9,7 +8,7 @@ import ast.Visitor;
  * Created by Nik on 10-06-2015
  */
 public class Plus extends Unary {
-	public Plus(@NotNull LocInfo locInfo, @NotNull Expr value) {
+	public Plus(@NotNull Integer locInfo, @NotNull Expr value) {
 		super(locInfo, value);
 	}
 

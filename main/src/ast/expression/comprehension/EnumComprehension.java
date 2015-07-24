@@ -1,6 +1,5 @@
 package ast.expression.comprehension;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -14,7 +13,7 @@ public class EnumComprehension extends Comprehension {
 
 	private final List<Expr> values;
 
-	public EnumComprehension(@NotNull LocInfo locInfo, @NotNull List<Expr> values) {
+	public EnumComprehension(@NotNull Integer locInfo, @NotNull List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}

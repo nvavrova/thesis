@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -15,7 +14,7 @@ public class Nonlocal extends Statement {
 
 	private final List<Identifier> identifiers;
 
-	public Nonlocal(@NotNull LocInfo locInfo, @NotNull List<Identifier> identifiers) {
+	public Nonlocal(@NotNull Integer locInfo, @NotNull List<Identifier> identifiers) {
 		super(locInfo);
 		this.identifiers = identifiers;
 	}

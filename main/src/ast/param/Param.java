@@ -1,6 +1,5 @@
 package ast.param;
 
-import ast.LocInfo;
 import ast.AstNode;
 import ast.expression.Expr;
 import ast.expression.primary.atom.Identifier;
@@ -14,7 +13,7 @@ public abstract class Param extends AstNode {
 	private final Identifier id;
 	private Expr defaultVal;
 
-	public Param(@NotNull LocInfo locInfo, @NotNull Identifier id) {
+	public Param(@NotNull Integer locInfo, @NotNull Identifier id) {
 		super(locInfo);
 		this.id = id;
 	}

@@ -11,10 +11,12 @@ import java.util.List;
  */
 public class Module extends AstNode {
 
+	private final String filePath;
     private final List<Statement> body;
 
-    public Module(@NotNull LocInfo locInfo, @NotNull List<Statement> body) {
+    public Module(@NotNull String filePath, @NotNull Integer locInfo, @NotNull List<Statement> body) {
         super(locInfo);
+	    this.filePath = filePath;
         this.body = body;
     }
 
@@ -23,11 +25,11 @@ public class Module extends AstNode {
     }
 
     public String getFilePath() {
-        return this.locInfo.getFilePath();
+        return this.filePath;
     }
 
 	public String getName() {
-		List<String> filePathParts = StringHelper.explode(this.locInfo.getFilePath(), "\\");
+		List<String> filePathParts = StringHelper.explode(this.filePath, "\\");
 		String s = filePathParts.get(filePathParts.size() - 1);
 		return s.substring(0, s.length() - 3);
 	}

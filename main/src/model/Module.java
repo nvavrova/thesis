@@ -7,14 +7,14 @@ import java.util.*;
  */
 public class Module {
 
-	private final String path;
+	private final String filePath;
 	private final String name;
 	private final Map<String, Class> classes;
 	private final Map<String, Class> classImports;
 	private final Map<String, Module> moduleImports;
 
-	public Module(String path, String name) {
-		this.path = path;
+	public Module(String filePath, String name) {
+		this.filePath = filePath;
 		this.name = name;
 		this.classes = new LinkedHashMap<>();
 		this.classImports = new HashMap<>();
@@ -51,8 +51,8 @@ public class Module {
 		return this.classes.get(this.classes.size() - 1);
 	}
 
-	public String getPath() {
-		return this.path;
+	public String getFilePath() {
+		return this.filePath;
 	}
 
 	public String getName() {
@@ -60,6 +60,6 @@ public class Module {
 	}
 
 	public String getFullPath() {
-		return this.path + "\\" + this.name;
+		return this.filePath + "\\" + this.name;
 	}
 }

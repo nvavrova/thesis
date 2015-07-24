@@ -1,6 +1,5 @@
 package ast.expression.primary.trailer;
 
-import ast.LocInfo;
 import ast.arg.Arg;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
@@ -21,15 +20,15 @@ public class ArgList extends ExprNoCond implements Trailer {
 	private final Expr args;
 	private final Expr kwargs;
 
-	public ArgList(@NotNull LocInfo locInfo) {
+	public ArgList(@NotNull Integer locInfo) {
 		this(locInfo, Collections.emptyList());
 	}
 
-	public ArgList(@NotNull LocInfo locInfo, @NotNull List<Arg> positional) {
+	public ArgList(@NotNull Integer locInfo, @NotNull List<Arg> positional) {
 		this(locInfo, positional, null, null);
 	}
 
-	public ArgList(@NotNull LocInfo locInfo, @NotNull List<Arg> positional, Expr args, Expr kwargs) {
+	public ArgList(@NotNull Integer locInfo, @NotNull List<Arg> positional, Expr args, Expr kwargs) {
 		super(locInfo);
 		this.positional = positional;
 		this.args = args;

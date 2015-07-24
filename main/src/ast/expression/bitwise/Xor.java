@@ -1,6 +1,5 @@
 package ast.expression.bitwise;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ import java.util.List;
  */
 public class Xor extends Bitwise {
 
-	public Xor(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
+	public Xor(@NotNull Integer locInfo, @NotNull List<Expr> operands) {
 		super(locInfo, operands);
 	}
 

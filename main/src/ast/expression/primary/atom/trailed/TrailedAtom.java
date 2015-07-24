@@ -1,6 +1,5 @@
 package ast.expression.primary.atom.trailed;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -11,7 +10,7 @@ public abstract class TrailedAtom extends Atom {
 
 	private Atom base;
 
-	public TrailedAtom(@NotNull LocInfo locInfo, @NotNull Atom base) {
+	public TrailedAtom(@NotNull Integer locInfo, @NotNull Atom base) {
 		super(locInfo);
 		this.base = base;
 	}

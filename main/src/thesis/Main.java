@@ -15,8 +15,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		File folder = new File(args[0]);
-		FileHelper fh = new FileHelper(folder);
-		List<String> filePaths = fh.getPythonFilePaths();
+		List<String> filePaths = FileHelper.getPythonFilePaths(folder);
 
 		List<Module> trees = getTrees(filePaths);
 
@@ -99,7 +98,6 @@ public class Main {
 				System.out.println("------------------------------ Parse ------------------------------");
 				System.out.println("FILE: \t" + filePath);
 				Module tree = parse(filePath);
-				LocCoverageResolver.resolve(tree);
 				trees.add(tree);
 				System.out.println("LOC: \t" + tree.getLocSpan());
 				System.out.println("-------------------------------------------------------------------\n");

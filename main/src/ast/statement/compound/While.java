@@ -1,6 +1,5 @@
 package ast.statement.compound;
 
-import ast.LocInfo;
 import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
@@ -16,7 +15,7 @@ public class While extends Statement {
 	private final Suite body;
 	private final Suite elseBody;
 
-	public While(@NotNull LocInfo locInfo, @NotNull Expr condition, @NotNull Suite body, Suite elseBody) {
+	public While(@NotNull Integer locInfo, @NotNull Expr condition, @NotNull Suite body, Suite elseBody) {
 		super(locInfo);
 		this.condition = condition;
 		this.body = body;

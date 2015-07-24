@@ -1,6 +1,5 @@
 package ast.expression.primary.atom.trailed;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class DirectCall extends TrailedAtom {
 
 	private final Call call;
 
-	public DirectCall(@NotNull LocInfo locInfo, @NotNull Atom base, @NotNull Call call) {
+	public DirectCall(@NotNull Integer locInfo, @NotNull Atom base, @NotNull Call call) {
 		super(locInfo, base);
 		this.call = call;
 	}

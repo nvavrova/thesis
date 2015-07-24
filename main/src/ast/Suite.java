@@ -13,7 +13,7 @@ public class Suite extends AstNode {
 
 	private final List<Statement> statements;
 
-	public Suite(@NotNull LocInfo locInfo, @NotNull List<Statement> statements) {
+	public Suite(@NotNull Integer locInfo, @NotNull List<Statement> statements) {
 		super(locInfo);
 		this.statements = statements;
 	}

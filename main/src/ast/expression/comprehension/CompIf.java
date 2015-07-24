@@ -1,6 +1,5 @@
 package ast.expression.comprehension;
 
-import ast.LocInfo;
 import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class CompIf extends CompIter {
 
 	private final ExprNoCond expression;
 
-	public CompIf(@NotNull LocInfo locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
+	public CompIf(@NotNull Integer locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
 		super(locInfo, nextLink);
 		this.expression = expression;
 	}

@@ -1,6 +1,5 @@
 package ast.statement.flow;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class YieldFrom extends Yield {
 
 	private final Expr from;
 
-	public YieldFrom(@NotNull LocInfo locInfo, @NotNull Expr from) {
+	public YieldFrom(@NotNull Integer locInfo, @NotNull Expr from) {
 		super(locInfo);
 		this.from = from;
 	}

@@ -1,6 +1,5 @@
 package ast.expression.primary.trailer;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class SubscriptIndex extends SubscriptSliceListElem {
 
 	private final Expr index;
 
-	public SubscriptIndex(@NotNull LocInfo locInfo, @NotNull Expr index) {
+	public SubscriptIndex(@NotNull Integer locInfo, @NotNull Expr index) {
 		super(locInfo);
 		this.index = index;
 	}

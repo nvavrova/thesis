@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -15,7 +14,7 @@ public class ExprList extends Statement {
 
 	private final List<Expr> values;
 
-	public ExprList(@NotNull LocInfo locInfo, @NotNull List<Expr> values) {
+	public ExprList(@NotNull Integer locInfo, @NotNull List<Expr> values) {
 		super(locInfo);
 		this.values = values;
 	}
@@ -24,7 +23,7 @@ public class ExprList extends Statement {
 		return this.values;
 	}
 
-	public Integer size() {
+	public java.lang.Integer size() {
 		return this.values.size();
 	}
 

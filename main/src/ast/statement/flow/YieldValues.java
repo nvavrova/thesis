@@ -1,7 +1,6 @@
 package ast.statement.flow;
 
 
-import ast.LocInfo;
 import ast.statement.simple.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -13,11 +12,11 @@ public class YieldValues extends Yield {
 
 	private final ExprList values;
 
-	public YieldValues(@NotNull LocInfo locInfo) {
+	public YieldValues(@NotNull Integer locInfo) {
 		this(locInfo, null);
 	}
 
-	public YieldValues(@NotNull LocInfo locInfo, ExprList values) {
+	public YieldValues(@NotNull Integer locInfo, ExprList values) {
 		super(locInfo);
 		this.values = values;
 	}

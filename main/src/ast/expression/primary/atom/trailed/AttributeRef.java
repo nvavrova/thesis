@@ -1,6 +1,5 @@
 package ast.expression.primary.atom.trailed;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -16,13 +15,13 @@ public class AttributeRef extends TrailedAtom {
 
 	private final List<Identifier> attributes;
 
-	public AttributeRef(@NotNull LocInfo locInfo, @NotNull AttributeRef base, @NotNull Identifier attribute) {
+	public AttributeRef(@NotNull Integer locInfo, @NotNull AttributeRef base, @NotNull Identifier attribute) {
 		super(locInfo, base.getBase());
 		this.attributes = base.getAttributes();
 		this.attributes.add(attribute);
 	}
 
-	public AttributeRef(@NotNull LocInfo locInfo, @NotNull Atom base, @NotNull Identifier attribute) {
+	public AttributeRef(@NotNull Integer locInfo, @NotNull Atom base, @NotNull Identifier attribute) {
 		super(locInfo, base);
 		this.attributes = new ArrayList<>();
 		this.attributes.add(attribute);

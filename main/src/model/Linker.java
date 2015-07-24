@@ -32,7 +32,7 @@ public class Linker {
 		assert (this.modules.containsKey(source));
 
 		Module sourceModule = this.modules.get(source);
-		List<String> sourcePaths = this.getSourcePaths(sourceModule.getPath());
+		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
 		Boolean added = false;
 		for (String sourcePath : sourcePaths) {
 			String fullPath = sourcePath + "\\" + this.getFilePath(target);
@@ -59,7 +59,7 @@ public class Linker {
 
 	private void addImportSpecific(String source, String importPath, String target, String alias) {
 		Module sourceModule = this.modules.get(source);
-		List<String> sourcePaths = this.getSourcePaths(sourceModule.getPath());
+		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
 
 		String pathMiddle = StringHelper.swapDelimiter(importPath, MODULE_DELIMITER, FILE_DELIMITER);
 

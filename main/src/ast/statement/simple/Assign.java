@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -12,7 +11,7 @@ public abstract class Assign extends Statement {
 	private final String operator;
 	private final ExprList targets;
 
-	public Assign(@NotNull LocInfo locInfo, @NotNull String operator, @NotNull ExprList targets) {
+	public Assign(@NotNull Integer locInfo, @NotNull String operator, @NotNull ExprList targets) {
 		super(locInfo);
 		this.operator = operator;
 		this.targets = targets;

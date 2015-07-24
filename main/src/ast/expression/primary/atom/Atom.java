@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -9,7 +8,7 @@ import org.antlr.v4.runtime.misc.NotNull;
  */
 public abstract class Atom extends ExprNoCond {
 
-	public Atom(@NotNull LocInfo locInfo) {
+	public Atom(@NotNull Integer locInfo) {
 		super(locInfo);
 	}
 }

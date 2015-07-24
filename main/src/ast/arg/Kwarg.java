@@ -1,6 +1,5 @@
 package ast.arg;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Identifier;
 import ast.expression.Expr;
 import ast.Visitor;
@@ -13,7 +12,7 @@ public class Kwarg extends Arg {
 	private final Identifier name;
 
 	//TODO: fix the Identifier! @NotNull ?
-	public Kwarg(LocInfo locInfo, Expr value, Identifier name) {
+	public Kwarg(Integer locInfo, Expr value, Identifier name) {
 		super(locInfo, value);
 		this.name = name;
 	}

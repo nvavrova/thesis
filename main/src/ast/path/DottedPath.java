@@ -1,6 +1,5 @@
 package ast.path;
 
-import ast.LocInfo;
 import ast.Visitor;
 import org.antlr.v4.runtime.misc.NotNull;
 import thesis.StringHelper;
@@ -15,7 +14,7 @@ public class DottedPath extends Path {
 	private static final String DELIMITER = ".";
 	private List<String> path;
 
-	public DottedPath(@NotNull LocInfo locInfo, @NotNull List<String> path) {
+	public DottedPath(@NotNull Integer locInfo, @NotNull List<String> path) {
 		super(locInfo);
 		this.path = path;
 	}

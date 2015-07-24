@@ -1,6 +1,5 @@
 package ast.expression.logical;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -13,7 +12,7 @@ public abstract class Binary extends Logical {
 
 	private final List<Expr> operands;
 
-	public Binary(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
+	public Binary(@NotNull Integer locInfo, @NotNull List<Expr> operands) {
 		super(locInfo);
 		this.operands = operands;
 	}

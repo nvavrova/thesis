@@ -1,6 +1,5 @@
 package ast.expression.primary.atom.trailed;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import ast.expression.primary.atom.Identifier;
 import ast.expression.primary.trailer.ArgList;
@@ -17,14 +16,14 @@ public class TrailedAtomBuilder {
 
 	private TrailedAtom result;
 
-	private TrailedAtomBuilder(LocInfo locInfo, Atom base, List<Trailer> trailers) {
+	private TrailedAtomBuilder(Integer locInfo, Atom base, List<Trailer> trailers) {
 		for (Trailer trailer : trailers) {
 			base = this.attachTrailer(locInfo, base, trailer);
 		}
 		this.result = this.transformRecursively((TrailedAtom) base);
 	}
 
-	public static Atom attachTrailers(LocInfo locInfo, Atom base, List<Trailer> trailers) {
+	public static Atom attachTrailers(Integer locInfo, Atom base, List<Trailer> trailers) {
 		if (trailers.size() == 0) {
 			return base;
 		}
@@ -34,7 +33,7 @@ public class TrailedAtomBuilder {
 	}
 
 
-	private TrailedAtom attachTrailer(LocInfo locInfo, Atom base, Trailer trailer) {
+	private TrailedAtom attachTrailer(Integer locInfo, Atom base, Trailer trailer) {
 		return TABVisitor.buildTrailedAtom(locInfo, base, trailer);
 	}
 
@@ -78,15 +77,15 @@ public class TrailedAtomBuilder {
 
 	private static class TABVisitor implements TrailerVisitor<TrailedAtom> {
 
-		private final LocInfo locInfo;
+		private final Integer locInfo;
 		private final Atom base;
 
-		public static TrailedAtom buildTrailedAtom(LocInfo locInfo, Atom base, Trailer trailer) {
+		public static TrailedAtom buildTrailedAtom(Integer locInfo, Atom base, Trailer trailer) {
 			TABVisitor tabVisitor = new TABVisitor(locInfo, base);
 			return trailer.accept(tabVisitor);
 		}
 
-		private TABVisitor(LocInfo locInfo, Atom base) {
+		private TABVisitor(Integer locInfo, Atom base) {
 			this.locInfo = locInfo;
 			this.base = base;
 		}

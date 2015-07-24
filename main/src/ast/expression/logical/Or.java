@@ -1,6 +1,5 @@
 package ast.expression.logical;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ import java.util.List;
  */
 public class Or extends Binary {
 
-	public Or(@NotNull LocInfo locInfo, @NotNull List<Expr> operands) {
+	public Or(@NotNull Integer locInfo, @NotNull List<Expr> operands) {
 		super(locInfo, operands);
 	}
 

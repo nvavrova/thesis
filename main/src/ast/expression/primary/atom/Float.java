@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -11,7 +10,7 @@ public class Float extends Atom {
 
 	private final Double value;
 
-	public Float(@NotNull LocInfo locInfo, @NotNull Double value) {
+	public Float(@NotNull Integer locInfo, @NotNull Double value) {
 		super(locInfo);
 		this.value = value;
 	}

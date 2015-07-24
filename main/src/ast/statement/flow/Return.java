@@ -1,6 +1,5 @@
 package ast.statement.flow;
 
-import ast.LocInfo;
 import ast.statement.Statement;
 import ast.statement.simple.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -13,11 +12,11 @@ public class Return extends Statement {
 
 	private final ExprList values;
 
-	public Return(@NotNull LocInfo locInfo) {
+	public Return(@NotNull Integer locInfo) {
 		this(locInfo, null);
 	}
 
-	public Return(@NotNull LocInfo locInfo, ExprList values) {
+	public Return(@NotNull Integer locInfo, ExprList values) {
 		super(locInfo);
 		this.values = values;
 	}

@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.expression.comprehension.CompFor;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -16,13 +15,13 @@ public class DictMaker extends Maker {
 	private final CompFor comprehension;
 	private final Map<Expr, Expr> values;
 
-	public DictMaker(@NotNull LocInfo locInfo, @NotNull CompFor comprehension) {
+	public DictMaker(@NotNull Integer locInfo, @NotNull CompFor comprehension) {
 		super(locInfo);
 
 		this.comprehension = comprehension;
 		this.values = null;
 	}
-	public DictMaker(@NotNull LocInfo locInfo, @NotNull Map<Expr, Expr> values) {
+	public DictMaker(@NotNull Integer locInfo, @NotNull Map<Expr, Expr> values) {
 		super(locInfo);
 
 		this.values = values;

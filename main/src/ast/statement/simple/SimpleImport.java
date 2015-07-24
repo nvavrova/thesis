@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.path.Path;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -14,7 +13,7 @@ import java.util.Map;
  */
 public class SimpleImport extends Import {
 
-    public SimpleImport(@NotNull LocInfo locInfo, @NotNull List<Path> paths) {
+    public SimpleImport(@NotNull Integer locInfo, @NotNull List<Path> paths) {
         super(locInfo, paths);
     }
 

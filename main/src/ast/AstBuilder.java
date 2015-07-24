@@ -36,6 +36,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import thesis.LocCounter;
 import thesis.StringHelper;
 
 import java.math.BigInteger;
@@ -62,9 +63,11 @@ public class AstBuilder {
 	private class AstBuilderVisitor implements Python3Visitor<AstNode> {
 
 		private final String filePath;
+		private final LocCounter locCounter;
 
 		public AstBuilderVisitor(String filePath) {
 			this.filePath = filePath;
+			this.locCounter = new LocCounter(this.filePath);
 		}
 
 		private int indent = 0;
@@ -97,13 +100,9 @@ public class AstBuilder {
 				List<Statement> children = new ArrayList<>();
 				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<Statement>) e.accept(this)).items));
 				this.indent--;
-				return new Module(this.getLocInfo(ctx), children);
+				return new Module(this.filePath, this.locCounter.count(), children);
 			}
-			if (ctx.NEWLINE() != null) {
-				this.indent--;
-				return new Module(this.getLocInfo(ctx), Collections.emptyList());
-			}
-			throw new IllegalArgumentException("Unknown context");
+			return new Module(this.filePath, this.locCounter.count(), Collections.emptyList());
 		}
 
 		@Override
@@ -1187,7 +1186,7 @@ public class AstBuilder {
 				List<String> strings = ctx.string().stream()
 						.map(e -> ((Str) e.accept(this)).getValue())
 						.collect(Collectors.toList());
-				return this.getStr(this.getLocInfo(ctx), StringHelper.implode(strings, ""));
+				return this.getStr(ctx.getStart().getLine(), StringHelper.implode(strings, ""));
 			}
 			if (ctx.ellipsis != null) {
 				return new Ellipsis(this.getLocInfo(ctx));
@@ -1204,12 +1203,11 @@ public class AstBuilder {
 			throw new IllegalArgumentException("Unknown context");
 		}
 
-		private AstNode getStr(LocInfo locInfo, String str) {
+		private AstNode getStr(java.lang.Integer startLine, String str) {
 			//this hacky method is here because end line of ctx is not correct so it's necessary to calculate it manually
-			Integer endLine = locInfo.getStartLine() + StringHelper.explode(str, "\n").size() - 1;
-			LocInfo updatedLocInfo = new LocInfo(this.filePath, locInfo.getStartLine(), endLine);
-
-			return new Str(updatedLocInfo, str);
+			java.lang.Integer endLine = startLine + StringHelper.explode(str, "\n").size() - 1;
+			Integer locInfo = this.locCounter.count(startLine, endLine);
+			return new Str(locInfo, str);
 		}
 
 		@Override
@@ -1494,13 +1492,11 @@ public class AstBuilder {
 			this.indent--;
 			//      STRING_LITERAL | BYTES_LITERAL
 
-			//TODO: strip out prefix + quotes?
 			if (ctx.STRING_LITERAL() != null) {
-				return this.getStr(this.getLocInfo(ctx), ctx.STRING_LITERAL().getText());
+				return this.getStr(ctx.getStart().getLine(), ctx.STRING_LITERAL().getText());
 			}
 			else if (ctx.BYTES_LITERAL() != null) {
-				//TODO: fix bytes into Bytes[] mb? or translate to normal string?
-				return this.getStr(this.getLocInfo(ctx), ctx.BYTES_LITERAL().getText());
+				return this.getStr(ctx.getStart().getLine(), ctx.BYTES_LITERAL().getText());
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1597,15 +1593,17 @@ public class AstBuilder {
 			return null;
 		}
 
-		private LocInfo getLocInfo(TerminalNode node) {
-			return new LocInfo(this.filePath, node.getSymbol().getLine(), node.getSymbol().getLine());
+		private java.lang.Integer getLocInfo(TerminalNode node) {
+			java.lang.Integer lineNr = node.getSymbol().getLine();
+			return this.locCounter.count(lineNr, lineNr);
 		}
 
-		private LocInfo getLocInfo(ParserRuleContext ctx) {
+		private java.lang.Integer getLocInfo(ParserRuleContext ctx) {
+			java.lang.Integer startLine = ctx.getStart().getLine();
 			if (ctx.getStop() == null) {
-				return new LocInfo(this.filePath, ctx.getStart().getLine(), ctx.getStart().getLine());
+				return this.locCounter.count(startLine, startLine);
 			}
-			return new LocInfo(this.filePath, ctx.getStart().getLine(), ctx.getStop().getLine());
+			return this.locCounter.count(startLine, ctx.getStop().getLine());
 		}
 
 		private Identifier getIdentifier(TerminalNode name) {
@@ -1676,7 +1674,7 @@ public class AstBuilder {
 		private class Wrapper<T> extends AstNode {
 			private final T item;
 
-			public Wrapper(LocInfo locInfo, T item) {
+			public Wrapper(Integer locInfo, T item) {
 				super(locInfo);
 				this.item = item;
 			}
@@ -1694,12 +1692,12 @@ public class AstBuilder {
 		private class CollectionWrapper<T> extends AstNode {
 			private final List<T> items;
 
-			public CollectionWrapper(LocInfo locInfo, List<T> items) {
+			public CollectionWrapper(Integer locInfo, List<T> items) {
 				super(locInfo);
 				this.items = items;
 			}
 
-			public CollectionWrapper(LocInfo locInfo, T item) {
+			public CollectionWrapper(Integer locInfo, T item) {
 				super(locInfo);
 				this.items = new ArrayList<>();
 				this.items.add(item);

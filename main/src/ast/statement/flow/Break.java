@@ -1,6 +1,5 @@
 package ast.statement.flow;
 
-import ast.LocInfo;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -9,7 +8,7 @@ import ast.Visitor;
  * Created by Nik on 25-05-2015
  */
 public class Break extends Statement {
-	public Break(@NotNull LocInfo locInfo) {
+	public Break(@NotNull Integer locInfo) {
 		super(locInfo);
 	}
 

@@ -1,6 +1,5 @@
 package ast.arg;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.Visitor;
 
@@ -9,7 +8,7 @@ import ast.Visitor;
  */
 public class SimpleArg extends Arg {
 
-	public SimpleArg(LocInfo locInfo, Expr value) {
+	public SimpleArg(Integer locInfo, Expr value) {
 		super(locInfo, value);
 	}
 

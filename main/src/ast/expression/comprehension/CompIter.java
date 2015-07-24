@@ -1,6 +1,5 @@
 package ast.expression.comprehension;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -11,7 +10,7 @@ public abstract class CompIter extends Expr {
 
 	private final CompIter nextLink;
 
-	public CompIter(@NotNull LocInfo locInfo, CompIter nextLink) {
+	public CompIter(@NotNull Integer locInfo, CompIter nextLink) {
 		super(locInfo);
 		this.nextLink = nextLink;
 	}

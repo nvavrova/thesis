@@ -1,6 +1,5 @@
 package model;
 
-import ast.LocInfo;
 import thesis.Helper;
 
 import java.util.*;
@@ -13,17 +12,17 @@ public class Class {
 
 	private final String name;
 	private final Module module;
-	private final LocInfo loc;
+	private final Integer loc;
 
 	private final Set<Class> dependentOn;
 
 	private final List<String> parents;
 	private final Set<String> variables;
 	private final List<Method> methods;
-	private final Map<String, Integer> methodPosition;
+	private final Map<String, java.lang.Integer> methodPosition;
 	private Boolean usesGlobals;
 
-	public Class(String name, Module module, LocInfo loc, List<String> parents) {
+	public Class(String name, Module module, Integer loc, List<String> parents) {
 		this.name = name;
 		this.module = module;
 		this.loc = loc;
@@ -40,11 +39,11 @@ public class Class {
 		this.dependentOn.add(c);
 	}
 
-	public void addAccessor(String name, LocInfo loc, List<String> params) {
+	public void addAccessor(String name, Integer loc, List<String> params) {
 		this.addMethod(name, loc, params, true);
 	}
 
-	public void addMethod(String name, LocInfo loc, List<String> params) {
+	public void addMethod(String name, Integer loc, List<String> params) {
 		this.addMethod(name, loc, params, false);
 	}
 
@@ -94,11 +93,11 @@ public class Class {
 				&& this.hasTooManyMethodsWithNoParams() && this.usesGlobals();
 	}
 
-	public Integer getLoc() {
-		return this.loc.getLocSpan();
+	public java.lang.Integer getLoc() {
+		return this.loc;
 	}
 
-	public Integer getNumberOfAccessors() {
+	public java.lang.Integer getNumberOfAccessors() {
 		Long count = this.methods.stream()
 				.filter(m -> m.isAccessor())
 				.count();
@@ -110,7 +109,7 @@ public class Class {
 	}
 
 	public String getFilePath() {
-		return this.loc.getFilePath();
+		return this.module.getFilePath();
 	}
 
 	public Boolean usesGlobals() {
@@ -127,25 +126,25 @@ public class Class {
 	}
 
 	public Boolean isLargeClass() {
-		return this.loc.getLocSpan() > 800;
+		return this.loc > 800;
 	}
 
-	public Integer getAmountOfMethods() {
+	public java.lang.Integer getAmountOfMethods() {
 		return this.methods.size();
 	}
 
-	public Integer getAmountOfVariables() {
+	public java.lang.Integer getAmountOfVariables() {
 		return this.variables.size();
 	}
 
-	public Integer getAmountOfPublicVariables() {
+	public java.lang.Integer getAmountOfPublicVariables() {
 		Long count = this.variables.stream()
 				.filter(v -> !v.startsWith("_"))
 				.count();
 		return count.intValue();
 	}
 
-	public Integer getAmountOfPrivateVariables() {
+	public java.lang.Integer getAmountOfPrivateVariables() {
 		Long count = this.variables.stream()
 				.filter(v -> v.startsWith("_"))
 				.count();
@@ -196,7 +195,7 @@ public class Class {
 		return false;
 	}
 
-	public Integer getNrOfMethodsWithNoParams() {
+	public java.lang.Integer getNrOfMethodsWithNoParams() {
 		Long count = this.methods.stream()
 				.filter(e -> e.hasNoParams())
 				.count();
@@ -207,14 +206,14 @@ public class Class {
 		return this.getNrOfMethodsWithNoParams() > 8;
 	}
 
-	public Integer amountOfRelatedDataClasses() {
+	public java.lang.Integer amountOfRelatedDataClasses() {
 		Long count = this.dependentOn.stream()
 				.filter(c -> c.isDataClass())
 				.count();
 		return count.intValue();
 	}
 
-	private void addMethod(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
+	private void addMethod(String name, Integer loc, List<String> params, Boolean isAccessor) {
 		Method method = new Method(name, loc, params, isAccessor);
 		this.methodPosition.put(name, this.methods.size());
 		this.methods.add(method);
@@ -223,11 +222,11 @@ public class Class {
 	private Method getMethod(String name) {
 		assert (this.methodPosition.containsKey(name));
 
-		Integer pos = this.methodPosition.get(name);
+		java.lang.Integer pos = this.methodPosition.get(name);
 		return this.methods.get(pos);
 	}
 
-	private Integer calculateLcom() {
+	private java.lang.Integer calculateLcom() {
 		int intersect = 0;
 		int nonIntersect = 0;
 		for (int i = 0; i < this.methods.size(); i++) {

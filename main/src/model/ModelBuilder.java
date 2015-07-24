@@ -1,6 +1,5 @@
 package model;
 
-import ast.LocInfo;
 import ast.Module;
 import ast.path.Path;
 import ast.expression.primary.atom.Identifier;
@@ -116,7 +115,7 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(ClassDef n) {
-			LocInfo locInfo = n.getLocInfo();
+			Integer locInfo = n.getLocInfo();
 
 			//accounts for the classes within classes
 			List<String> prevClsNames = this.classes.stream()

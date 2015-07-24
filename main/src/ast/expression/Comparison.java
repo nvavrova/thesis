@@ -1,6 +1,5 @@
 package ast.expression;
 
-import ast.LocInfo;
 import ast.expression.logical.Logical;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -15,7 +14,7 @@ public class Comparison extends Logical {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Comparison(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Comparison(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 
 		assert operands.size() - 1 == operators.size();
@@ -32,7 +31,7 @@ public class Comparison extends Logical {
 		return this.operators;
 	}
 
-	public Integer getArity() {
+	public java.lang.Integer getArity() {
 		return this.operands.size();
 	}
 

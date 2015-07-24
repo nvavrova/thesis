@@ -1,6 +1,5 @@
 package ast.expression.arithmetic;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -16,7 +15,7 @@ public class Arithmetic extends ExprNoCond {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Arithmetic(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Arithmetic(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 
 		this.operands = operands;

@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.path.Path;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -16,7 +15,7 @@ public class ImportFrom extends Import {
 
 	private final Path module;
 
-	public ImportFrom(@NotNull LocInfo locInfo, @NotNull List<Path> paths, @NotNull Path module) {
+	public ImportFrom(@NotNull Integer locInfo, @NotNull List<Path> paths, @NotNull Path module) {
 		super(locInfo, paths);
 		this.module = module;
 	}

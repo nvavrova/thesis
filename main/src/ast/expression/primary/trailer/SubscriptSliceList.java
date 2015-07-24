@@ -1,6 +1,5 @@
 package ast.expression.primary.trailer;
 
-import ast.LocInfo;
 import ast.expression.ExprNoCond;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -14,7 +13,7 @@ public class SubscriptSliceList extends ExprNoCond implements Trailer {
 
 	private final List<SubscriptSliceListElem> indexes;
 
-	public SubscriptSliceList(@NotNull LocInfo locInfo, List<SubscriptSliceListElem> indexes) {
+	public SubscriptSliceList(@NotNull Integer locInfo, List<SubscriptSliceListElem> indexes) {
 		super(locInfo);
 		this.indexes = indexes;
 	}

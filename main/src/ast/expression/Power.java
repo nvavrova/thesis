@@ -1,6 +1,5 @@
 package ast.expression;
 
-import ast.LocInfo;
 import ast.expression.primary.atom.Atom;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -13,7 +12,7 @@ public class Power extends ExprNoCond {
 	private final Atom base;
 	private final Expr exponent;
 
-	public Power(LocInfo locInfo, @NotNull Atom base, @NotNull Expr exponent) {
+	public Power(Integer locInfo, @NotNull Atom base, @NotNull Expr exponent) {
 		super(locInfo);
 		this.base = base;
 		this.exponent = exponent;

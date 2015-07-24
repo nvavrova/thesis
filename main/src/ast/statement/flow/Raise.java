@@ -1,6 +1,5 @@
 package ast.statement.flow;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -14,7 +13,7 @@ public class Raise extends Statement {
 	private final Expr type;
 	private final Expr source;
 
-	public Raise(@NotNull LocInfo locInfo, Expr type, Expr source) {
+	public Raise(@NotNull Integer locInfo, Expr type, Expr source) {
 		super(locInfo);
 		this.type = type;
 		this.source = source;

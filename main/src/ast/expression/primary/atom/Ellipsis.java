@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -9,7 +8,7 @@ import ast.Visitor;
  */
 public class Ellipsis extends Atom {
 
-	public Ellipsis(@NotNull LocInfo locInfo) {
+	public Ellipsis(@NotNull Integer locInfo) {
 		super(locInfo);
 	}
 

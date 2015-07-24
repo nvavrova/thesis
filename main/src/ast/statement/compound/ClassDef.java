@@ -1,7 +1,6 @@
 package ast.statement.compound;
 
 import ast.Decorator;
-import ast.LocInfo;
 import ast.Suite;
 import ast.arg.SimpleArg;
 import ast.expression.primary.atom.Identifier;
@@ -22,7 +21,7 @@ public class ClassDef extends Statement {
 	private final List<SimpleArg> inheritance; //either power(a.b) or identifier(a)
 	private List<Decorator> decorators;
 
-	public ClassDef(@NotNull LocInfo locInfo, @NotNull Identifier name, @NotNull Suite body, @NotNull List<SimpleArg> inheritance) {
+	public ClassDef(@NotNull Integer locInfo, @NotNull Identifier name, @NotNull Suite body, @NotNull List<SimpleArg> inheritance) {
 		super(locInfo);
 		this.name = name;
 		this.body = body;

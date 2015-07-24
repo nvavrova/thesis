@@ -12,7 +12,7 @@ public class Decorator extends AstNode {
 	private final DottedPath name;
 	private final ArgList argList;
 
-	public Decorator(@NotNull LocInfo locInfo, @NotNull DottedPath name, ArgList argList) {
+	public Decorator(@NotNull Integer locInfo, @NotNull DottedPath name, ArgList argList) {
 		super(locInfo);
 		this.name = name;
 		this.argList = argList;

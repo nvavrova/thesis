@@ -1,6 +1,5 @@
 package ast.expression.primary.atom;
 
-import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -8,7 +7,7 @@ import ast.Visitor;
  * Created by Nik on 15-06-2015
  */
 public class None extends Atom {
-	public None(@NotNull LocInfo locInfo) {
+	public None(@NotNull Integer locInfo) {
 		super(locInfo);
 	}
 

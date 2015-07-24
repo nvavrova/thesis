@@ -1,6 +1,5 @@
 package ast.statement.compound;
 
-import ast.LocInfo;
 import ast.Suite;
 import ast.expression.Expr;
 import ast.statement.Statement;
@@ -21,7 +20,7 @@ public class If extends Statement {
 	private final Map<Expr, Suite> bodies;
 	private final Suite elseBody;
 
-	public If(@NotNull LocInfo locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
+	public If(@NotNull Integer locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
 		super(locInfo);
 
 		this.conditions = new ArrayList<>();

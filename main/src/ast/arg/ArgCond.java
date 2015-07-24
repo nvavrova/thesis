@@ -1,6 +1,5 @@
 package ast.arg;
 
-import ast.LocInfo;
 import ast.expression.comprehension.CompFor;
 import ast.expression.Expr;
 
@@ -11,7 +10,7 @@ public class ArgCond extends SimpleArg {
 
 	private final CompFor condition;
 
-	public ArgCond(LocInfo locInfo, Expr value, CompFor condition) {
+	public ArgCond(Integer locInfo, Expr value, CompFor condition) {
 		super(locInfo, value);
 		this.condition = condition;
 	}

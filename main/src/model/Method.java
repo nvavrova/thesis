@@ -1,6 +1,5 @@
 package model;
 
-import ast.LocInfo;
 import thesis.Helper;
 
 import java.util.HashSet;
@@ -12,12 +11,12 @@ import java.util.Set;
  */
 public class Method {
 	private final String name;
-	private final LocInfo loc;
+	private final Integer loc;
 	private final Boolean isAccessor;
 	private final Set<String> usedClassVars;
 	private final List<String> params;
 
-	public Method(String name, LocInfo loc, List<String> params, Boolean isAccessor) {
+	public Method(String name, Integer loc, List<String> params, Boolean isAccessor) {
 		this.name = name;
 		this.loc = loc;
 		this.params = params;
@@ -29,8 +28,8 @@ public class Method {
 		return this.name;
 	}
 
-	public Integer getLoc() {
-		return this.loc.getLocSpan();
+	public java.lang.Integer getLoc() {
+		return this.loc;
 	}
 
 	public Set<String> getUsedClassVars() {
@@ -54,7 +53,7 @@ public class Method {
 	}
 
 	public Boolean isLongMethod() {
-		return this.loc.getLocSpan() > 100;
+		return this.loc > 100;
 	}
 
 	public Boolean hasNoParams() {

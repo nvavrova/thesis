@@ -1,6 +1,5 @@
 package ast.param;
 
-import ast.LocInfo;
 import ast.AstNode;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -17,11 +16,11 @@ public class Params extends AstNode {
 	private final List<SimpleParam> args;
 	private final List<SimpleParam> kwargs;
 
-	public Params(@NotNull LocInfo locInfo) {
+	public Params(@NotNull Integer locInfo) {
 		this(locInfo, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 	}
 
-	public Params(@NotNull LocInfo locInfo, @NotNull List<SimpleParam> positionalArgs, @NotNull List<SimpleParam> args, @NotNull List<SimpleParam> kwargs) {
+	public Params(@NotNull Integer locInfo, @NotNull List<SimpleParam> positionalArgs, @NotNull List<SimpleParam> args, @NotNull List<SimpleParam> kwargs) {
 		super(locInfo);
 		this.positionalArgs = positionalArgs;
 		this.args = args;

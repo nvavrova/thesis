@@ -1,6 +1,5 @@
 package ast.expression.comprehension;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -13,7 +12,7 @@ public class CondComprehension extends Comprehension {
 	private final Expr expression;
 	private final CompFor compFor;
 
-	public CondComprehension(@NotNull LocInfo locInfo, @NotNull Expr expression, @NotNull CompFor compFor) {
+	public CondComprehension(@NotNull Integer locInfo, @NotNull Expr expression, @NotNull CompFor compFor) {
 		super(locInfo);
 		this.expression = expression;
 		this.compFor = compFor;

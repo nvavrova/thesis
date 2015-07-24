@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class Delete extends Statement {
 
 	private final ExprList items;
 
-	public Delete(@NotNull LocInfo locInfo, @NotNull ExprList items) {
+	public Delete(@NotNull Integer locInfo, @NotNull ExprList items) {
 		super(locInfo);
 		this.items = items;
 	}

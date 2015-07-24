@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -14,11 +13,11 @@ public class Assert extends Statement {
 	private final Expr assertion;
 	private final Expr assertionError;
 
-	public Assert(@NotNull LocInfo locInfo, @NotNull Expr assertion) {
+	public Assert(@NotNull Integer locInfo, @NotNull Expr assertion) {
 		this(locInfo, assertion, null);
 	}
 
-	public Assert(@NotNull LocInfo locInfo, @NotNull Expr assertion, Expr assertionError) {
+	public Assert(@NotNull Integer locInfo, @NotNull Expr assertion, Expr assertionError) {
 		super(locInfo);
 		this.assertion = assertion;
 		this.assertionError = assertionError;

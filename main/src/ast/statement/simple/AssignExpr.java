@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -11,7 +10,7 @@ public class AssignExpr extends Assign {
 
 	private final ExprList source;
 
-	public AssignExpr(@NotNull LocInfo locInfo, String operator, ExprList targets, @NotNull ExprList source) {
+	public AssignExpr(@NotNull Integer locInfo, String operator, ExprList targets, @NotNull ExprList source) {
 		super(locInfo, operator, targets);
 		this.source = source;
 	}

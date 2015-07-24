@@ -1,6 +1,5 @@
 package ast.statement.simple;
 
-import ast.LocInfo;
 import ast.statement.flow.Yield;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -12,7 +11,7 @@ public class AssignYield extends Assign {
 
 	public final Yield yield;
 
-	public AssignYield(@NotNull LocInfo locInfo, @NotNull String operator, @NotNull ExprList targets, @NotNull Yield yield) {
+	public AssignYield(@NotNull Integer locInfo, @NotNull String operator, @NotNull ExprList targets, @NotNull Yield yield) {
 		super(locInfo, operator, targets);
 		this.yield = yield;
 	}

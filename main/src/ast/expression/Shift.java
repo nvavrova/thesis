@@ -1,6 +1,5 @@
 package ast.expression;
 
-import ast.LocInfo;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -14,7 +13,7 @@ public class Shift extends ExprNoCond {
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Shift(@NotNull LocInfo locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Shift(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 		this.operands = operands;
 		this.operators = operators;
