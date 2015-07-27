@@ -1,8 +1,10 @@
 package model;
 
-import thesis.Helper;
+import helpers.Helper;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Nik on 30-06-2015
@@ -14,12 +16,13 @@ public class Class {
 	private final Module module;
 	private final Integer loc;
 
-	private final Set<Class> dependentOn;
+	private final Map<String, Class> dependentOn;
 
 	private final List<String> parents;
+	private final Set<String> references;
 	private final Set<String> variables;
 	private final List<Method> methods;
-	private final Map<String, java.lang.Integer> methodPosition;
+	private final Map<String, Integer> methodPosition;
 	private Boolean usesGlobals;
 
 	public Class(String name, Module module, Integer loc, List<String> parents) {
@@ -27,16 +30,30 @@ public class Class {
 		this.module = module;
 		this.loc = loc;
 
-		this.dependentOn = new HashSet<>();
+		this.dependentOn = new HashMap<>();
 		this.parents = parents;
+		this.references = new HashSet<>();
 		this.variables = new HashSet<>();
 		this.methods = new ArrayList<>();
 		this.methodPosition = new HashMap<>();
 		this.usesGlobals = false;
 	}
 
-	public void addDependency(Class c) {
-		this.dependentOn.add(c);
+	public void linkVarToClass(String alias, Class c) {
+		if (this.isAliasReferenced(alias)) {
+			this.dependentOn.put(alias, c);
+		}
+	}
+
+	private boolean isAliasReferenced(String alias) {
+		return this.variables.contains(alias) || this.parents.contains(alias) || this.references.contains(alias);
+	}
+
+	public void printDependencies() {
+		System.out.println(this.getName() + " DEPENDENCIES");
+		for (String a : this.dependentOn.keySet()) {
+			System.out.println("\t" + a + "  ->  " + this.dependentOn.get(a).getName());
+		}
 	}
 
 	public void addAccessor(String name, Integer loc, List<String> params) {
@@ -47,7 +64,7 @@ public class Class {
 		this.addMethod(name, loc, params, false);
 	}
 
-	public Boolean hasNoMethods() {
+	public boolean hasNoMethods() {
 		return this.methods.size() == 0;
 	}
 
@@ -63,41 +80,49 @@ public class Class {
 		this.variables.add(varName);
 	}
 
-	public void addVariable(String varName, String methodName) {
-		Method method = this.getMethod(methodName);
-		method.addVarUse(varName);
-		this.addVariable(varName);
+//	public void addVariable(String varName, String methodName) {
+//		Method method = this.getMethod(methodName);
+//		method.addVarUse(varName);
+//		this.addVariable(varName);
+//	}
+
+	public void addReference(String name) {
+		this.references.add(name);
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
-	public Boolean isBlob() {
+	public boolean isBlob() {
 		//TODO: add relations to Data Classes
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
 				(this.hasControllerName() || this.hasControllerMethods());
-		// && this.amountOfRelatedDataClasses() > 1;
+		// && this.relatedDataClassesCount() > 1;
 	}
 
-	public Boolean isSwissArmyKnife() {
+	public boolean isSwissArmyKnife() {
 		return this.hasTooManyParents();
 	}
 
-	public Boolean isFunctionalDecomposition() {
-		return this.hasProceduralName() && this.noInheritance(); //TODO
+	public boolean isFunctionalDecomposition() {
+		return (this.relatedPrivateFieldsWithOneMethodCount() > 2) && (this.hasProceduralName() && this.noInheritance()); //TODO
 	}
 
-	public Boolean isSpaghettiCode() {
+	public boolean isSpaghettiCode() {
 		return this.noInheritance() && this.hasProceduralName() && this.hasLongMethod()
 				&& this.hasTooManyMethodsWithNoParams() && this.usesGlobals();
 	}
 
-	public java.lang.Integer getLoc() {
+	public boolean privateFieldsWithOneMethod() {
+		return this.privateVariablesCount() > 10 && this.methodCount() == 1;
+	}
+
+	public Integer getLoc() {
 		return this.loc;
 	}
 
-	public java.lang.Integer getNumberOfAccessors() {
+	public Integer getNumberOfAccessors() {
 		Long count = this.methods.stream()
 				.filter(m -> m.isAccessor())
 				.count();
@@ -117,43 +142,57 @@ public class Class {
 		return this.usesGlobals;
 	}
 
+	public Set<Class> getDependencies() {
+		return this.dependentOn.values().stream().collect(Collectors.toSet());
+	}
+
 	public void registerGlobalUse() {
 		this.usesGlobals = true;
 	}
 
-	public Boolean hasLowCohesion() {
+	public boolean hasLowCohesion() {
 		return this.calculateLcom() > 5;
 	}
 
-	public Boolean isLargeClass() {
+	public boolean isLargeClass() {
 		return this.loc > 800;
 	}
 
-	public java.lang.Integer getAmountOfMethods() {
+	public Integer methodCount() {
 		return this.methods.size();
 	}
 
-	public java.lang.Integer getAmountOfVariables() {
+	public Integer variablesCount() {
 		return this.variables.size();
 	}
 
-	public java.lang.Integer getAmountOfPublicVariables() {
-		Long count = this.variables.stream()
-				.filter(v -> !v.startsWith("_"))
-				.count();
+	public Integer publicVariablesCount() {
+		Long count = this.getPublicVariablesStream().count();
 		return count.intValue();
 	}
 
-	public java.lang.Integer getAmountOfPrivateVariables() {
-		Long count = this.variables.stream()
-				.filter(v -> v.startsWith("_"))
-				.count();
+	public Integer privateVariablesCount() {
+		Long count = this.getPrivateVariablesStream().count();
 		return count.intValue();
 	}
 
-	public Boolean isDataClass() {
+	private boolean isPrivateVariable(String varName) {
+		return varName.startsWith("_");
+	}
+
+	private Stream<String> getPrivateVariablesStream() {
+		return this.variables.stream()
+				.filter(v -> this.isPrivateVariable(v));
+	}
+
+	private Stream<String> getPublicVariablesStream() {
+		return this.variables.stream()
+				.filter(v -> !this.isPrivateVariable(v));
+	}
+
+	public boolean isDataClass() {
 		//TODO: figure out how to redefine a DataClass for Python
-		return this.getAmountOfPublicVariables() > 10;
+		return this.publicVariablesCount() > 10;
 //		return this.getNumberOfAccessors() > 5;
 	}
 
@@ -174,19 +213,19 @@ public class Class {
 		return false;
 	}
 
-	public Boolean noInheritance() {
+	public boolean noInheritance() {
 		return this.parents.size() == 0;
 	}
 
-	public Boolean lowAmountOfMethods() {
+	public boolean lowAmountOfMethods() {
 		return this.methods.size() <= 4;
 	}
 
-	public Boolean hasTooManyParents() {
+	public boolean hasTooManyParents() {
 		return this.parents.size() > 2;
 	}
 
-	public Boolean hasLongMethod() {
+	public boolean hasLongMethod() {
 		for (Method m : this.methods) {
 			if (m.isLongMethod()) {
 				return true;
@@ -195,19 +234,26 @@ public class Class {
 		return false;
 	}
 
-	public java.lang.Integer getNrOfMethodsWithNoParams() {
+	public Integer methodsWithNoParamsCount() {
 		Long count = this.methods.stream()
-				.filter(e -> e.hasNoParams())
+				.filter(m -> m.hasNoParams())
 				.count();
 		return count.intValue();
 	}
 
-	public Boolean hasTooManyMethodsWithNoParams() {
-		return this.getNrOfMethodsWithNoParams() > 8;
+	public boolean hasTooManyMethodsWithNoParams() {
+		return this.methodsWithNoParamsCount() > 8;
 	}
 
-	public java.lang.Integer amountOfRelatedDataClasses() {
-		Long count = this.dependentOn.stream()
+	public Integer relatedPrivateFieldsWithOneMethodCount() {
+		Long count = this.dependentOn.values().stream()
+				.filter(c -> c.privateFieldsWithOneMethod())
+				.count();
+		return count.intValue();
+	}
+
+	public Integer relatedDataClassesCount() {
+		Long count = this.dependentOn.values().stream()
 				.filter(c -> c.isDataClass())
 				.count();
 		return count.intValue();
@@ -222,15 +268,15 @@ public class Class {
 	private Method getMethod(String name) {
 		assert (this.methodPosition.containsKey(name));
 
-		java.lang.Integer pos = this.methodPosition.get(name);
+		Integer pos = this.methodPosition.get(name);
 		return this.methods.get(pos);
 	}
 
-	private java.lang.Integer calculateLcom() {
+	private Integer calculateLcom() {
 		int intersect = 0;
 		int nonIntersect = 0;
 		for (int i = 0; i < this.methods.size(); i++) {
-			for (int j = i + 1; j > i && j < methods.size(); j++) {
+			for (int j = i + 1; j > i && j < this.methods.size(); j++) {
 				Method a = this.methods.get(i);
 				Method b = this.methods.get(j);
 				if (a.hasVariableIntersection(b)) {

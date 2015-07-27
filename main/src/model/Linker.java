@@ -1,7 +1,7 @@
 package model;
 
-import thesis.FileHelper;
-import thesis.StringHelper;
+import helpers.FileHelper;
+import helpers.StringHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ public class Linker {
 	}
 
 	public void link() {
+		this.modules.values().forEach(model.Module::link);
 	}
 
 	public void addImport(String source, String target, String alias) {
@@ -35,7 +36,7 @@ public class Linker {
 		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
 		Boolean added = false;
 		for (String sourcePath : sourcePaths) {
-			String fullPath = sourcePath + "\\" + this.getFilePath(target);
+			String fullPath = sourcePath + FILE_DELIMITER + this.getFilePath(target);
 			added = this.addModuleImport(sourceModule, fullPath, alias);
 			if (added) {
 				break;
@@ -57,15 +58,14 @@ public class Linker {
 		}
 	}
 
-	private void addImportSpecific(String source, String importPath, String target, String alias) {
+	private void addImportSpecific(String source, String importPath, String className, String alias) {
 		Module sourceModule = this.modules.get(source);
 		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
 
 		String pathMiddle = StringHelper.swapDelimiter(importPath, MODULE_DELIMITER, FILE_DELIMITER);
 
-		String modulePathEnd = pathMiddle + FILE_DELIMITER + this.getFilePath(target);
+		String modulePathEnd = pathMiddle + FILE_DELIMITER + this.getFilePath(className);
 		String classPathEnd = pathMiddle + FileHelper.PYTHON_EXTENSION;
-		String className = target;
 
 		Boolean added = false;
 		for (String path : sourcePaths) {
@@ -81,7 +81,7 @@ public class Linker {
 		}
 
 		if (!added) {
-			System.out.println("UNRESOLVED: \n\tsource: \t" + source + "\n\timport: \t" + importPath + "   " + target);
+			System.out.println("UNRESOLVED: \n\tsource: \t" + source + "\n\timport: \t" + importPath + "   " + className);
 		}
 	}
 

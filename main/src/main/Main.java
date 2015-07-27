@@ -1,9 +1,10 @@
-package thesis;
+package main;
 
 import ast.AstBuilder;
 import ast.Module;
 import gen.Python3Lexer;
 import gen.Python3Parser;
+import helpers.FileHelper;
 import model.Class;
 import model.ModelBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -29,15 +30,15 @@ public class Main {
 			for (Class pyClass : pyClasses) {
 				Map<String, Boolean> antipatterns = new HashMap<>();
 
-				if (!methods.containsKey(pyClass.getAmountOfMethods())) {
-					methods.put(pyClass.getAmountOfMethods(), 0);
+				if (!methods.containsKey(pyClass.methodCount())) {
+					methods.put(pyClass.methodCount(), 0);
 				}
-				methods.put(pyClass.getAmountOfMethods(), methods.get(pyClass.getAmountOfMethods()) + 1);
+				methods.put(pyClass.methodCount(), methods.get(pyClass.methodCount()) + 1);
 
-				if (!vars.containsKey(pyClass.getAmountOfVariables())) {
-					vars.put(pyClass.getAmountOfVariables(), 0);
+				if (!vars.containsKey(pyClass.variablesCount())) {
+					vars.put(pyClass.variablesCount(), 0);
 				}
-				vars.put(pyClass.getAmountOfVariables(), vars.get(pyClass.getAmountOfVariables()) + 1);
+				vars.put(pyClass.variablesCount(), vars.get(pyClass.variablesCount()) + 1);
 
 				antipatterns.put("DATA CLASS", pyClass.isDataClass());
 				antipatterns.put("BLOB", pyClass.isBlob());
@@ -49,11 +50,13 @@ public class Main {
 //					System.out.println(a.getValue().getClass());
 //				}
 
-				for (String name : antipatterns.keySet()) {
-					if (antipatterns.get(name)) {
-						printAntipattern(name, fileName, pyClass.getName());
-					}
-				}
+				antipatterns.keySet().stream()
+						.filter(name -> antipatterns.get(name))
+						.forEach(name -> {
+							printAntipattern(name, fileName, pyClass.getName());
+						});
+
+				pyClass.printDependencies();
 //
 //				if (pyClass.noInheritance()) {
 //					System.out.println("noInheritance " + pyClass.getName() + "  " + fileName);
@@ -75,14 +78,14 @@ public class Main {
 //				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));
 			}
 		}
-		System.out.println("METHODS:");
-		for (Integer i : methods.keySet()) {
-			System.out.println(i + "\t=> " + methods.get(i));
-		}
-		System.out.println("VARIABLES:");
-		for (Integer i : vars.keySet()) {
-			System.out.println(i + "\t=> " + vars.get(i));
-		}
+//		System.out.println("METHODS:");
+//		for (Integer i : methods.keySet()) {
+//			System.out.println(i + "\t=> " + methods.get(i));
+//		}
+//		System.out.println("VARIABLES:");
+//		for (Integer i : vars.keySet()) {
+//			System.out.println(i + "\t=> " + vars.get(i));
+//		}
 	}
 
 	private static void printAntipattern(String antipatternName, String fileName, String className) {

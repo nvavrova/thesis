@@ -1,14 +1,17 @@
 class ClsOne():
     var = 2
 
-    def print_stuff(self):
+    def print_stuff(self):  # comment
         print (self.var)
         self.multiply(3)
+        # comment 2
         print (ClsOne.var)
 
     def multiply(self, number):
         return number * 2
 
+
+# comment 3
 
 class ClsTwo():
     def met(self):

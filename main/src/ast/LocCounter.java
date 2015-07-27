@@ -1,4 +1,6 @@
-package thesis;
+package ast;
+
+import helpers.FileHelper;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,8 +11,7 @@ import java.util.regex.Pattern;
  */
 public class LocCounter {
 
-	private static final Pattern emptyPattern = Pattern.compile("[ \t]*");
-	private static final Pattern commentPattern = Pattern.compile("[ \t]*#.*");
+	private static final Pattern emptyOrComment = Pattern.compile("([ \t]*|[ \t]*#.*)");
 
 	private final FileHelper fileHelper;
 
@@ -34,18 +35,11 @@ public class LocCounter {
 	}
 
 	public boolean countsTowardsLoc(String line) {
-		boolean commentLine = this.isCommentLine(line);
-		boolean emptyLine = this.isEmptyLine(line);
-		return !(commentLine || emptyLine);
+		return !this.isEmptyOrComment(line);
 	}
 
-	public boolean isEmptyLine(String line) {
-		Matcher matcher = emptyPattern.matcher(line);
-		return matcher.matches();
-	}
-
-	public boolean isCommentLine(String line) {
-		Matcher matcher = commentPattern.matcher(line);
+	private boolean isEmptyOrComment(String line) {
+		Matcher matcher = emptyOrComment.matcher(line);
 		return matcher.matches();
 	}
 }

@@ -1,6 +1,6 @@
 package model;
 
-import thesis.Helper;
+import helpers.Helper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +28,7 @@ public class Method {
 		return this.name;
 	}
 
-	public java.lang.Integer getLoc() {
+	public Integer getLoc() {
 		return this.loc;
 	}
 

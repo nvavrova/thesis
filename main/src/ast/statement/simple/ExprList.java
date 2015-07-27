@@ -23,7 +23,7 @@ public class ExprList extends Statement {
 		return this.values;
 	}
 
-	public java.lang.Integer size() {
+	public Integer size() {
 		return this.values.size();
 	}
 

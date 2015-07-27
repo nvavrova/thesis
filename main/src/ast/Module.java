@@ -2,7 +2,7 @@ package ast;
 
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import thesis.StringHelper;
+import helpers.StringHelper;
 
 import java.util.List;
 

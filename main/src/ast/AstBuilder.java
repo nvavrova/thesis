@@ -36,8 +36,7 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import thesis.LocCounter;
-import thesis.StringHelper;
+import helpers.StringHelper;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -1203,9 +1202,9 @@ public class AstBuilder {
 			throw new IllegalArgumentException("Unknown context");
 		}
 
-		private AstNode getStr(java.lang.Integer startLine, String str) {
+		private AstNode getStr(Integer startLine, String str) {
 			//this hacky method is here because end line of ctx is not correct so it's necessary to calculate it manually
-			java.lang.Integer endLine = startLine + StringHelper.explode(str, "\n").size() - 1;
+			Integer endLine = startLine + StringHelper.explode(str, "\n").size() - 1;
 			Integer locInfo = this.locCounter.count(startLine, endLine);
 			return new Str(locInfo, str);
 		}
@@ -1593,13 +1592,13 @@ public class AstBuilder {
 			return null;
 		}
 
-		private java.lang.Integer getLocInfo(TerminalNode node) {
-			java.lang.Integer lineNr = node.getSymbol().getLine();
+		private Integer getLocInfo(TerminalNode node) {
+			Integer lineNr = node.getSymbol().getLine();
 			return this.locCounter.count(lineNr, lineNr);
 		}
 
-		private java.lang.Integer getLocInfo(ParserRuleContext ctx) {
-			java.lang.Integer startLine = ctx.getStart().getLine();
+		private Integer getLocInfo(ParserRuleContext ctx) {
+			Integer startLine = ctx.getStart().getLine();
 			if (ctx.getStop() == null) {
 				return this.locCounter.count(startLine, startLine);
 			}

@@ -1,4 +1,4 @@
-package thesis;
+package helpers;
 
 import com.sun.deploy.util.StringUtils;
 

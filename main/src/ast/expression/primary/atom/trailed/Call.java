@@ -21,6 +21,10 @@ public class Call extends TrailedAtom {
 		return this.args;
 	}
 
+	public String getName() {
+		return this.getBase().toString();
+	}
+
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);

@@ -31,7 +31,7 @@ public class Comparison extends Logical {
 		return this.operators;
 	}
 
-	public java.lang.Integer getArity() {
+	public Integer getArity() {
 		return this.operands.size();
 	}
 

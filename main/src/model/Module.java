@@ -21,6 +21,36 @@ public class Module {
 		this.moduleImports = new HashMap<>();
 	}
 
+	public void link() {
+		for (Class c : this.classes.values()) {
+			this.resolveClassImports(c);
+			this.resolveModuleImports(c);
+			this.resolveIntraModuleDependencies(c);
+		}
+	}
+
+	private void resolveClassImports(Class c) {
+		for (String alias : this.classImports.keySet()) {
+			c.linkVarToClass(alias, this.classImports.get(alias));
+		}
+	}
+
+	private void resolveModuleImports(Class c) {
+		for (String alias : this.moduleImports.keySet()) {
+			for (Class moduleClass : this.moduleImports.get(alias).getClasses()) {
+				String fullAlias = alias + "." + moduleClass.getName();
+				c.linkVarToClass(fullAlias, moduleClass);
+			}
+		}
+	}
+
+	//TODO
+	private void resolveIntraModuleDependencies(Class c) {
+		this.classes.values().stream()
+				.filter(dep -> !c.equals(dep))
+				.forEach(dep -> c.linkVarToClass(dep.getName(), dep));
+	}
+
 	public void addImport(Module m, String name) {
 		this.moduleImports.put(name, m);
 	}
@@ -45,6 +75,10 @@ public class Module {
 
 	public Collection<Class> getClasses() {
 		return this.classes.values();
+	}
+
+	public Integer getClassCount() {
+		return this.classes.values().size();
 	}
 
 	public Class getLastClass() {

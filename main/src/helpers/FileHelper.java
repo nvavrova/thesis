@@ -1,4 +1,4 @@
-package thesis;
+package helpers;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ public class FileHelper {
 	}
 
 	public List<String> getFileContents(Integer start, Integer end) {
+		end = Math.min(end, this.lines.size()); //in case last line is empty, when the BufferedReader doesn't collect it
 		return this.lines.subList(start, end);
 	}
 
