@@ -1,4 +1,4 @@
-package ast.expression.arithmetic;
+package ast.expression;
 
 import ast.expression.Expr;
 import ast.expression.ExprNoCond;

@@ -197,7 +197,6 @@ public class ModelBuilder {
 		@Override
 		public Void visit(AttributeRef n) {
 			this.addVar(n.toString());
-			//TODO: check if the IF below is necessary
 			if (n.getBase() instanceof Identifier) {
 				Identifier id = (Identifier) n.getBase();
 				this.addVar(id.getValue());

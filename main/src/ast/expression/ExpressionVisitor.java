@@ -1,6 +1,5 @@
 package ast.expression;
 
-import ast.expression.arithmetic.Arithmetic;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Or;
 import ast.expression.bitwise.Xor;

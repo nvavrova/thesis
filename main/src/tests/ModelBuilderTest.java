@@ -26,8 +26,8 @@ public class ModelBuilderTest {
 	}
 
 	@Test
-	public void collectAttributes() {
-		Map<String, Class> classes = TestHelper.getClasses("collect_attributes.py");
+	public void collectVariables() {
+		Map<String, Class> classes = TestHelper.getClasses("collect_variables.py");
 
 		Class one = classes.get("ClsOne");
 		Set<String> oneVars = one.getVariables();

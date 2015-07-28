@@ -11,13 +11,15 @@ import java.util.Set;
  */
 public class Method {
 	private final String name;
+	private final Class cls;
 	private final Integer loc;
 	private final Boolean isAccessor;
 	private final Set<String> usedClassVars;
 	private final List<String> params;
 
-	public Method(String name, Integer loc, List<String> params, Boolean isAccessor) {
+	public Method(String name, Class cls, Integer loc, List<String> params, Boolean isAccessor) {
 		this.name = name;
+		this.cls = cls;
 		this.loc = loc;
 		this.params = params;
 		this.isAccessor = isAccessor;
@@ -28,16 +30,20 @@ public class Method {
 		return this.name;
 	}
 
+	public Class getCls() {
+		return this.cls;
+	}
+
 	public Integer getLoc() {
 		return this.loc;
 	}
 
-	public Set<String> getUsedClassVars() {
-		return this.usedClassVars;
+	public Integer paramCount() {
+		return this.params.size();
 	}
 
-	public void addVarUse(String varName) {
-		this.usedClassVars.add(varName);
+	public Set<String> getUsedClassVars() {
+		return this.usedClassVars;
 	}
 
 	public Boolean isAccessor() {

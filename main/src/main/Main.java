@@ -2,6 +2,7 @@ package main;
 
 import ast.AstBuilder;
 import ast.Module;
+import db.DataHandler;
 import gen.Python3Lexer;
 import gen.Python3Parser;
 import helpers.FileHelper;
@@ -22,70 +23,31 @@ public class Main {
 
 		ModelBuilder collector = new ModelBuilder(folder.getAbsolutePath(), trees);
 		Map<String, model.Module> modules = collector.getModules();
-		Map<Integer, Integer> methods = new HashMap<>();
-		Map<Integer, Integer> vars = new HashMap<>();
+
+		Set<Class> classes = new HashSet<>();
+
 		for (String fileName : modules.keySet()) {
 			model.Module module = modules.get(fileName);
+			classes.addAll(module.getClasses());
+
 			Collection<Class> pyClasses = module.getClasses();
 			for (Class pyClass : pyClasses) {
 				Map<String, Boolean> antipatterns = new HashMap<>();
 
-				if (!methods.containsKey(pyClass.methodCount())) {
-					methods.put(pyClass.methodCount(), 0);
-				}
-				methods.put(pyClass.methodCount(), methods.get(pyClass.methodCount()) + 1);
-
-				if (!vars.containsKey(pyClass.variablesCount())) {
-					vars.put(pyClass.variablesCount(), 0);
-				}
-				vars.put(pyClass.variablesCount(), vars.get(pyClass.variablesCount()) + 1);
-
-				antipatterns.put("DATA CLASS", pyClass.isDataClass());
 				antipatterns.put("BLOB", pyClass.isBlob());
 				antipatterns.put("FUNCTIONAL DECOMPOSITION", pyClass.isFunctionalDecomposition());
 				antipatterns.put("SPAGHETTI CODE", pyClass.isSpaghettiCode());
 				antipatterns.put("SWISS ARMY KNIFE", pyClass.isSwissArmyKnife());
-
-//				for (Arg a : pyClass.getParents()) {
-//					System.out.println(a.getValue().getClass());
-//				}
 
 				antipatterns.keySet().stream()
 						.filter(name -> antipatterns.get(name))
 						.forEach(name -> {
 							printAntipattern(name, fileName, pyClass.getName());
 						});
-
-				pyClass.printDependencies();
-//
-//				if (pyClass.noInheritance()) {
-//					System.out.println("noInheritance " + pyClass.getName() + "  " + fileName);
-//				}
-//				if (pyClass.hasProceduralName()) {
-//					System.out.println("hasProceduralName " + pyClass.getName() + "  " + fileName);
-//				}
-//				if (pyClass.hasLongMethod()) {
-//					System.out.println("hasLongMethod " + pyClass.getName() + "  " + fileName);
-//				}
-//				if (pyClass.hasTooManyMethodsWithNoParams()) {
-//					System.out.println("hasTooManyMethodsWithNoParams " + pyClass.getName() + "  " + fileName);
-//				}
-//				if (pyClass.usesGlobals()) {
-//					System.out.println("usesGlobals " + pyClass.getName() + "  " + fileName);
-//				}
-
-//				System.out.println("IDENTIFIERS: ");
-//				pyClass.getVariables().forEach(i -> System.out.println("\t" + i));
 			}
 		}
-//		System.out.println("METHODS:");
-//		for (Integer i : methods.keySet()) {
-//			System.out.println(i + "\t=> " + methods.get(i));
-//		}
-//		System.out.println("VARIABLES:");
-//		for (Integer i : vars.keySet()) {
-//			System.out.println(i + "\t=> " + vars.get(i));
-//		}
+		DataHandler dataHandler = new DataHandler(folder.getName(), classes);
+		dataHandler.save();
 	}
 
 	private static void printAntipattern(String antipatternName, String fileName, String className) {
@@ -94,16 +56,11 @@ public class Main {
 
 	public static List<Module> getTrees(List<String> filePaths) {
 		List<Module> trees = new ArrayList<>();
-		System.out.println("start");
 		long startTime = System.nanoTime();
 		for (String filePath : filePaths) {
 			try {
-				System.out.println("------------------------------ Parse ------------------------------");
-				System.out.println("FILE: \t" + filePath);
 				Module tree = parse(filePath);
 				trees.add(tree);
-				System.out.println("LOC: \t" + tree.getLocSpan());
-				System.out.println("-------------------------------------------------------------------\n");
 			}
 			catch (Exception e) {
 				e.printStackTrace();

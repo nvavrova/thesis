@@ -12,8 +12,7 @@ public class Kwarg extends Arg {
 
 	private final Identifier name;
 
-	//TODO: fix the Identifier! @NotNull ?
-	public Kwarg(@NotNull Integer locInfo, @NotNull Expr value, Identifier name) {
+	public Kwarg(@NotNull Integer locInfo, @NotNull Expr value, @NotNull Identifier name) {
 		super(locInfo, value);
 		this.name = name;
 	}

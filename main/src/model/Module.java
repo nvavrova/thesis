@@ -44,7 +44,6 @@ public class Module {
 		}
 	}
 
-	//TODO
 	private void resolveIntraModuleDependencies(Class c) {
 		this.classes.values().stream()
 				.filter(dep -> !c.equals(dep))
@@ -77,23 +76,11 @@ public class Module {
 		return this.classes.values();
 	}
 
-	public Integer getClassCount() {
-		return this.classes.values().size();
-	}
-
-	public Class getLastClass() {
-		return this.classes.get(this.classes.size() - 1);
-	}
-
 	public String getFilePath() {
 		return this.filePath;
 	}
 
 	public String getName() {
 		return this.name;
-	}
-
-	public String getFullPath() {
-		return this.filePath + "\\" + this.name;
 	}
 }

@@ -5,7 +5,7 @@ import ast.arg.ArgCond;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
-import ast.expression.arithmetic.Arithmetic;
+import ast.expression.Arithmetic;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
@@ -870,7 +870,6 @@ public class AstBuilder {
 
 			this.indent--;
 			if (ctx.or_test() != null) {
-				//TODO: This needs to return something of type ExprNoCond! Figure out what it should be!
 				return ctx.or_test().accept(this);
 			}
 			if (ctx.lambdef_nocond() != null) {
@@ -1169,7 +1168,6 @@ public class AstBuilder {
 				return ctx.yield_expr().accept(this);
 			}
 			if (ctx.testlist_comp() != null) {
-				//TODO: make a distinction between a dictionary and a tuple?
 				return ctx.testlist_comp().accept(this);
 			}
 			if (ctx.dictorsetmaker() != null) {
@@ -1390,10 +1388,9 @@ public class AstBuilder {
 
 			if (ctx.name != null) {
 				Expr value = (Expr) ctx.value.accept(this);
-				//TODO: either translate this to Identifier somehow or change the param for Kwarg to Expr
-				//Identifier id = (Identifier) ctx.name.accept(this);
+				Identifier id = (Identifier) ctx.name.accept(this);
 				this.indent--;
-				return new Kwarg(this.getLocInfo(ctx), value, null);
+				return new Kwarg(this.getLocInfo(ctx), value, id);
 			}
 			if (ctx.value != null) {
 				Expr value = (Expr) ctx.value.accept(this);
@@ -1664,10 +1661,6 @@ public class AstBuilder {
 
 		private Suite process(Python3Parser.SuiteContext node) {
 			return (Suite) node.accept(this);
-		}
-
-		private CollectionWrapper<Statement> getResultWrapper(Python3Parser.SuiteContext node) {
-			return (CollectionWrapper<Statement>) node.accept(this);
 		}
 
 		private class Wrapper<T> extends AstNode {

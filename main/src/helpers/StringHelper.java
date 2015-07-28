@@ -2,6 +2,7 @@ package helpers;
 
 import com.sun.deploy.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,5 +21,13 @@ public class StringHelper {
 
 	public static String swapDelimiter(String str, String oldDelim, String newDelim) {
 		return implode(explode(str, oldDelim), newDelim);
+	}
+
+	public static List<String> replicate(String s, Integer count) {
+		List<String> ss = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			ss.add(s);
+		}
+		return ss;
 	}
 }

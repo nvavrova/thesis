@@ -3,7 +3,7 @@ package ast;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
-import ast.expression.arithmetic.Arithmetic;
+import ast.expression.Arithmetic;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.CompFor;
 import ast.expression.comprehension.CompIf;

@@ -4,7 +4,7 @@ import ast.arg.Arg;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
-import ast.expression.arithmetic.Arithmetic;
+import ast.expression.Arithmetic;
 import ast.expression.bitwise.And;
 import ast.expression.bitwise.Bitwise;
 import ast.expression.bitwise.Or;
@@ -488,10 +488,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 	public void visitChildren(Kwarg n) {
 		n.getValue().accept(this);
-		//TODO: fix the Identifier! @NotNull ?
-		if (n.getName() != null) {
-			n.getName().accept(this);
-		}
+		n.getName().accept(this);
 	}
 
 	public void visitChildren(SimpleParam n) {
