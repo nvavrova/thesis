@@ -48,6 +48,16 @@ public class FileHelper {
 				.collect(Collectors.toList());
 	}
 
+	public static List<File> getSubfolders(File folder) {
+		List<File> subfolders = new ArrayList<>();
+		for (File f : folder.listFiles()) {
+			if (f.isDirectory()) {
+				subfolders.add(f);
+			}
+		}
+		return subfolders;
+	}
+
 	private static List<String> getFilePaths(File folder) {
 		List<String> fileNames = new ArrayList<>();
 

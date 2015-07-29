@@ -42,9 +42,6 @@ public class Linker {
 				break;
 			}
 		}
-		if (!added) {
-			System.out.println("UNRESOLVED: \n\tsource: \t" + source + "\n\timport: \t" + target);
-		}
 	}
 
 	public void addImport(String source, String importPath, String target, String alias) {
@@ -78,10 +75,6 @@ public class Linker {
 			if (added) {
 				break;
 			}
-		}
-
-		if (!added) {
-			System.out.println("UNRESOLVED: \n\tsource: \t" + source + "\n\timport: \t" + importPath + "   " + className);
 		}
 	}
 

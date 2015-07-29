@@ -1,12 +1,12 @@
 package db;
 
+import db.pojo.*;
 import model.Class;
 import model.Method;
 import model.Module;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
-import db.pojo.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +28,6 @@ public class DataHandler {
 		RunInfoEntity runInfoEntity = Converter.createRunInfo(projectName);
 		insert(runInfoEntity);
 
-		System.out.println(runInfoEntity.getId());
 		Set<Module> modules = getModules(classes);
 		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(runInfoEntity, modules);
 		insert(moduleMap.values());

@@ -7,3 +7,6 @@ notes/*
 *.iml
 *.iws
 out/*
+
+# Logs
+logs/*
