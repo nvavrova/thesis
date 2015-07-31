@@ -10,3 +10,6 @@ out/*
 
 # Logs
 logs/*
+
+#build
+build/*
