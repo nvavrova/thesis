@@ -58,7 +58,7 @@ public class Module {
 		this.classImports.put(name, c);
 	}
 
-	public void addClass(Class c) {
+	public void registerClass(Class c) {
 		this.classes.put(c.getName(), c);
 	}
 

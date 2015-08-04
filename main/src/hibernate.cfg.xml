@@ -15,6 +15,7 @@
         <mapping class="db.pojo.MethodEntity"/>
         <mapping class="db.pojo.ModuleEntity"/>
         <mapping class="db.pojo.RunInfoEntity"/>
+        <mapping class="db.pojo.VersionEntity"/>
 
     </session-factory>
 </hibernate-configuration>

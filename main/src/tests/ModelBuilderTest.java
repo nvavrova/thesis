@@ -13,7 +13,7 @@ public class ModelBuilderTest {
 
 	@Test
 	public void collectClasses() {
-		Map<String, Class> classes = TestHelper.getClasses("collect_classes.py");
+		Map<String, Class> classes = TestHelper.getClasses("collect_classes/collect_classes.py");
 		assert (classes.size() == 7);
 		
 		assert (classes.keySet().contains("First"));
@@ -27,7 +27,7 @@ public class ModelBuilderTest {
 
 	@Test
 	public void collectVariables() {
-		Map<String, Class> classes = TestHelper.getClasses("collect_variables.py");
+		Map<String, Class> classes = TestHelper.getClasses("collect_variables/collect_variables.py");
 
 		Class one = classes.get("ClsOne");
 		Set<String> oneVars = one.getVariables();
@@ -43,7 +43,7 @@ public class ModelBuilderTest {
 
 	@Test
 	public void collectMethods() {
-		Map<String, Class> classes = TestHelper.getClasses("collect_methods.py");
+		Map<String, Class> classes = TestHelper.getClasses("collect_methods/collect_methods.py");
 		assert (classes.size() == 2);
 
 		Class one = classes.get("ClsOne");

@@ -17,19 +17,20 @@ import java.util.stream.Collectors;
 public class DataHandler {
 
 	private final String projectName;
-	private final Set<Class> classes;
+	private final RunInfoEntity runInfoEntity;
 
-	public DataHandler(String projectName, Set<Class> classes) {
+	public DataHandler(String projectName) {
 		this.projectName = projectName;
-		this.classes = classes;
+		this.runInfoEntity = Converter.createRunInfo(projectName);
+		insert(runInfoEntity);
 	}
 
-	public void save() {
-		RunInfoEntity runInfoEntity = Converter.createRunInfo(projectName);
-		insert(runInfoEntity);
+	public void save(String commitSha, Set<Class> classes) {
+		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, commitSha);
+		insert(versionEntity);
 
 		Set<Module> modules = getModules(classes);
-		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(runInfoEntity, modules);
+		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, modules);
 		insert(moduleMap.values());
 
 		Map<Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, classes);
@@ -55,11 +56,11 @@ public class DataHandler {
 				.collect(Collectors.toSet());
 	}
 
-	private void insert(RunInfoEntity runInfoEntity) {
+	private void insert(Object o) {
 		ConnectionManager cm = ConnectionManager.getInstance();
 		Session session = cm.openSession();
 		Transaction tx = session.beginTransaction();
-		session.save(runInfoEntity);
+		session.save(o);
 		tx.commit();
 		session.close();
 	}

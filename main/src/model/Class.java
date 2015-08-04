@@ -14,28 +14,33 @@ public class Class {
 
 	private final String name;
 	private final Module module;
+
 	private final Integer loc;
+	private Boolean usesGlobals;
 
 	private final Map<String, Class> dependentOn;
 
 	private final List<String> parents;
-	private final Set<String> references;
-	private final Set<String> variables;
 	private final Map<String, Method> methods;
-	private Boolean usesGlobals;
+	private final Set<String> variables;
+	private final Set<String> references;
 
 	public Class(String name, Module module, Integer loc, List<String> parents) {
 		this.name = name;
 		this.module = module;
+
 		this.loc = loc;
+		this.usesGlobals = false;
 
 		this.dependentOn = new HashMap<>();
+
 		this.parents = parents;
-		this.references = new HashSet<>();
-		this.variables = new HashSet<>();
 		this.methods = new HashMap<>();
-		this.usesGlobals = false;
+		this.variables = new HashSet<>();
+		this.references = new HashSet<>();
+
 	}
+
 
 	public void linkVarToClass(String alias, Class c) {
 		if (this.isAliasReferenced(alias)) {

@@ -6,17 +6,20 @@ import db.DataHandler;
 import gen.Python3Lexer;
 import gen.Python3Parser;
 import helpers.FileHelper;
-import model.Class;
-import model.ModelBuilder;
+import model.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import vc.GitHandler;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		File folder = new File(args[0]);
 		List<File> projectFolders = FileHelper.getSubfolders(folder);
 
@@ -24,7 +27,7 @@ public class Main {
 		System.setOut(out);
 		System.setErr(out);
 
-		for (File projectFolder: projectFolders) {
+		for (File projectFolder : projectFolders) {
 			System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
 			System.out.println("Name: " + projectFolder.getName());
 			try {
@@ -32,28 +35,24 @@ public class Main {
 			}
 			catch (Exception ex) {
 				System.err.println("EXCEPTION: " + ex.getMessage());
-				System.err.println(ex.getStackTrace().toString());
+				ex.printStackTrace(System.err);
 			}
 			System.out.println("-----------------------------------------------------------------------------------------------------------");
 		}
 	}
 
-	private static void processProject(File projectFolder) {
-		List<String> filePaths = FileHelper.getPythonFilePaths(projectFolder);
+	private static void processProject(File projectFolder) throws IOException, InterruptedException {
+		GitHandler gitHandler = new GitHandler(projectFolder);
+		gitHandler.goToFirstCommit();
+		DataHandler dataHandler = new DataHandler(projectFolder.getName());
+		Project project = new Project(projectFolder);
 
-		List<Module> trees = getTrees(filePaths);
-
-		ModelBuilder collector = new ModelBuilder(projectFolder.getAbsolutePath(), trees);
-		Map<String, model.Module> modules = collector.getModules();
-
-		Set<Class> classes = new HashSet<>();
-
-		for (String fileName : modules.keySet()) {
-			model.Module module = modules.get(fileName);
-			classes.addAll(module.getClasses());
-
-//			Collection<Class> pyClasses = module.getClasses();
-//			for (Class pyClass : pyClasses) {
+		while (!gitHandler.isAtLastCommit()) {
+			List<String> filePaths = FileHelper.getPythonFilePaths(projectFolder);
+			List<Module> trees = getTrees(filePaths);
+			ModelBuilder collector = new ModelBuilder(trees, project);
+			Set<model.Class> classes = project.getClasses();
+//			for (Class pyClass : classes) {
 //				Map<String, Boolean> antipatterns = new HashMap<>();
 //
 //				antipatterns.put("BLOB", pyClass.isBlob());
@@ -67,9 +66,9 @@ public class Main {
 //							printAntipattern(name, fileName, pyClass.getName());
 //						});
 //			}
+			dataHandler.save(gitHandler.getCurrentCommitSha(), classes);
+			gitHandler.goForth();
 		}
-		DataHandler dataHandler = new DataHandler(projectFolder.getName(), classes);
-		dataHandler.save();
 	}
 
 //	private static void printAntipattern(String antipatternName, String fileName, String className) {

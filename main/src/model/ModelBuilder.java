@@ -1,7 +1,6 @@
 package model;
 
 import ast.DefaultVisitor;
-import ast.Module;
 import ast.expression.primary.atom.Identifier;
 import ast.expression.primary.atom.trailed.AttributeRef;
 import ast.expression.primary.atom.trailed.Call;
@@ -15,9 +14,7 @@ import ast.statement.simple.Global;
 import ast.statement.simple.ImportFrom;
 import ast.statement.simple.SimpleImport;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -31,14 +28,11 @@ public class ModelBuilder {
 	private final BuildingVisitor buildingVisitor;
 	private final LinkingVisitor linkingVisitor;
 
-	public ModelBuilder(String projectFolder, List<Module> trees) {
-		this.buildingVisitor = new BuildingVisitor(trees);
-		Map<String, model.Module> modules = this.buildingVisitor.getModules();
-		this.linkingVisitor = new LinkingVisitor(projectFolder, trees, modules);
-	}
-
-	public Map<String, model.Module> getModules() {
-		return this.buildingVisitor.getModules();
+	public ModelBuilder(List<ast.Module> trees, Project project) {
+		project.initVersion();
+		this.buildingVisitor = new BuildingVisitor(trees, project);
+		this.linkingVisitor = new LinkingVisitor(trees, project);
+		project.cleanupVersion();
 	}
 
 	private class LinkingVisitor extends DefaultVisitor<Void> {
@@ -46,10 +40,10 @@ public class ModelBuilder {
 		private String currentFilePath;
 		private final Linker linker;
 
-		public LinkingVisitor(String projectFolder, List<Module> trees, Map<String, model.Module> modules) {
+		public LinkingVisitor(List<ast.Module> trees, Project project) {
 			super();
-			this.linker = new Linker(projectFolder, modules);
-			for (Module m : trees) {
+			this.linker = new Linker(project);
+			for (ast.Module m : trees) {
 				this.currentFilePath = m.getFilePath();
 				m.accept(this);
 			}
@@ -78,30 +72,28 @@ public class ModelBuilder {
 	}
 
 
+
 	private class BuildingVisitor extends DefaultVisitor<Void> {
 
 		private String currentFilePath;
-		private final Map<String, model.Module> modules;
+		private final Project project;
 		private final Stack<model.Class> classes;
 
-		public BuildingVisitor(List<Module> trees) {
+		public BuildingVisitor(List<ast.Module> trees, Project project) {
 			super();
-			this.modules = new HashMap<>();
+			this.project = project;
 			this.classes = new Stack<>();
-			for (Module m : trees) {
+			for (ast.Module m : trees) {
 				this.currentFilePath = m.getFilePath();
 				m.accept(this);
 			}
 		}
 
-		public Map<String, model.Module> getModules() {
-			return this.modules;
-		}
-
 		@Override
-		public void visitChildren(Module n) {
-			model.Module module = new model.Module(n.getFilePath(), n.getName());
-			this.modules.put(n.getFilePath(), module);
+		public void visitChildren(ast.Module n) {
+			String filePath = n.getFilePath();
+			model.Module module = new model.Module(filePath, n.getName());
+			this.project.registerModule(module);
 			super.visitChildren(n);
 		}
 
@@ -126,9 +118,9 @@ public class ModelBuilder {
 					.map(p -> p.getValue().toString())
 					.collect(Collectors.toList());
 
-			model.Module curentModule = this.getCurentModule();
-			Class c = new Class(name, curentModule, locInfo, parents);
-			curentModule.addClass(c);
+			model.Module currentModule = this.getCurrentModule();
+			Class c = new Class(name, currentModule, locInfo, parents);
+			currentModule.registerClass(c);
 
 			this.classes.push(c);
 			this.visitChildren(n);
@@ -245,11 +237,11 @@ public class ModelBuilder {
 			return varName.startsWith(this.getCurrentClass().getName() + ".") || varName.startsWith(SELF_KEYWORD + ".");
 		}
 
-		private model.Module getCurentModule() {
-			if (this.modules.size() == 0) {
+		private model.Module getCurrentModule() {
+			if (this.currentFilePath == null || !this.project.hasModule(this.currentFilePath)) {
 				return null;
 			}
-			return this.modules.get(this.currentFilePath);
+			return this.project.getModule(this.currentFilePath);
 		}
 
 		private Class getCurrentClass() {

@@ -6,7 +6,6 @@ import helpers.StringHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nik on 11-07-2015
@@ -16,28 +15,25 @@ public class Linker {
 	private static final String MODULE_DELIMITER = ".";
 	private static final String FILE_DELIMITER = "\\";
 
-	private final Map<String, Module> modules;
-	private final String projectFolder;
+	private final Project project;
 
-	public Linker(String projectFolder, Map<String, Module> modules) {
-		this.modules = modules;
-		this.projectFolder = projectFolder;
+	public Linker(Project project) {
+		this.project = project;
 
 	}
 
 	public void link() {
-		this.modules.values().forEach(model.Module::link);
+		this.project.getModules().forEach(model.Module::link);
 	}
 
 	public void addImport(String source, String target, String alias) {
-		assert (this.modules.containsKey(source));
+		assert (this.project.hasModule(source));
 
-		Module sourceModule = this.modules.get(source);
+		Module sourceModule = this.project.getModule(source);
 		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
-		Boolean added = false;
 		for (String sourcePath : sourcePaths) {
 			String fullPath = sourcePath + FILE_DELIMITER + this.getFilePath(target);
-			added = this.addModuleImport(sourceModule, fullPath, alias);
+			Boolean added = this.addModuleImport(sourceModule, fullPath, alias);
 			if (added) {
 				break;
 			}
@@ -45,7 +41,7 @@ public class Linker {
 	}
 
 	public void addImport(String source, String importPath, String target, String alias) {
-		assert (this.modules.containsKey(source));
+		assert (this.project.hasModule(source));
 
 		if (target.equals("*")) {
 			this.addImportAll(source, importPath);
@@ -56,7 +52,7 @@ public class Linker {
 	}
 
 	private void addImportSpecific(String source, String importPath, String className, String alias) {
-		Module sourceModule = this.modules.get(source);
+		Module sourceModule = this.project.getModule(source);
 		List<String> sourcePaths = this.getSourcePaths(sourceModule.getFilePath());
 
 		String pathMiddle = StringHelper.swapDelimiter(importPath, MODULE_DELIMITER, FILE_DELIMITER);
@@ -64,11 +60,10 @@ public class Linker {
 		String modulePathEnd = pathMiddle + FILE_DELIMITER + this.getFilePath(className);
 		String classPathEnd = pathMiddle + FileHelper.PYTHON_EXTENSION;
 
-		Boolean added = false;
 		for (String path : sourcePaths) {
 			String fullModulePath = path + FILE_DELIMITER + modulePathEnd;
 			String fullClassPath = path + FILE_DELIMITER + classPathEnd;
-			added = this.addModuleImport(sourceModule, fullModulePath, alias);
+			Boolean added = this.addModuleImport(sourceModule, fullModulePath, alias);
 			if (!added) {
 				added = this.addClassImport(sourceModule, fullClassPath, className, alias);
 			}
@@ -79,12 +74,12 @@ public class Linker {
 	}
 
 	private void addImportAll(String source, String importPath) {
-		Module sourceModule = this.modules.get(source);
+		Module sourceModule = this.project.getModule(source);
 		String path = this.getParentFolder(source);
 		path += this.getFilePath(importPath);
 
-		if (this.modules.containsKey(path)) {
-			Module importedModule = this.modules.get(path);
+		if (this.project.hasModule(path)) {
+			Module importedModule = this.project.getModule(path);
 			for (model.Class c : importedModule.getClasses()) {
 				sourceModule.addImport(c, c.getName());
 			}
@@ -93,8 +88,8 @@ public class Linker {
 
 
 	private Boolean addModuleImport(Module source, String path, String alias) {
-		if (this.modules.containsKey(path)) {
-			Module importedModule = this.modules.get(path);
+		if (this.project.hasModule(path)) {
+			Module importedModule = this.project.getModule(path);
 			source.addImport(importedModule, alias);
 			return true;
 		}
@@ -103,24 +98,26 @@ public class Linker {
 
 
 	private List<String> getSourcePaths(String source) {
-		assert (source.startsWith(this.projectFolder));
+		String projectFolder = this.project.getFolder();
+
+		assert (source.startsWith(projectFolder));
 
 		String sourceFolder = this.getParentFolder(source);
 
 		List<String> paths = new ArrayList<>();
-		while (!sourceFolder.equals(this.projectFolder)) {
+		while (!sourceFolder.equals(projectFolder)) {
 			paths.add(sourceFolder);
 			sourceFolder = this.getParentFolder(sourceFolder);
 		}
-		paths.add(this.projectFolder);
+		paths.add(projectFolder);
 
 		return paths;
 	}
 
 
 	private Boolean addClassImport(Module source, String importModule, String className, String alias) {
-		if (this.modules.containsKey(importModule)) {
-			Module m = this.modules.get(importModule);
+		if (this.project.hasModule(importModule)) {
+			Module m = this.project.getModule(importModule);
 			if (m.containsClass(className)) {
 				source.addImport(m.getClass(className), alias);
 				return true;

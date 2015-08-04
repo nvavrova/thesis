@@ -3,11 +3,11 @@ package tests;
 import ast.AstBuilder;
 import gen.Python3Lexer;
 import gen.Python3Parser;
-import model.Class;
-import model.Module;
-import model.ModelBuilder;
-import org.antlr.v4.runtime.ParserRuleContext;
 import helpers.FileHelper;
+import model.Class;
+import model.ModelBuilder;
+import model.Project;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,14 +39,14 @@ public class TestHelper {
 		return astBuilder.build();
 	}
 
-	public static Map<String, Module> getModulesByName(String fileName) {
-		Map<String, Module> ms = TestHelper.getModules(fileName);
-		Map<String, Module> modules = new HashMap<>();
-		ms.values().forEach(m -> modules.put(m.getName(), m));
-		return modules;
+	public static Map<String, Class> getClasses(String fileName) {
+		Project project = TestHelper.getProject(fileName);
+		Map<String, Class> classMap = new HashMap<>();
+		project.getClasses().forEach(c -> classMap.put(c.getName(), c));
+		return classMap;
 	}
 
-	public static Map<String, Module> getModules(String fileName) {
+	public static Project getProject(String fileName) {
 		File file = new File(fileName);
 		String parent = file.isDirectory() ? file.getAbsolutePath() : file.getParent();
 
@@ -58,22 +58,15 @@ public class TestHelper {
 			filePaths.add(fileName);
 		}
 
-		return TestHelper.getModules(parent, filePaths);
+		return TestHelper.getProject(parent, filePaths);
 	}
 
 
-	private static Map<String, Module> getModules(String parent, List<String> fileNames) {
+	private static Project getProject(String parent, List<String> fileNames) {
 		List<ast.Module> trees = new ArrayList<>();
 		fileNames.stream().forEach(f -> trees.add(parseFile(f)));
-		ModelBuilder collector = new ModelBuilder(parent, trees);
-		return collector.getModules();
-	}
-
-	public static Map<String, Class> getClasses(String fileName) {
-		Map<String, Module> modules = TestHelper.getModules(fileName);
-
-		Map<String, Class> classes = new HashMap<>();
-		modules.values().forEach(m -> m.getClasses().forEach(c -> classes.put(c.getName(), c)));
-		return classes;
+		Project project = new Project(new File(parent));
+		ModelBuilder collector = new ModelBuilder(trees, project);
+		return project;
 	}
 }

@@ -12,7 +12,7 @@ public class LocCounterTest {
 
 	@Test
 	public void countLoc() {
-		File f = new File("count_loc.py");
+		File f = new File("count_loc/count_loc.py");
 
 		LocCounter c = new LocCounter(f.getAbsolutePath());
 		assert (c.count() == 15);

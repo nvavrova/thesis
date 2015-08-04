@@ -21,10 +21,17 @@ public class Converter {
 		return ri;
 	}
 
-	public static Map<Module, ModuleEntity> convertModules(RunInfoEntity runInfoEntity, Set<Module> modules) {
+	public static VersionEntity createVersion(RunInfoEntity runInfoEntity, String commitSha) {
+		VersionEntity v = new VersionEntity();
+		v.setRunInfoEntity(runInfoEntity);
+		v.setCommitSha(commitSha);
+		return v;
+	}
+
+	public static Map<Module, ModuleEntity> convertModules(VersionEntity versionEntity, Set<Module> modules) {
 		Map<Module, ModuleEntity> moduleMap = new HashMap<>();
 		for (Module m : modules) {
-			moduleMap.put(m, convert(m, runInfoEntity));
+			moduleMap.put(m, convert(m, versionEntity));
 		}
 		return moduleMap;
 	}
@@ -87,9 +94,9 @@ public class Converter {
 		return clsEnt;
 	}
 
-	private static ModuleEntity convert(Module module, RunInfoEntity runInfoEntity) {
+	private static ModuleEntity convert(Module module, VersionEntity versionEntity) {
 		ModuleEntity moduleEntity = new ModuleEntity();
-		moduleEntity.setRunInfoEntity(runInfoEntity);
+		moduleEntity.setVersionEntity(versionEntity);
 		moduleEntity.setPath(module.getFilePath());
 		return moduleEntity;
 	}

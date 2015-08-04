@@ -10,7 +10,7 @@ import javax.persistence.*;
 @SequenceGenerator(name = "MOD_SEQ", sequenceName = "module_id_seq", allocationSize = 1)
 public class ModuleEntity {
 	private Integer id;
-	private RunInfoEntity runInfoEntity;
+	private VersionEntity versionEntity;
 	private String path;
 
 	@Id
@@ -25,13 +25,13 @@ public class ModuleEntity {
 	}
 
 	@ManyToOne
-	@JoinColumn(name = "run_info_id")
-	public RunInfoEntity getRunInfoEntity() {
-		return this.runInfoEntity;
+	@JoinColumn(name = "version_id")
+	public VersionEntity getVersionEntity() {
+		return this.versionEntity;
 	}
 
-	public void setRunInfoEntity(RunInfoEntity runInfoEntity) {
-		this.runInfoEntity = runInfoEntity;
+	public void setVersionEntity(VersionEntity versionEntity) {
+		this.versionEntity = versionEntity;
 	}
 
 	@Basic
