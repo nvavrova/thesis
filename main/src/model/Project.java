@@ -2,6 +2,7 @@ package model;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 03-08-2015
@@ -31,11 +32,10 @@ public class Project {
 	}
 
 	public void cleanupVersion() {
-		for (String key : this.modules.keySet()) {
-			if (!modulesInThisVersion.contains(key)) {
-				this.modules.remove(key);
-			}
-		}
+		Set<String> keysToRemove = this.modules.keySet().stream()
+				.filter(k -> !modulesInThisVersion.contains(k))
+				.collect(Collectors.toSet());
+		keysToRemove.forEach(this.modules::remove);
 	}
 
 	public void registerModule(Module m) {

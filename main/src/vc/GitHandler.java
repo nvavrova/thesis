@@ -28,6 +28,7 @@ public class GitHandler {
 		}
 		this.latestCommit = this.loadLatestCommit();
 		this.commits = this.loadCommits();
+		Runtime.getRuntime().exec("chmod 777 " + baseFolder.getAbsolutePath());
 	}
 
 	public String getCurrentCommitSha() {
@@ -67,7 +68,7 @@ public class GitHandler {
 	}
 
 	private void goToCommit(String commitSha) throws IOException, InterruptedException {
-		this.exec("stash");
+//		this.exec("stash");
 		this.exec("reset --hard " + commitSha);
 	}
 

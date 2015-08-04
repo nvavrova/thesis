@@ -113,7 +113,7 @@ public class Main {
 		}
 
 		Date now = new Date();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddd_HH-mm-SS");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-SSS");
 		String date = dateFormat.format(now);
 		return "logs/" + date + "_log.txt";
 	}

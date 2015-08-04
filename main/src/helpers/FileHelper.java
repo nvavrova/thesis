@@ -32,8 +32,13 @@ public class FileHelper {
 
 	private List<String> readFile() {
 		try {
-			BufferedReader bf = new BufferedReader(new FileReader(this.filePath));
-			return bf.lines().collect(Collectors.toList());
+			FileReader fr = new FileReader(this.filePath);
+			BufferedReader br = new BufferedReader(fr);
+			List<String> res = br.lines().collect(Collectors.toList());
+			fr.close();
+			br.close();
+
+			return res;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
