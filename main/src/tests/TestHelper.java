@@ -4,17 +4,17 @@ import ast.AstBuilder;
 import gen.Python3Lexer;
 import gen.Python3Parser;
 import helpers.FileHelper;
+import main.VersionSwitcher;
 import model.Class;
 import model.ModelBuilder;
+import model.Module;
 import model.Project;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 08-07-2015
@@ -39,8 +39,23 @@ public class TestHelper {
 		return astBuilder.build();
 	}
 
+	public static Project getFirstVersionProject(String fileName) throws IOException, InterruptedException {
+		File projectFolder = new File("version_switch");
+		VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
+		return versionSwitcher.getFirstProjectVersion();
+	}
+
+	public static Map<String, Module> getModules(Project project) {
+		Set<Module> modules = project.getModules();
+		return modules.stream().collect(Collectors.toMap(k -> k.getFilePath(), v -> v));
+	}
+
 	public static Map<String, Class> getClasses(String fileName) {
 		Project project = TestHelper.getProject(fileName);
+		return TestHelper.getClasses(project);
+	}
+
+	public static Map<String, Class> getClasses(Project project) {
 		Map<String, Class> classMap = new HashMap<>();
 		project.getClasses().forEach(c -> classMap.put(c.getName(), c));
 		return classMap;
@@ -48,7 +63,7 @@ public class TestHelper {
 
 	public static Project getProject(String fileName) {
 		File file = new File(fileName);
-		String parent = file.isDirectory() ? file.getAbsolutePath() : file.getParent();
+		String projectFolder = file.isDirectory() ? file.getAbsolutePath() : file.getParent();
 
 		List<String> filePaths = new ArrayList<>();
 		if (file.isDirectory()) {
@@ -58,15 +73,14 @@ public class TestHelper {
 			filePaths.add(fileName);
 		}
 
-		return TestHelper.getProject(parent, filePaths);
+		return TestHelper.getProject(projectFolder, filePaths);
 	}
 
 
 	private static Project getProject(String parent, List<String> fileNames) {
 		List<ast.Module> trees = new ArrayList<>();
 		fileNames.stream().forEach(f -> trees.add(parseFile(f)));
-		Project project = new Project(new File(parent));
-		ModelBuilder collector = new ModelBuilder(trees, project);
-		return project;
+		ModelBuilder modelBuilder = new ModelBuilder(new File(parent), trees);
+		return modelBuilder.getProject();
 	}
 }

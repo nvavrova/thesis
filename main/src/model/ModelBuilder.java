@@ -14,8 +14,8 @@ import ast.statement.simple.Global;
 import ast.statement.simple.ImportFrom;
 import ast.statement.simple.SimpleImport;
 
-import java.util.List;
-import java.util.Stack;
+import java.io.File;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -25,24 +25,55 @@ public class ModelBuilder {
 
 	private static final String SELF_KEYWORD = "self";
 
-	private final BuildingVisitor buildingVisitor;
-	private final LinkingVisitor linkingVisitor;
+	private final Project project;
 
-	public ModelBuilder(List<ast.Module> trees, Project project) {
-		project.initVersion();
-		this.buildingVisitor = new BuildingVisitor(trees, project);
-		this.linkingVisitor = new LinkingVisitor(trees, project);
-		project.cleanupVersion();
+	public ModelBuilder(Project oldProject, Map<String, ast.Module> oldTrees, Map<String, ast.Module> trees) {
+		this.project = new Project(oldProject.getFolder());
+
+		//build new modules
+		BuildingVisitor buildingVisitor = new BuildingVisitor(this.project);
+		buildingVisitor.build(trees.values());
+
+		//add relevant modules from previous version
+		Set<Module> oldModules = oldProject.getModules().stream()
+				.filter(m -> oldTrees.containsKey(m.getFilePath()))
+				.map(m -> oldProject.getModule(m.getFilePath()))
+				.collect(Collectors.toSet());
+		oldModules.forEach(this.project::registerModule);
+
+		//link everything
+		Map<String, ast.Module> allTrees = new HashMap<>();
+		allTrees.putAll(oldTrees);
+		allTrees.putAll(trees);
+		LinkingVisitor linkingVisitor = new LinkingVisitor(this.project);
+		linkingVisitor.link(allTrees.values());
+	}
+
+	public ModelBuilder(File projectFolder, Collection<ast.Module> trees) {
+		this.project = new Project(projectFolder);
+		BuildingVisitor buildingVisitor = new BuildingVisitor(project);
+		buildingVisitor.build(trees);
+		LinkingVisitor linkingVisitor = new LinkingVisitor(project);
+		linkingVisitor.link(trees);
+	}
+
+	public Project getProject() {
+		return this.project;
 	}
 
 	private class LinkingVisitor extends DefaultVisitor<Void> {
 
 		private String currentFilePath;
-		private final Linker linker;
+		private final Project project;
+		private Linker linker;
 
-		public LinkingVisitor(List<ast.Module> trees, Project project) {
+		public LinkingVisitor(Project project) {
 			super();
-			this.linker = new Linker(project);
+			this.project = project;
+		}
+
+		public void link(Collection<ast.Module> trees) {
+			this.linker = new Linker(this.project);
 			for (ast.Module m : trees) {
 				this.currentFilePath = m.getFilePath();
 				m.accept(this);
@@ -72,17 +103,19 @@ public class ModelBuilder {
 	}
 
 
-
 	private class BuildingVisitor extends DefaultVisitor<Void> {
 
 		private String currentFilePath;
 		private final Project project;
 		private final Stack<model.Class> classes;
 
-		public BuildingVisitor(List<ast.Module> trees, Project project) {
+		public BuildingVisitor(Project project) {
 			super();
 			this.project = project;
 			this.classes = new Stack<>();
+		}
+
+		public void build(Collection<ast.Module> trees) {
 			for (ast.Module m : trees) {
 				this.currentFilePath = m.getFilePath();
 				m.accept(this);

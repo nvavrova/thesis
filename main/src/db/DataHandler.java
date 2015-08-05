@@ -4,6 +4,7 @@ import db.pojo.*;
 import model.Class;
 import model.Method;
 import model.Module;
+import model.Project;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
@@ -25,35 +26,21 @@ public class DataHandler {
 		insert(runInfoEntity);
 	}
 
-	public void save(String commitSha, Set<Class> classes) {
-		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, commitSha);
+	public void save(Project project) {
+		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, project.getVersion());
 		insert(versionEntity);
 
-		Set<Module> modules = getModules(classes);
-		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, modules);
+		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, project.getModules());
 		insert(moduleMap.values());
 
-		Map<Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, classes);
+		Map<Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, project.getClasses());
 		insert(classMap.values());
 
 		List<DependenciesEntity> dependencies = Converter.createDependencies(classMap);
 		insert(dependencies);
 
-		Set<Method> methods = getMethods(classes);
-		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, methods);
+		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, project.getMethods());
 		insert(methodMap.values());
-	}
-
-	private Set<Method> getMethods(Set<Class> classes) {
-		Set<Method> methods = new HashSet<>();
-		classes.stream().forEach(c -> methods.addAll(c.getMethods()));
-		return methods;
-	}
-
-	private Set<Module> getModules(Set<Class> classes) {
-		return classes.stream()
-				.map(c -> c.getModule())
-				.collect(Collectors.toSet());
 	}
 
 	private void insert(Object o) {
