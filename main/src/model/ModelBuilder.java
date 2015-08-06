@@ -36,17 +36,14 @@ public class ModelBuilder {
 
 		//add relevant modules from previous version
 		Set<Module> oldModules = oldProject.getModules().stream()
-				.filter(m -> oldTrees.containsKey(m.getFilePath()))
+				.filter(m -> oldTrees.containsKey(m.getFilePath()) && !this.project.hasModule(m.getFilePath()))
 				.map(m -> oldProject.getModule(m.getFilePath()))
 				.collect(Collectors.toSet());
 		oldModules.forEach(this.project::registerModule);
 
-		//link everything
-		Map<String, ast.Module> allTrees = new HashMap<>();
-		allTrees.putAll(oldTrees);
-		allTrees.putAll(trees);
+		//link
 		LinkingVisitor linkingVisitor = new LinkingVisitor(this.project);
-		linkingVisitor.link(allTrees.values());
+		linkingVisitor.link(trees.values());
 	}
 
 	public ModelBuilder(File projectFolder, Collection<ast.Module> trees) {

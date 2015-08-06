@@ -7,7 +7,6 @@ import model.Project;
 import vc.GitHandler;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,12 +22,12 @@ public class VersionSwitcher {
 	private Map<String, Module> trees;
 	private Project project;
 
-	public VersionSwitcher(File projectFolder) throws IOException, InterruptedException {
+	public VersionSwitcher(File projectFolder) throws Exception {
 		this.projectFolder = projectFolder;
 		this.gitHandler = new GitHandler(projectFolder);
 	}
 
-	public Project getFirstProjectVersion() throws IOException, InterruptedException {
+	public Project getFirstProjectVersion() throws Exception {
 		this.gitHandler.goToFirstCommit();
 		List<String> allFiles = FileHelper.getPythonFilePaths(this.projectFolder);
 		this.trees = File2AstConverter.getTrees(allFiles);
@@ -44,7 +43,7 @@ public class VersionSwitcher {
 		return gitHandler.isAtLastCommit();
 	}
 
-	public Project getNextProjectVersion() throws IOException, InterruptedException {
+	public Project getNextProjectVersion() throws Exception {
 		List<String> changedFiles = gitHandler.goForth();
 		this.cleanUpNonExistingFiles();
 		Map<String, Module> currentTrees = File2AstConverter.getTrees(changedFiles);
@@ -56,10 +55,10 @@ public class VersionSwitcher {
 
 		return this.project;
 	}
-
-	public void cleanUp() throws IOException, InterruptedException {
-		this.gitHandler.finalize();
-	}
+//
+//	public void cleanUp() throws Exception {
+//		this.gitHandler.finalize();
+//	}
 
 	private void cleanUpNonExistingFiles() {
 		List<String> allFiles = FileHelper.getPythonFilePaths(this.projectFolder);

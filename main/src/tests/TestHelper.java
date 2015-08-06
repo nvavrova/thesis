@@ -39,7 +39,7 @@ public class TestHelper {
 		return astBuilder.build();
 	}
 
-	public static Project getFirstVersionProject(String fileName) throws IOException, InterruptedException {
+	public static Project getFirstVersionProject(String fileName) throws Exception {
 		File projectFolder = new File("version_switch");
 		VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
 		return versionSwitcher.getFirstProjectVersion();
