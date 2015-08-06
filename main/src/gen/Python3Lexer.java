@@ -1,4 +1,4 @@
-// Generated from D:/intellij_projects/thesis/main/grammar\Python3.g4 by ANTLR 4.5
+// Generated from D:/intellij_projects/thesis/main/grammar\Python3.g4 by ANTLR 4.5.1
 package gen;
 
     import java.util.List;
@@ -17,7 +17,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Python3Lexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.5.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -122,7 +122,7 @@ public class Python3Lexer extends Lexer {
 	}
 
 	@Override
-	@NotNull
+
 	public Vocabulary getVocabulary() {
 		return VOCABULARY;
 	}
@@ -249,38 +249,32 @@ public class Python3Lexer extends Lexer {
 	@Override
 	public void action(RuleContext _localctx, int ruleIndex, int actionIndex) {
 		switch (ruleIndex) {
-		case 33: 
-			NEWLINE_action((RuleContext)_localctx, actionIndex); 
+		case 33:
+			NEWLINE_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 46: 
-			OPEN_PAREN_action((RuleContext)_localctx, actionIndex); 
+		case 46:
+			OPEN_PAREN_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 47: 
-			CLOSE_PAREN_action((RuleContext)_localctx, actionIndex); 
+		case 47:
+			CLOSE_PAREN_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 53: 
-			OPEN_BRACK_action((RuleContext)_localctx, actionIndex); 
+		case 53:
+			OPEN_BRACK_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 54: 
-			CLOSE_BRACK_action((RuleContext)_localctx, actionIndex); 
+		case 54:
+			CLOSE_BRACK_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 66: 
-			OPEN_BRACE_action((RuleContext)_localctx, actionIndex); 
+		case 66:
+			OPEN_BRACE_action((RuleContext)_localctx, actionIndex);
 			break;
-
-		case 67: 
-			CLOSE_BRACE_action((RuleContext)_localctx, actionIndex); 
+		case 67:
+			CLOSE_BRACE_action((RuleContext)_localctx, actionIndex);
 			break;
 		}
 	}
 	private void NEWLINE_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 0: 
+		case 0:
 
 			     String newLine = getText().replaceAll("[^\r\n]+", "");
 			     String spaces = getText().replaceAll("[\r\n]+", "");
@@ -313,63 +307,63 @@ public class Python3Lexer extends Lexer {
 			         }
 			       }
 			     }
-			    
+			   
 			break;
 		}
 	}
 	private void OPEN_PAREN_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 1: 
-			opened++; 
+		case 1:
+			opened++;
 			break;
 		}
 	}
 	private void CLOSE_PAREN_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 2: 
-			opened--; 
+		case 2:
+			opened--;
 			break;
 		}
 	}
 	private void OPEN_BRACK_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 3: 
-			opened++; 
+		case 3:
+			opened++;
 			break;
 		}
 	}
 	private void CLOSE_BRACK_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 4: 
-			opened--; 
+		case 4:
+			opened--;
 			break;
 		}
 	}
 	private void OPEN_BRACE_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 5: 
-			opened++; 
+		case 5:
+			opened++;
 			break;
 		}
 	}
 	private void CLOSE_BRACE_action(RuleContext _localctx, int actionIndex) {
 		switch (actionIndex) {
-		case 6: 
-			opened--; 
+		case 6:
+			opened--;
 			break;
 		}
 	}
 	@Override
 	public boolean sempred(RuleContext _localctx, int ruleIndex, int predIndex) {
 		switch (ruleIndex) {
-		case 33: 
+		case 33:
 			return NEWLINE_sempred((RuleContext)_localctx, predIndex);
 		}
 		return true;
 	}
 	private boolean NEWLINE_sempred(RuleContext _localctx, int predIndex) {
 		switch (predIndex) {
-		case 0: 
+		case 0:
 			return atStartOfInput();
 		}
 		return true;

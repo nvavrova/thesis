@@ -290,6 +290,19 @@ public class AstBuilder {
 		}
 
 		@Override
+		public AstNode visitLast_stmt(Python3Parser.Last_stmtContext ctx) {
+			this.indent++;
+			this.print("visitLast_stmt");
+			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
+
+			List<Statement> statements = ctx.small_stmt().stream()
+					.map(e -> (Statement) e.accept(this))
+					.collect(Collectors.toList());
+			this.indent--;
+			return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
+		}
+
+		@Override
 		public AstNode visitSmall_stmt(@NotNull Python3Parser.Small_stmtContext ctx) {
 			this.indent++;
 			this.print("visitSmall_stmt");

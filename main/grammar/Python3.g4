@@ -156,7 +156,7 @@ single_input
 
 /// file_input: (NEWLINE | stmt)* ENDMARKER
 file_input
- : ( NEWLINE | stmt )* EOF
+ : ( NEWLINE | stmt )* last_stmt? EOF
  ;
 
 /// eval_input: testlist NEWLINE* ENDMARKER
@@ -244,6 +244,10 @@ stmt
 /// simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 simple_stmt
  : small_stmt ( ';' small_stmt )* ';'? NEWLINE
+ ;
+
+last_stmt
+ : small_stmt ( ';' small_stmt )* ';'?
  ;
 
 /// small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
