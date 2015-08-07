@@ -94,14 +94,17 @@ public class AstBuilder {
 		public AstNode visitFile_input(@NotNull Python3Parser.File_inputContext ctx) {
 			this.indent++;
 			this.print("visitFile_input");
-			//      ( NEWLINE | stmt )* EOF
+			//      ( NEWLINE | stmt )* last_stmt? EOF
+			List<Statement> children = new ArrayList<>();
 			if (ctx.stmt() != null) {
-				List<Statement> children = new ArrayList<>();
 				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<Statement>) e.accept(this)).items));
-				this.indent--;
-				return new Module(this.filePath, this.locCounter.count(), children);
 			}
-			return new Module(this.filePath, this.locCounter.count(), Collections.emptyList());
+			if (ctx.last_stmt() != null) {
+				CollectionWrapper<Statement> ls = (CollectionWrapper<Statement>) ctx.last_stmt().accept(this);
+				children.addAll(ls.getItems());
+			}
+			this.indent--;
+			return new Module(this.filePath, this.locCounter.count(), children);
 		}
 
 		@Override
