@@ -2,6 +2,9 @@ package helpers;
 
 import com.sun.deploy.util.StringUtils;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,5 +32,22 @@ public class StringHelper {
 			ss.add(s);
 		}
 		return ss;
+	}
+
+	public static String getStackTraceString(Exception ex) {
+		String stackTrace = "";
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		ex.printStackTrace(pw);
+
+		stackTrace = sw.toString();
+		try {
+			sw.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		pw.close();
+		return stackTrace;
 	}
 }

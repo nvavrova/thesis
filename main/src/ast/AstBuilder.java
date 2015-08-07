@@ -55,6 +55,10 @@ public class AstBuilder {
 		this.context = context;
 	}
 
+	public static Module buildErrorModule(String filePath) {
+		return new Module(filePath, new LocCounter(filePath).count());
+	}
+
 	public Module build() {
 		return (Module) this.context.accept(this.visitor);
 	}

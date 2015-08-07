@@ -1,7 +1,6 @@
 package main;
 
 import db.DataHandler;
-import helpers.FileHelper;
 import model.Project;
 
 import java.io.File;
@@ -9,30 +8,34 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 public class Main {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
-		List<File> projectFolders = FileHelper.getSubfolders(folder);
 
 		PrintStream out = new PrintStream(new FileOutputStream(getLogName()));
 		System.setOut(out);
 		System.setErr(out);
 
-		for (File projectFolder : projectFolders) {
-			System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
-			System.out.println("Name: " + projectFolder.getName());
-			try {
-				Main.processProject(projectFolder);
-			}
-			catch (Exception ex) {
-				System.err.println("EXCEPTION: " + ex.getMessage());
-				ex.printStackTrace(System.err);
-			}
-			System.out.println("-----------------------------------------------------------------------------------------------------------");
+		Main.handleProject(folder);
+
+//		List<File> projectFolders = FileHelper.getSubfolders(folder);
+//		projectFolders.forEach(Main::handleProject);
+
+	}
+
+	private static void handleProject(File projectFolder) throws Exception {
+		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
+		System.out.println("Name: " + projectFolder.getName());
+		try {
+			Main.processProject(projectFolder);
 		}
+		catch (Exception ex) {
+			System.err.println("EXCEPTION: " + ex.getMessage());
+			ex.printStackTrace(System.err);
+		}
+		System.out.println("-----------------------------------------------------------------------------------------------------------");
 	}
 
 	private static void processProject(File projectFolder) throws Exception {

@@ -46,6 +46,12 @@ public class FileHelper {
 		return Collections.emptyList();
 	}
 
+	public static List<String> getPythonFilePaths(List<String> paths) {
+		return paths.stream()
+				.filter(FileHelper::isPythonFile)
+				.collect(Collectors.toList());
+	}
+
 	public static List<String> getPythonFilePaths(File folder) {
 		return FileHelper.getFilePaths(folder)
 				.stream()

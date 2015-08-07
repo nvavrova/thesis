@@ -9,13 +9,15 @@ public class Module {
 
 	private final String filePath;
 	private final String name;
+	private final String error;
 	private final Map<String, Class> classes;
 	private final Map<String, Class> classImports;
 	private final Map<String, Module> moduleImports;
 
-	public Module(String filePath, String name) {
+	public Module(String filePath, String name, String error) {
 		this.filePath = filePath;
 		this.name = name;
+		this.error = error;
 		this.classes = new LinkedHashMap<>();
 		this.classImports = new HashMap<>();
 		this.moduleImports = new HashMap<>();
@@ -62,8 +64,12 @@ public class Module {
 		this.classes.put(c.getName(), c);
 	}
 
-	public Boolean containsClass(String name) {
+	public boolean containsClass(String name) {
 		return this.classes.containsKey(name);
+	}
+
+	public boolean containsError() {
+		return this.error != null;
 	}
 
 	public Class getClass(String name) {
@@ -82,5 +88,9 @@ public class Module {
 
 	public String getName() {
 		return this.name;
+	}
+
+	public String getError() {
+		return this.error;
 	}
 }

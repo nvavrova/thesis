@@ -13,6 +13,7 @@ import ast.statement.compound.Function;
 import ast.statement.simple.Global;
 import ast.statement.simple.ImportFrom;
 import ast.statement.simple.SimpleImport;
+import helpers.StringHelper;
 
 import java.io.File;
 import java.util.*;
@@ -122,7 +123,7 @@ public class ModelBuilder {
 		@Override
 		public void visitChildren(ast.Module n) {
 			String filePath = n.getFilePath();
-			model.Module module = new model.Module(filePath, n.getName());
+			model.Module module = new model.Module(filePath, n.getName(), StringHelper.implode(n.getErrors(), "\n"));
 			this.project.registerModule(module);
 			super.visitChildren(n);
 		}

@@ -45,8 +45,10 @@ public class VersionSwitcher {
 
 	public Project getNextProjectVersion() throws Exception {
 		List<String> changedFiles = gitHandler.goForth();
+		List<String> changedPythonFiles = FileHelper.getPythonFilePaths(changedFiles);
+
 		this.cleanUpNonExistingFiles();
-		Map<String, Module> currentTrees = File2AstConverter.getTrees(changedFiles);
+		Map<String, Module> currentTrees = File2AstConverter.getTrees(changedPythonFiles);
 
 		ModelBuilder builder = new ModelBuilder(this.project, this.trees, currentTrees);
 		this.project = builder.getProject();

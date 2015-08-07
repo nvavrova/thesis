@@ -12,6 +12,7 @@ public class ModuleEntity {
 	private Integer id;
 	private VersionEntity versionEntity;
 	private String path;
+	private String errorMessages;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MOD_SEQ")
@@ -43,6 +44,17 @@ public class ModuleEntity {
 	public void setPath(String path) {
 		this.path = path;
 	}
+
+	@Basic
+	@Column(name = "error")
+	public String getErrorMessages() {
+		return this.errorMessages;
+	}
+
+	public void setErrorMessages(String errorMessages) {
+		this.errorMessages = errorMessages;
+	}
+
 
 	@Override
 	public int hashCode() {

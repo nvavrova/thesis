@@ -56,10 +56,9 @@ public class Converter {
 		List<DependenciesEntity> dependencies = new ArrayList<>();
 		for (Class dependentCls : classMap.keySet()) {
 			ClassEntity dependent = classMap.get(dependentCls);
-			for (Class c : dependentCls.getDependencies()) {
-				ClassEntity target = classMap.get(c);
-				dependencies.add(createDependency(dependent, target));
-			}
+			dependentCls.getDependencies().stream()
+					.filter(c -> classMap.containsKey(c))
+					.forEach(c -> dependencies.add(createDependency(dependent, classMap.get(c))));
 		}
 		return dependencies;
 	}
@@ -98,6 +97,7 @@ public class Converter {
 		ModuleEntity moduleEntity = new ModuleEntity();
 		moduleEntity.setVersionEntity(versionEntity);
 		moduleEntity.setPath(module.getFilePath());
+		moduleEntity.setErrorMessages(module.getError());
 		return moduleEntity;
 	}
 }
