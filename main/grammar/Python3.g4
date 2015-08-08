@@ -265,9 +265,12 @@ small_stmt
 
 /// expr_stmt: testlist_star_expr (augassign (yield_expr|testlist) |
 ///                      ('=' (yield_expr|testlist_star_expr))*)
-expr_stmt
- : target=testlist_star_expr ( augassign ( assignYield=yield_expr | assignTest=testlist)
-                      | ( '=' ( assignYield=yield_expr | assignTestStarredList=testlist_star_expr ) )*
+expr_stmt returns [List<Testlist_star_exprContext> chainedAssign]
+@init {
+    $chainedAssign = new ArrayList<>();
+}
+ : target=testlist_star_expr { $chainedAssign.add($target.ctx); } ( augassign ( assignYield=yield_expr | assignTest=testlist)
+                      | ( '=' ( assignYield=yield_expr | assignTestStarredList=testlist_star_expr { $chainedAssign.add($assignTestStarredList.ctx); } ) )*
                       )
  ;
 

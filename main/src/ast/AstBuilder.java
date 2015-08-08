@@ -349,7 +349,6 @@ public class AstBuilder {
 			this.print("visitExpr_stmt");
 			//      testlist_star_expr ( augassign ( yield_expr | testlist) | ( '=' ( yield_expr | testlist_star_expr ) )* )
 
-			ExprList targets = (ExprList) ctx.target.accept(this);
 
 			String operator = "=";
 			if (ctx.augassign() != null) {
@@ -357,24 +356,28 @@ public class AstBuilder {
 				operator = wrap.getItem();
 			}
 
+			//assign yield
 			if (ctx.assignYield != null) {
 				Yield yield = (Yield) ctx.assignYield.accept(this);
 				this.indent--;
-				return new AssignYield(this.getLocInfo(ctx), operator, targets, yield);
+				return new AssignYield(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), yield);
 			}
+			//assign expr
+			List<ExprList> targets = ctx.chainedAssign.stream()
+					.map(a -> (ExprList) a.accept(this))
+					.collect(Collectors.toList());
 			if (ctx.assignTest != null) {
 				ExprList source = (ExprList) ctx.assignTest.accept(this);
 				this.indent--;
 				return new AssignExpr(this.getLocInfo(ctx), operator, targets, source);
 			}
 			if (ctx.assignTestStarredList != null) {
-				ExprList source = (ExprList) ctx.assignTestStarredList.accept(this);
 				this.indent--;
-				return new AssignExpr(this.getLocInfo(ctx), operator, targets, source);
+				return new AssignExpr(this.getLocInfo(ctx), operator, targets, targets.get(targets.size() - 1));
 			}
 
 			this.indent--;
-			return targets;
+			return targets.get(0);
 		}
 
 

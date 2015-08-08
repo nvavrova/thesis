@@ -38,7 +38,6 @@ public class Class {
 		this.methods = new HashMap<>();
 		this.variables = new HashSet<>();
 		this.references = new HashSet<>();
-
 	}
 
 

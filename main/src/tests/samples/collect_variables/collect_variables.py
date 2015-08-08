@@ -11,12 +11,17 @@ class ClsOne():
 
 
 class ClsTwo():
+    def __init__(self):
+        self.co = ClsOne()
+
     def met(self):
         print(self.met2(self.varr))
 
     def met2(self, str):
         return str.upper() if not str is None else ""
 
+    def met3(self, nr):
+        return self.co.var == nr
 
 co = ClsOne()
 co.talk()
