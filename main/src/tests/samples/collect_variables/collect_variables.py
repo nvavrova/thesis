@@ -12,7 +12,7 @@ class ClsOne():
 
 class ClsTwo():
     def __init__(self):
-        self.co = ClsOne()
+        self.co = self.co2 = ClsOne()
 
     def met(self):
         print(self.met2(self.varr))

@@ -1,7 +1,6 @@
 package ast.statement.compound;
 
 import ast.Suite;
-import ast.statement.Statement;
 import ast.statement.simple.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
@@ -9,7 +8,7 @@ import ast.Visitor;
 /**
  * Created by Nik on 17-06-2015
  */
-public class For extends Statement {
+public class For extends ast.statement.Statement {
 
 	private final ExprList iterator;
 	private final ExprList source;

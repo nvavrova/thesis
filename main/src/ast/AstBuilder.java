@@ -5,7 +5,6 @@ import ast.arg.ArgCond;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
-import ast.expression.Arithmetic;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
@@ -30,13 +29,13 @@ import ast.statement.flow.*;
 import ast.statement.simple.*;
 import gen.Python3Parser;
 import gen.Python3Visitor;
+import helpers.StringHelper;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import helpers.StringHelper;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -99,12 +98,12 @@ public class AstBuilder {
 			this.indent++;
 			this.print("visitFile_input");
 			//      ( NEWLINE | stmt )* last_stmt? EOF
-			List<Statement> children = new ArrayList<>();
+			List<ast.statement.Statement> children = new ArrayList<>();
 			if (ctx.stmt() != null) {
-				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<Statement>) e.accept(this)).items));
+				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<ast.statement.Statement>) e.accept(this)).items));
 			}
 			if (ctx.last_stmt() != null) {
-				CollectionWrapper<Statement> ls = (CollectionWrapper<Statement>) ctx.last_stmt().accept(this);
+				CollectionWrapper<ast.statement.Statement> ls = (CollectionWrapper<ast.statement.Statement>) ctx.last_stmt().accept(this);
 				children.addAll(ls.getItems());
 			}
 			this.indent--;
@@ -276,7 +275,7 @@ public class AstBuilder {
 			}
 			if (ctx.compound_stmt() != null) {
 				//wrap this for consistency
-				Statement s = (Statement) ctx.compound_stmt().accept(this);
+				ast.statement.Statement s = (ast.statement.Statement) ctx.compound_stmt().accept(this);
 				this.indent--;
 				return new CollectionWrapper<>(this.getLocInfo(ctx), s);
 			}
@@ -289,8 +288,8 @@ public class AstBuilder {
 			this.print("visitSimple_stmt");
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
 
-			List<Statement> statements = ctx.small_stmt().stream()
-					.map(e -> (Statement) e.accept(this))
+			List<ast.statement.Statement> statements = ctx.small_stmt().stream()
+					.map(e -> (ast.statement.Statement) e.accept(this))
 					.collect(Collectors.toList());
 			this.indent--;
 			return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
@@ -302,8 +301,8 @@ public class AstBuilder {
 			this.print("visitLast_stmt");
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
 
-			List<Statement> statements = ctx.small_stmt().stream()
-					.map(e -> (Statement) e.accept(this))
+			List<ast.statement.Statement> statements = ctx.small_stmt().stream()
+					.map(e -> (ast.statement.Statement) e.accept(this))
 					.collect(Collectors.toList());
 			this.indent--;
 			return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
@@ -356,28 +355,31 @@ public class AstBuilder {
 				operator = wrap.getItem();
 			}
 
-			//assign yield
+			//single assign
 			if (ctx.assignYield != null) {
 				Yield yield = (Yield) ctx.assignYield.accept(this);
 				this.indent--;
 				return new AssignYield(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), yield);
 			}
-			//assign expr
-			List<ExprList> targets = ctx.chainedAssign.stream()
-					.map(a -> (ExprList) a.accept(this))
-					.collect(Collectors.toList());
 			if (ctx.assignTest != null) {
-				ExprList source = (ExprList) ctx.assignTest.accept(this);
+				Statement source = (Statement) ctx.assignTest.accept(this);
 				this.indent--;
-				return new AssignExpr(this.getLocInfo(ctx), operator, targets, source);
-			}
-			if (ctx.assignTestStarredList != null) {
-				this.indent--;
-				return new AssignExpr(this.getLocInfo(ctx), operator, targets, targets.get(targets.size() - 1));
+				return new AssignExpr(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), source);
 			}
 
-			this.indent--;
-			return targets.get(0);
+			//(possible) chained assign
+			if (ctx.chainedAssign.size() == 1) {
+				this.indent--;
+				return ctx.chainedAssign.get(0).accept(this);
+			}
+
+			List<ParserRuleContext> targetsCtx = ctx.chainedAssign.subList(0, ctx.chainedAssign.size() - 1);
+			List<ExprList> targets = targetsCtx.stream()
+					.map(a -> (ExprList) a.accept(this))
+					.collect(Collectors.toList());
+
+			ParserRuleContext sourceCtx = ctx.chainedAssign.get(ctx.chainedAssign.size() - 1);
+			return new AssignExpr(this.getLocInfo(ctx), operator, targets, (Statement) sourceCtx.accept(this));
 		}
 
 
@@ -844,14 +846,14 @@ public class AstBuilder {
 			//      simple_stmt | NEWLINE INDENT stmt+ DEDENT
 
 			if (ctx.simple_stmt() != null) {
-				CollectionWrapper<Statement> wrap = (CollectionWrapper<Statement>) ctx.simple_stmt().accept(this);
+				CollectionWrapper<ast.statement.Statement> wrap = (CollectionWrapper<ast.statement.Statement>) ctx.simple_stmt().accept(this);
 				return new Suite(this.getLocInfo(ctx), wrap.getItems());
 			}
 			else if (ctx.stmt() != null) {
-				List<CollectionWrapper<Statement>> collectionWrappers = ctx.stmt().stream()
-						.map(c -> (CollectionWrapper<Statement>) c.accept(this))
+				List<CollectionWrapper<ast.statement.Statement>> collectionWrappers = ctx.stmt().stream()
+						.map(c -> (CollectionWrapper<ast.statement.Statement>) c.accept(this))
 						.collect(Collectors.toList());
-				List<Statement> statements = new ArrayList<>();
+				List<ast.statement.Statement> statements = new ArrayList<>();
 				collectionWrappers.forEach(e -> statements.addAll(e.getItems()));
 				this.indent--;
 				return new Suite(this.getLocInfo(ctx), statements);

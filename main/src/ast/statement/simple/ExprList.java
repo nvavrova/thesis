@@ -1,16 +1,15 @@
 package ast.statement.simple;
 
-import ast.expression.Expr;
-import ast.statement.Statement;
-import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
+import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
 /**
  * Created by Nik on 29-06-2015
  */
-public class ExprList extends Statement {
+public class ExprList extends ast.statement.Statement {
 
 	private final List<Expr> values;
 

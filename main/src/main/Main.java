@@ -1,31 +1,37 @@
 package main;
 
+import ast.Module;
 import db.DataHandler;
+import helpers.FileHelper;
+import model.ModelBuilder;
 import model.Project;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
 
 	public static void main(String[] args) throws Exception {
 		File folder = new File(args[0]);
-
-		PrintStream out = new PrintStream(new FileOutputStream(getLogName()));
-		System.setOut(out);
-		System.setErr(out);
-
-		Main.handleProject(folder);
-
+		List<String> allFiles = FileHelper.getPythonFilePaths(folder);
+		Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
+		ModelBuilder mb = new ModelBuilder(folder, trees.values());
+		Project p = mb.getProject();
+//		PrintStream out = new PrintStream(new FileOutputStream(getLogName()));
+//		System.setOut(out);
+//		System.setErr(out);
+//
+////		Main.handleProject(folder);
+//
 //		List<File> projectFolders = FileHelper.getSubfolders(folder);
 //		projectFolders.forEach(Main::handleProject);
 
 	}
 
-	private static void handleProject(File projectFolder) throws Exception {
+	private static void handleProject(File projectFolder) {
 		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
 		System.out.println("Name: " + projectFolder.getName());
 		try {

@@ -10,9 +10,7 @@ import ast.param.SimpleParam;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
-import ast.statement.simple.Global;
-import ast.statement.simple.ImportFrom;
-import ast.statement.simple.SimpleImport;
+import ast.statement.simple.*;
 import helpers.StringHelper;
 
 import java.io.File;
@@ -106,11 +104,13 @@ public class ModelBuilder {
 		private String currentFilePath;
 		private final Project project;
 		private final Stack<model.Class> classes;
+		private boolean inAssign;
 
 		public BuildingVisitor(Project project) {
 			super();
 			this.project = project;
 			this.classes = new Stack<>();
+			this.inAssign = false;
 		}
 
 		public void build(Collection<ast.Module> trees) {
@@ -136,6 +136,19 @@ public class ModelBuilder {
 			return null;
 		}
 
+		@Override
+		public void visitChildren(AssignYield n) {
+			this.inAssign = true;
+			super.visitChildren(n);
+			this.inAssign = false;
+		}
+
+		@Override
+		public void visitChildren(AssignExpr n) {
+			this.inAssign = true;
+			super.visitChildren(n);
+			this.inAssign = false;
+		}
 
 		@Override
 		public Void visit(ClassDef n) {
@@ -200,6 +213,9 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(Identifier n) {
+			if (n.getValue().equals("ModifiedCls")) {
+				System.out.print("");
+			}
 			this.addVar(n.getValue());
 			return null;
 		}
@@ -220,10 +236,6 @@ public class ModelBuilder {
 		@Override
 		public Void visit(AttributeRef n) {
 			this.addVar(n.toString());
-			if (n.getBase() instanceof Identifier) {
-				Identifier id = (Identifier) n.getBase();
-				this.addVar(id.getValue());
-			}
 			this.visitChildren(n);
 			return null;
 		}
@@ -248,20 +260,42 @@ public class ModelBuilder {
 			n.getCall().accept(this);
 		}
 
-		private void addVar(String varName) {
-			if (this.inMethod() && (this.isClassVar(varName))) {
-				this.getCurrentClass().addVariable(varName);
+		private void addVar(String varFullName) {
+			String varBaseName = this.getVarBaseName(varFullName);
+			if (varBaseName != null) {
+				if (this.inMethod()) {
+					this.getCurrentClass().addVariable(varBaseName);
+				}
+				else if (this.inAssign) {
+					this.getCurrentClass().addVariable(SELF_KEYWORD + "." + varBaseName);
+				}
 			}
-			else if (this.inClass() && !this.inMethod()) {
-				this.getCurrentClass().addVariable(SELF_KEYWORD + "." + varName);
-//				this.getCurrentClass().addVariable(this.getCurrentClass().getName() + "." + varName);
-			}
+			this.addRef(varFullName);
+
 		}
 
 		private void addRef(String name) {
 			if (this.inClass()) {
-				this.getCurrentClass().addReference(name);
+				List<String> refParts = StringHelper.explode(name, ".");
+				for (int i = 1; i <= refParts.size(); i++) {
+					this.addRef(refParts.subList(0, i));
+				}
 			}
+		}
+
+		private void addRef(List<String> refParts) {
+			this.getCurrentClass().addReference(StringHelper.implode(refParts, "."));
+		}
+
+		private String getVarBaseName(String varFullName) {
+			List<String> nameParts = StringHelper.explode(varFullName, ".");
+			if (this.inMethod() && nameParts.size() > 1 && this.isClassVar(varFullName)) {
+				return nameParts.get(0) + "." + nameParts.get(1);
+			}
+			if (this.inClass() && !this.inMethod()) {
+				return nameParts.get(0);
+			}
+			return null;
 		}
 
 		private boolean isClassVar(String varName) {

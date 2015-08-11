@@ -37,9 +37,10 @@ public class ModelBuilderTest {
 
 		Class two = classes.get("ClsTwo");
 		Set<String> twoVars = two.getVariables();
-		assert (twoVars.size() == 2);
+		assert (twoVars.size() == 3);
 		assert (twoVars.contains("self.varr"));
 		assert (twoVars.contains("self.co"));
+		assert (twoVars.contains("self.co2"));
 		assert (!twoVars.contains("self.co.var"));
 	}
 

@@ -265,12 +265,13 @@ small_stmt
 
 /// expr_stmt: testlist_star_expr (augassign (yield_expr|testlist) |
 ///                      ('=' (yield_expr|testlist_star_expr))*)
-expr_stmt returns [List<Testlist_star_exprContext> chainedAssign]
+expr_stmt returns [List<ParserRuleContext> chainedAssign]
 @init {
     $chainedAssign = new ArrayList<>();
 }
  : target=testlist_star_expr { $chainedAssign.add($target.ctx); } ( augassign ( assignYield=yield_expr | assignTest=testlist)
-                      | ( '=' ( assignYield=yield_expr | assignTestStarredList=testlist_star_expr { $chainedAssign.add($assignTestStarredList.ctx); } ) )*
+                      | ( '=' ( ayi=yield_expr { $chainedAssign.add($ayi.ctx); }
+                                | atsl=testlist_star_expr { $chainedAssign.add($atsl.ctx); } ) )*
                       )
  ;
 

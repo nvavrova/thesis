@@ -1,6 +1,7 @@
 package ast.statement.simple;
 
 import ast.Visitor;
+import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
@@ -10,19 +11,19 @@ import java.util.List;
  */
 public class AssignExpr extends Assign {
 
-	private final ExprList source;
+	private final Statement source;
 
-	public AssignExpr(@NotNull Integer locInfo, String operator, ExprList targets, @NotNull ExprList source) {
+	public AssignExpr(@NotNull Integer locInfo, String operator, ExprList targets, @NotNull Statement source) {
 		super(locInfo, operator, targets);
 		this.source = source;
 	}
 
-	public AssignExpr(@NotNull Integer locInfo, String operator, List < ExprList > targets, @NotNull ExprList source) {
+	public AssignExpr(@NotNull Integer locInfo, String operator, List<ExprList> targets, @NotNull Statement source) {
 		super(locInfo, operator, targets);
 		this.source = source;
 	}
 
-	public ExprList getSource() {
+	public Statement getSource() {
 		return this.source;
 	}
 

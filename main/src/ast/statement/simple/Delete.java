@@ -1,13 +1,12 @@
 package ast.statement.simple;
 
-import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
 /**
  * Created by Nik on 17-06-2015
  */
-public class Delete extends Statement {
+public class Delete extends ast.statement.Statement {
 
 	private final ExprList items;
 
