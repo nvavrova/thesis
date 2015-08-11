@@ -10,6 +10,7 @@ public class Module {
 	private final String filePath;
 	private final String name;
 	private final String error;
+	private final Set<String> variables;
 	private final Map<String, Class> classes;
 	private final Map<String, Class> classImports;
 	private final Map<String, Module> moduleImports;
@@ -18,6 +19,7 @@ public class Module {
 		this.filePath = filePath;
 		this.name = name;
 		this.error = error;
+		this.variables = new HashSet<>();
 		this.classes = new LinkedHashMap<>();
 		this.classImports = new HashMap<>();
 		this.moduleImports = new HashMap<>();
@@ -29,6 +31,15 @@ public class Module {
 			this.resolveModuleImports(c);
 			this.resolveIntraModuleDependencies(c);
 		}
+	}
+
+	public void resolveGlobalUse() {
+		Set<String> moduleVars = new HashSet<>();
+		for (String alias : this.moduleImports.keySet()) {
+			Module m = this.moduleImports.get(alias);
+			m.getVariables().forEach(var -> moduleVars.add(alias + "." + var));
+		}
+		this.classes.values().forEach(c -> c.registerGlobals(moduleVars));
 	}
 
 	private void resolveClassImports(Class c) {
@@ -70,6 +81,14 @@ public class Module {
 
 	public boolean containsError() {
 		return this.error != null;
+	}
+
+	public void addVariable(String var) {
+		this.variables.add(var);
+	}
+
+	public Set<String> getVariables() {
+		return this.variables;
 	}
 
 	public Class getClass(String name) {

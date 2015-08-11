@@ -16,30 +16,63 @@ public class Class {
 	private final Module module;
 
 	private final Integer loc;
-	private Boolean usesGlobals;
 
 	private final Map<String, Class> dependentOn;
 
 	private final List<String> parents;
 	private final Map<String, Method> methods;
 	private final Set<String> variables;
-	private final Set<String> references;
+	private final Set<String> usedGlobals;
+	private final Set<String> varReferences;
+	private final Set<String> methodReferences;
 
 	public Class(String name, Module module, Integer loc, List<String> parents) {
 		this.name = name;
 		this.module = module;
 
 		this.loc = loc;
-		this.usesGlobals = false;
 
 		this.dependentOn = new HashMap<>();
 
 		this.parents = parents;
 		this.methods = new HashMap<>();
 		this.variables = new HashSet<>();
-		this.references = new HashSet<>();
+		this.usedGlobals = new HashSet<>();
+		this.varReferences = new HashSet<>();
+		this.methodReferences = new HashSet<>();
 	}
 
+	public void addGlobal(String name) {
+		this.usedGlobals.add(name);
+	}
+
+	public void registerGlobals(Set<String> moduleVars) {
+		this.registerClassDepGlobals();
+		this.registerModuleDepGlobals(moduleVars);
+	}
+
+	private void registerClassDepGlobals() {
+
+		for (String alias : this.dependentOn.keySet()) {
+			Class c = this.dependentOn.get(alias);
+			this.addGlobalsFromClass(alias, c.getInstanceVariables());
+		}
+	}
+
+	private void registerModuleDepGlobals(Set<String> moduleVars) {
+		Set<String> globals = moduleVars.stream()
+				.filter(this.varReferences::contains)
+				.collect(Collectors.toSet());
+		this.usedGlobals.addAll(globals);
+	}
+
+	private void addGlobalsFromClass(String alias, Set<String> vars) {
+		List<String> globals = vars.stream()
+				.filter(var -> this.varReferences.contains(alias + "." + var))
+				.map(var -> alias + "." + var)
+				.collect(Collectors.toList());
+		this.usedGlobals.addAll(globals);
+	}
 
 	public void linkVarToClass(String alias, Class c) {
 		if (this.isAliasReferenced(alias)) {
@@ -48,11 +81,8 @@ public class Class {
 	}
 
 	private boolean isAliasReferenced(String alias) {
-		return this.variables.contains(alias) || this.parents.contains(alias) || this.references.contains(alias);
-	}
-
-	public void registerGlobalUse() {
-		this.usesGlobals = true;
+		return this.variables.contains(alias) || this.parents.contains(alias)
+				|| this.varReferences.contains(alias) || this.methodReferences.contains(alias);
 	}
 
 	public void addAccessor(String name, Integer loc, List<String> params) {
@@ -62,7 +92,6 @@ public class Class {
 	public void addMethod(String name, Integer loc, List<String> params) {
 		this.addMethod(name, loc, params, false);
 	}
-
 
 
 	public boolean hasNoMethods() {
@@ -77,8 +106,12 @@ public class Class {
 		this.variables.add(varName);
 	}
 
-	public void addReference(String name) {
-		this.references.add(name);
+	public void addVarReference(String name) {
+		this.varReferences.add(name);
+	}
+
+	public void addMethodReference(String name) {
+		this.methodReferences.add(name);
 	}
 
 	public String getName() {
@@ -102,11 +135,34 @@ public class Class {
 	}
 
 	public Integer usedGlobalsCount() {
-		return 0; //TODO: implement
+		return this.usedGlobals.size();
+	}
+
+	public Set<String> getInstanceVariables() {
+		return this.getVarsStartingWith("self.");
+	}
+
+	public Set<String> getStaticVariables() {
+		return this.getVarsStartingWith(this.name + ".");
+	}
+
+	private Set<String> getVarsStartingWith(String prefix) {
+		Set<String> vars = new HashSet<>();
+		for (String s : this.variables) {
+			if (s.startsWith(prefix)) {
+				s = s.replaceFirst(prefix, "");
+				vars.add(s);
+			}
+		}
+		return vars;
 	}
 
 	public Set<String> getVariables() {
 		return this.variables;
+	}
+
+	public Set<String> getUsedGlobals() {
+		return this.usedGlobals;
 	}
 
 	public Set<Class> getDependencies() {
@@ -143,7 +199,6 @@ public class Class {
 	}
 
 
-
 	public boolean isBlob() {
 		//TODO: add relations to Data Classes
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
@@ -165,7 +220,6 @@ public class Class {
 	}
 
 
-
 	private boolean isDataClass() {
 		//TODO: figure out how to redefine a DataClass for Python
 		return this.publicVariablesCount() > 10;
@@ -185,7 +239,7 @@ public class Class {
 
 	private Boolean usesGlobals() {
 		//TODO: add the vars that are not declared global by a keyword but still are?
-		return this.usesGlobals;
+		return this.usedGlobals.size() > 0;
 	}
 
 	private boolean hasLowCohesion() {

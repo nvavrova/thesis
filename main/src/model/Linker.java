@@ -24,6 +24,7 @@ public class Linker {
 
 	public void link() {
 		this.project.getModules().forEach(model.Module::link);
+		this.project.getModules().forEach(model.Module::resolveGlobalUse);
 	}
 
 	public void addImport(String source, String target, String alias) {

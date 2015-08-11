@@ -93,7 +93,6 @@ public class TrailedAtomBuilder {
 		@Override
 		public TrailedAtom visit(Identifier n) {
 			if (this.base instanceof AttributeRef) {
-				//TODO: cast?
 				return new AttributeRef(this.locInfo, (AttributeRef) this.base, n);
 			}
 			return new AttributeRef(this.locInfo, this.base, n);

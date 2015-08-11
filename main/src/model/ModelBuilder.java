@@ -131,7 +131,7 @@ public class ModelBuilder {
 		@Override
 		public Void visit(Global n) {
 			if (this.inClass()) {
-				this.getCurrentClass().registerGlobalUse();
+				n.getIdentifiers().forEach(i -> this.getCurrentClass().addGlobal(i.getValue()));
 			}
 			return null;
 		}
@@ -242,14 +242,14 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(Call n) {
-			this.addRef(n.getBase().toString());
+			this.addMethodRef(n.getBase().toString());
 			this.visitChildren(n);
 			return null;
 		}
 
 		@Override
 		public Void visit(DirectCall n) {
-			this.addRef(n.getBase().toString() + "." + n.getCall().getName());
+			this.addMethodRef(n.getBase().toString() + "." + n.getCall().getName());
 			this.visitChildren(n);
 			return null;
 		}
@@ -258,6 +258,12 @@ public class ModelBuilder {
 		public void visitChildren(DirectCall n) {
 			n.getBase().accept(this);
 			n.getCall().accept(this);
+		}
+
+		private void addMethodRef(String name) {
+			if (this.inClass()) {
+				this.getCurrentClass().addMethodReference(name);
+			}
 		}
 
 		private void addVar(String varFullName) {
@@ -270,21 +276,24 @@ public class ModelBuilder {
 					this.getCurrentClass().addVariable(SELF_KEYWORD + "." + varBaseName);
 				}
 			}
-			this.addRef(varFullName);
+			if (!this.inClass()) {
+				this.getCurrentModule().addVariable(varFullName);
+			}
+			this.addVarRef(varFullName);
 
 		}
 
-		private void addRef(String name) {
+		private void addVarRef(String name) {
 			if (this.inClass()) {
 				List<String> refParts = StringHelper.explode(name, ".");
 				for (int i = 1; i <= refParts.size(); i++) {
-					this.addRef(refParts.subList(0, i));
+					this.addVarRef(refParts.subList(0, i));
 				}
 			}
 		}
 
-		private void addRef(List<String> refParts) {
-			this.getCurrentClass().addReference(StringHelper.implode(refParts, "."));
+		private void addVarRef(List<String> refParts) {
+			this.getCurrentClass().addVarReference(StringHelper.implode(refParts, "."));
 		}
 
 		private String getVarBaseName(String varFullName) {

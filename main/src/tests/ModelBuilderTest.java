@@ -15,7 +15,7 @@ public class ModelBuilderTest {
 	public void collectClasses() {
 		Map<String, Class> classes = TestHelper.getClasses("collect_classes/collect_classes.py");
 		assert (classes.size() == 7);
-		
+
 		assert (classes.keySet().contains("First"));
 		assert (classes.keySet().contains("Second"));
 		assert (classes.keySet().contains("Second.Third"));
@@ -55,6 +55,26 @@ public class ModelBuilderTest {
 
 		Class two = classes.get("ClsTwo");
 		assert (two.methodCount() == 1);
+	}
+
+	@Test
+	public void collectGlobals() {
+		Map<String, Class> classes = TestHelper.getClasses("globals");
+
+		Set<String> usrCls = classes.get("UsrCls").getUsedGlobals();
+		Set<String> firstTestCls = classes.get("FirstTestCls").getUsedGlobals();
+		Set<String> secondTestCls = classes.get("SecondTestCls").getUsedGlobals();
+
+		assert (usrCls.size() == 1);
+		assert (usrCls.contains("s.var"));
+
+		assert (firstTestCls.size() == 1);
+		assert (firstTestCls.contains("sc.first"));
+
+		assert (secondTestCls.size() == 2);
+		assert (secondTestCls.contains("sc.first"));
+		assert (secondTestCls.contains("sc.third"));
+		assert (!secondTestCls.contains("sc.met"));
 	}
 
 	@Test
