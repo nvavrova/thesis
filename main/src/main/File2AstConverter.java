@@ -4,6 +4,7 @@ import ast.AstBuilder;
 import ast.Module;
 import gen.Python3Lexer;
 import gen.Python3Parser;
+import helpers.StringHelper;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -16,17 +17,20 @@ import java.util.Map;
  */
 public class File2AstConverter {
 
-	public static Map<String, Module> getTrees(List<String> filePaths) throws Exception {
+	public static Map<String, Module> getTrees(List<String> filePaths) {
 		Map<String, Module> trees = new HashMap<>();
 		for (String filePath : filePaths) {
 			try {
 				Module tree = File2AstConverter.parse(filePath);
 				trees.put(filePath, tree);
+				if (tree.getErrors().size() > 0) {
+					throw new Exception(StringHelper.implode(tree.getErrors(), "\n"));
+				}
 			}
 			catch (Exception e) {
-				throw e;
-//				System.err.println("Parse Exception: " + e.getMessage());
-//				e.printStackTrace(System.err);
+				System.err.println(e.getMessage());
+				e.printStackTrace(System.err);
+//				throw e;
 			}
 		}
 		return trees;
@@ -46,11 +50,10 @@ public class File2AstConverter {
 			return astBuilder.build();
 		}
 		catch (Exception ex) {
-			throw ex;
-//			Module m = AstBuilder.buildErrorModule(fileName);
-//			m.addError("Parse exception in " + fileName + ": \n" + StringHelper.getStackTraceString(ex));
-//
-//			return m;
+			Module m = AstBuilder.buildErrorModule(fileName);
+			m.addError("Parse Exception in " + fileName + ": \n" + StringHelper.getStackTraceString(ex));
+
+			return m;
 		}
 	}
 }

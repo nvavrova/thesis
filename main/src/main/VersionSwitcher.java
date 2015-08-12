@@ -27,8 +27,17 @@ public class VersionSwitcher {
 		this.gitHandler = new GitHandler(projectFolder);
 	}
 
+	public Project getLatestProjectVersion() throws Exception {
+		this.gitHandler.goToLastCommit();
+		return this.getProject();
+	}
+
 	public Project getFirstProjectVersion() throws Exception {
 		this.gitHandler.goToFirstCommit();
+		return this.getProject();
+	}
+
+	private Project getProject() {
 		List<String> allFiles = FileHelper.getPythonFilePaths(this.projectFolder);
 		this.trees = File2AstConverter.getTrees(allFiles);
 

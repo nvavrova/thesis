@@ -1,34 +1,52 @@
 package main;
 
-import ast.Module;
 import db.DataHandler;
-import helpers.FileHelper;
-import model.ModelBuilder;
 import model.Project;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class Main {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws FileNotFoundException {
 		File folder = new File(args[0]);
-		List<String> allFiles = FileHelper.getPythonFilePaths(folder);
-		Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
-		ModelBuilder mb = new ModelBuilder(folder, trees.values());
-		Project p = mb.getProject();
-//		PrintStream out = new PrintStream(new FileOutputStream(getLogName()));
-//		System.setOut(out);
-//		System.setErr(out);
-//
-////		Main.handleProject(folder);
-//
+
+		PrintStream out = new PrintStream(new FileOutputStream(getLogName()));
+		System.setOut(out);
+		System.setErr(out);
+
+		Main.handleProject(folder);
+
+
 //		List<File> projectFolders = FileHelper.getSubfolders(folder);
 //		projectFolders.forEach(Main::handleProject);
 
+//		List<String> allFiles = FileHelper.getPythonFilePaths(folder);
+//		Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
+//		ModelBuilder mb = new ModelBuilder(folder, trees.values());
+//		Project p = mb.getProject();
+//		Main.handleProject(folder);
+
+	}
+
+	private static void handleSingleProjectVersion(File projectFolder) {
+		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
+		System.out.println("Name: " + projectFolder.getName());
+		try {
+			DataHandler dataHandler = new DataHandler(projectFolder.getName());
+			VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
+			Project project = versionSwitcher.getLatestProjectVersion();
+			dataHandler.save(project);
+		}
+		catch (Exception ex) {
+			System.err.println("EXCEPTION: " + ex.getMessage());
+			ex.printStackTrace(System.err);
+		}
+		System.out.println("-----------------------------------------------------------------------------------------------------------");
 	}
 
 	private static void handleProject(File projectFolder) {

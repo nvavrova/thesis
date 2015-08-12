@@ -33,7 +33,6 @@ public class GitHandler {
 		catch (Exception ex) {
 			this.stashed = false;
 		}
-		Object o = new Object();
 	}
 
 	@Override
@@ -60,8 +59,13 @@ public class GitHandler {
 		this.goToCommit(0);
 	}
 
+	public void goToLastCommit() throws Exception {
+		this.goToCommit(this.commits.size() - 1);
+	}
+
 	/**
 	 * goes one revision backwards
+	 *
 	 * @return files that were added or changed in this revision
 	 */
 	public List<String> goBack() throws Exception {
@@ -73,6 +77,7 @@ public class GitHandler {
 
 	/**
 	 * goes one revision further
+	 *
 	 * @return files that were added or changed in this revision
 	 */
 	public List<String> goForth() throws Exception {
@@ -85,6 +90,7 @@ public class GitHandler {
 
 	/**
 	 * goes to specific commit
+	 *
 	 * @return files that were added or changed between this commit and the specified commit
 	 */
 	private List<String> goToCommit(int commitIndex) throws Exception {
@@ -170,13 +176,12 @@ public class GitHandler {
 		errorGobbler.join();
 		outputGobbler.join();
 
-		//TODO: handle errors & exit val
 		List<String> errors = errorGobbler.getStreamValues();
 		if (errors.size() != 0) {
-			String exceptionMessage = "Git Error: " + StringHelper.implode(errors, "\n");
+			String exceptionMessage = "Git Error " + StringHelper.implode(errors, "\n");
 			throw new Exception(exceptionMessage);
 		}
-		
+
 
 		return outputGobbler.getStreamValues();
 	}
