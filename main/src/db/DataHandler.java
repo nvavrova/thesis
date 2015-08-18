@@ -1,69 +1,84 @@
 package db;
 
 import db.pojo.*;
-import model.Class;
-import model.Method;
-import model.Module;
-import model.Project;
+import mining.Bugs;
+import model.*;
 import org.hibernate.Session;
-import org.hibernate.StatelessSession;
 import org.hibernate.Transaction;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 28-07-2015
  */
 public class DataHandler {
 
-	private final String projectName;
-	private final RunInfoEntity runInfoEntity;
+	private final ProjectEntity projectEntity;
 
-	public DataHandler(String projectName) {
-		this.projectName = projectName;
-		this.runInfoEntity = Converter.createRunInfo(projectName);
-		insert(runInfoEntity);
+	public DataHandler(ProjectEntity projectEntity) {
+		this.projectEntity = projectEntity;
+	}
+
+	public void save(Bugs bugs) {
+		ConnectionManager cm = ConnectionManager.getInstance();
+		Session session = cm.openSession();
+		try {
+			Transaction tx = session.beginTransaction();
+			Map<BugEntity, List<BugFixCommitEntity>> bugRecords = Converter.createBugs(this.projectEntity, bugs);
+			bugRecords.keySet().forEach(session::save);
+			bugRecords.values().forEach(l -> l.forEach(session::save));
+			tx.commit();
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		finally {
+			session.close();
+		}
 	}
 
 	public void save(Project project) {
-		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, project.getVersion());
-		insert(versionEntity);
-
-		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, project.getModules());
-		insert(moduleMap.values());
-
-		Map<Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, project.getClasses());
-		insert(classMap.values());
-
-		List<DependenciesEntity> dependencies = Converter.createDependencies(classMap);
-		insert(dependencies);
-
-		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, project.getMethods());
-		insert(methodMap.values());
-	}
-
-	private void insert(Object o) {
 		ConnectionManager cm = ConnectionManager.getInstance();
 		Session session = cm.openSession();
-		Transaction tx = session.beginTransaction();
-		session.save(o);
-		tx.commit();
-		session.close();
+		try {
+			Transaction tx = session.beginTransaction();
+			this.save(project, session);
+			tx.commit();
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		finally {
+			session.close();
+		}
 	}
 
-	private <T> void insert(Collection<T> objects) {
-		insertObjects(objects.stream().map(m -> (Object) m).collect(Collectors.toList()));
-	}
-
-	private void insertObjects(List<Object> objects) {
+	public static List<ProjectEntity> loadProjects() {
 		ConnectionManager cm = ConnectionManager.getInstance();
-		StatelessSession session = cm.openStatelessSession();
-		Transaction tx = session.beginTransaction();
-		objects.forEach(o -> session.insert(o));
-		tx.commit();
+		Session session = cm.openSession();
+		List<ProjectEntity> projects = session.createQuery("from ProjectEntity where process = true").list();
 		session.close();
+		return projects;
+	}
+
+	private void save(Project project, Session session) {
+		RunInfoEntity runInfoEntity = Converter.createRunInfo(this.projectEntity);
+		session.save(runInfoEntity);
+
+		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, project.getVersion());
+		session.save(versionEntity);
+
+		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, project.getModules());
+		moduleMap.values().forEach(session::save);
+
+		Map<model.Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, project.getClasses());
+		classMap.values().forEach(session::save);
+
+		List<DependenciesEntity> dependencies = Converter.createDependencies(classMap);
+		dependencies.forEach(session::save);
+
+		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, project.getMethods());
+		methodMap.values().forEach(session::save);
 	}
 }

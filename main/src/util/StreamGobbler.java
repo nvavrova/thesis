@@ -1,4 +1,4 @@
-package vc;
+package util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,14 +15,14 @@ public class StreamGobbler extends Thread {
 	private final InputStream inputStream;
 	private final List<String> streamValues;
 
-	StreamGobbler(InputStream inputStream) {
+	public StreamGobbler(InputStream inputStream) {
 		this.inputStream = inputStream;
 		this.streamValues = new ArrayList<>();
 	}
 
 	public void run() {
 		try {
-			InputStreamReader isr = new InputStreamReader(inputStream);
+			InputStreamReader isr = new InputStreamReader(this.inputStream);
 			BufferedReader br = new BufferedReader(isr);
 			String line = null;
 			while ((line = br.readLine()) != null) {

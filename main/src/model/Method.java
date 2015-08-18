@@ -1,6 +1,6 @@
 package model;
 
-import helpers.Helper;
+import util.Helper;
 
 import java.util.HashSet;
 import java.util.List;

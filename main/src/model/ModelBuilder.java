@@ -11,7 +11,7 @@ import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
 import ast.statement.simple.*;
-import helpers.StringHelper;
+import util.StringHelper;
 
 import java.io.File;
 import java.util.*;
@@ -47,9 +47,9 @@ public class ModelBuilder {
 
 	public ModelBuilder(File projectFolder, Collection<ast.Module> trees) {
 		this.project = new Project(projectFolder);
-		BuildingVisitor buildingVisitor = new BuildingVisitor(project);
+		BuildingVisitor buildingVisitor = new BuildingVisitor(this.project);
 		buildingVisitor.build(trees);
-		LinkingVisitor linkingVisitor = new LinkingVisitor(project);
+		LinkingVisitor linkingVisitor = new LinkingVisitor(this.project);
 		linkingVisitor.link(trees);
 	}
 
@@ -320,10 +320,6 @@ public class ModelBuilder {
 
 		private Class getCurrentClass() {
 			return this.classes.peek();
-		}
-
-		private Method getCurrentMethod() {
-			return this.getCurrentClass().getLastAddedMethod();
 		}
 
 		private boolean inClass() {

@@ -1,6 +1,6 @@
 package model;
 
-import helpers.Helper;
+import util.Helper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -200,10 +200,9 @@ public class Class {
 
 
 	public boolean isBlob() {
-		//TODO: add relations to Data Classes
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
-				(this.hasControllerName() || this.hasControllerMethods());
-		// && this.relatedDataClassesCount() > 1;
+				(this.hasControllerName() || this.hasControllerMethods())
+				&& this.relatedDataClassesCount() > 1;
 	}
 
 	public boolean isSwissArmyKnife() {

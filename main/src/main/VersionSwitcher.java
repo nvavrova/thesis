@@ -1,7 +1,7 @@
 package main;
 
 import ast.Module;
-import helpers.FileHelper;
+import util.FileHelper;
 import model.ModelBuilder;
 import model.Project;
 import vc.GitHandler;
@@ -49,11 +49,11 @@ public class VersionSwitcher {
 	}
 
 	public boolean isAtLatestVersion() {
-		return gitHandler.isAtLastCommit();
+		return this.gitHandler.isAtLastCommit();
 	}
 
 	public Project getNextProjectVersion() throws Exception {
-		List<String> changedFiles = gitHandler.goForth();
+		List<String> changedFiles = this.gitHandler.goForth();
 		List<String> changedPythonFiles = FileHelper.getPythonFilePaths(changedFiles);
 
 		this.cleanUpNonExistingFiles();

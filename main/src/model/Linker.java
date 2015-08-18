@@ -1,7 +1,7 @@
 package model;
 
-import helpers.FileHelper;
-import helpers.StringHelper;
+import util.FileHelper;
+import util.StringHelper;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -16,6 +16,9 @@
         <mapping class="db.pojo.ModuleEntity"/>
         <mapping class="db.pojo.RunInfoEntity"/>
         <mapping class="db.pojo.VersionEntity"/>
+        <mapping class="db.pojo.ProjectEntity"/>
+        <mapping class="db.pojo.BugEntity"/>
+        <mapping class="db.pojo.BugFixCommitEntity"/>
 
     </session-factory>
 </hibernate-configuration>

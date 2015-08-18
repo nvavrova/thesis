@@ -1,9 +1,11 @@
 package db;
 
+import db.pojo.*;
+import mining.Bug;
+import mining.Bugs;
 import model.Class;
 import model.Method;
 import model.Module;
-import db.pojo.*;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -14,10 +16,29 @@ import java.util.*;
  */
 public class Converter {
 
-	public static RunInfoEntity createRunInfo(String projectName) {
+	public static Map<BugEntity, List<BugFixCommitEntity>> createBugs(ProjectEntity projectEntity, Bugs bugs) {
+		Map<BugEntity, List<BugFixCommitEntity>> bugEntityListMap = new HashMap<>();
+		for (Bug bug : bugs) {
+			BugEntity bugEntity = new BugEntity();
+			bugEntity.setProjectEntity(projectEntity);
+			bugEntity.setGitId(String.valueOf(bug.getId()));
+
+			List<BugFixCommitEntity> fixCommits = new ArrayList<>();
+			for (String commit : bug.getFixCommits()) {
+				BugFixCommitEntity bfce = new BugFixCommitEntity();
+				bfce.setCommitSha(commit);
+				bfce.setBugEntity(bugEntity);
+				fixCommits.add(bfce);
+			}
+			bugEntityListMap.put(bugEntity, fixCommits);
+		}
+		return bugEntityListMap;
+	}
+
+	public static RunInfoEntity createRunInfo(ProjectEntity projectEntity) {
 		RunInfoEntity ri = new RunInfoEntity();
 		ri.setRuntime(Timestamp.valueOf(LocalDateTime.now()));
-		ri.setProjectName(projectName);
+		ri.setProjectEntity(projectEntity);
 		return ri;
 	}
 
@@ -57,7 +78,7 @@ public class Converter {
 		for (Class dependentCls : classMap.keySet()) {
 			ClassEntity dependent = classMap.get(dependentCls);
 			dependentCls.getDependencies().stream()
-					.filter(c -> classMap.containsKey(c))
+					.filter(classMap::containsKey)
 					.forEach(c -> dependencies.add(createDependency(dependent, classMap.get(c))));
 		}
 		return dependencies;

@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class RunInfoEntity {
 	private Integer id;
 	private Timestamp runtime;
-	private String projectName;
+	private ProjectEntity projectEntity;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RI_SEQ")
@@ -35,21 +35,20 @@ public class RunInfoEntity {
 		this.runtime = runtime;
 	}
 
-	@Basic
-	@Column(name = "project_name")
-	public String getProjectName() {
-		return this.projectName;
+	@ManyToOne
+	@JoinColumn(name = "project_id")
+	public ProjectEntity getProjectEntity() {
+		return this.projectEntity;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setProjectEntity(ProjectEntity projectEntity) {
+		this.projectEntity = projectEntity;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = this.id;
 		result = 31 * result + (this.runtime != null ? this.runtime.hashCode() : 0);
-		result = 31 * result + (this.projectName != null ? this.projectName.hashCode() : 0);
 		return result;
 	}
 
@@ -68,9 +67,6 @@ public class RunInfoEntity {
 			return false;
 		}
 		if (this.runtime != null ? !this.runtime.equals(that.runtime) : that.runtime != null) {
-			return false;
-		}
-		if (this.projectName != null ? !this.projectName.equals(that.projectName) : that.projectName != null) {
 			return false;
 		}
 

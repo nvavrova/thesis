@@ -13,3 +13,6 @@ logs/*
 
 #build
 build/*
+
+#Git API Token
+token.txt

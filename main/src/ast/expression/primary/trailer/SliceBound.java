@@ -2,7 +2,7 @@ package ast.expression.primary.trailer;
 
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
-import helpers.StringHelper;
+import util.StringHelper;
 import ast.Visitor;
 
 import java.util.ArrayList;

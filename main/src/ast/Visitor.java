@@ -1,5 +1,6 @@
 package ast;
 
+import ast.arg.ArgCond;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
@@ -46,6 +47,7 @@ public interface Visitor<T> {
 	//-----------------------------------------------------------------------------------------------------\\
 	T visit(Kwarg n);
 	T visit(SimpleArg n);
+	T visit(ArgCond n);
 
 	//-----------------------------------------------------------------------------------------------------\\
 	//----------------------------------------------- PARAM -----------------------------------------------\\

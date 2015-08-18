@@ -1,6 +1,7 @@
 package ast;
 
 import ast.arg.Arg;
+import ast.arg.ArgCond;
 import ast.arg.Kwarg;
 import ast.arg.SimpleArg;
 import ast.expression.*;
@@ -75,6 +76,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(SimpleArg n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(ArgCond n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -486,6 +493,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getValue().accept(this);
 	}
 
+
+	private void visitChildren(ArgCond n) {
+		n.getValue().accept(this);
+		n.getCondition().accept(this);
+	}
+
 	public void visitChildren(Kwarg n) {
 		n.getValue().accept(this);
 		n.getName().accept(this);
@@ -747,6 +760,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Subscription n) {
+		n.getSubscript().accept(this);
 		n.getBase().accept(this);
 
 	}

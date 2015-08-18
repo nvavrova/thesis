@@ -39,10 +39,6 @@ public class Params extends AstNode {
 		return this.kwargs;
 	}
 
-	public Boolean isEmpty() {
-		return this.positionalArgs.size() == 0 && this.args.size() == 0 && this.kwargs.size() == 0;
-	}
-
 	public Boolean isEmptyExceptForSelf() {
 		if (this.positionalArgs.size() == 1 && this.args.size() == 0 && this.kwargs.size() == 0) {
 			SimpleParam p = this.positionalArgs.get(0);

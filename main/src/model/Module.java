@@ -79,10 +79,6 @@ public class Module {
 		return this.classes.containsKey(name);
 	}
 
-	public boolean containsError() {
-		return this.error != null;
-	}
-
 	public void addVariable(String var) {
 		this.variables.add(var);
 	}

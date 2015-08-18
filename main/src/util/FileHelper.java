@@ -1,8 +1,10 @@
-package helpers;
+package util;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +46,18 @@ public class FileHelper {
 			e.printStackTrace();
 		}
 		return Collections.emptyList();
+	}
+
+	public static String getLogName(String type) {
+		File folder = new File("logs");
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
+
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-SSS");
+		String date = dateFormat.format(now);
+		return "logs/" + date + "_" + type + "_log.txt";
 	}
 
 	public static List<String> getPythonFilePaths(List<String> paths) {

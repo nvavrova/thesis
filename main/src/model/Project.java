@@ -1,7 +1,10 @@
 package model;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,10 +27,6 @@ public class Project {
 
 	public void setVersion(String version) {
 		this.version = version;
-	}
-
-	public String getName() {
-		return this.folder.getName();
 	}
 
 	public File getFolder() {

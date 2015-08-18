@@ -2,7 +2,7 @@ package ast;
 
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import helpers.StringHelper;
+import util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;

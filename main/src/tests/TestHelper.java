@@ -3,7 +3,7 @@ package tests;
 import ast.AstBuilder;
 import gen.Python3Lexer;
 import gen.Python3Parser;
-import helpers.FileHelper;
+import util.FileHelper;
 import main.VersionSwitcher;
 import model.Class;
 import model.ModelBuilder;

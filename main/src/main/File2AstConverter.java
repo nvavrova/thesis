@@ -4,7 +4,7 @@ import ast.AstBuilder;
 import ast.Module;
 import gen.Python3Lexer;
 import gen.Python3Parser;
-import helpers.StringHelper;
+import util.StringHelper;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 

@@ -3,19 +3,19 @@ package db.pojo;
 import javax.persistence.*;
 
 /**
- * Created by Nik on 03-08-2015
+ * Created by Nik on 18-08-2015
  */
 @Entity
-@Table(name = "version", schema = "public", catalog = "thesis")
-@SequenceGenerator(name = "VE_SEQ", sequenceName = "version_id_seq", allocationSize = 1)
-public class VersionEntity {
+@Table(name = "bug_fix_commit", schema = "public", catalog = "thesis")
+@SequenceGenerator(name = "BUG_FIX_SEQ", sequenceName = "bug_fix_commit_id_seq", allocationSize = 1)
+public class BugFixCommitEntity {
 	private int id;
 	private String commitSha;
-	private RunInfoEntity runInfoEntity;
+	private BugEntity bugEntity;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "VE_SEQ")
 	@Column(name = "id")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BUG_FIX_SEQ")
 	public int getId() {
 		return this.id;
 	}
@@ -35,15 +35,14 @@ public class VersionEntity {
 	}
 
 	@ManyToOne
-	@JoinColumn(name = "run_info_id")
-	public RunInfoEntity getRunInfoEntity() {
-		return this.runInfoEntity;
+	@JoinColumn(name = "bug_id")
+	public BugEntity getBugEntity() {
+		return this.bugEntity;
 	}
 
-	public void setRunInfoEntity(RunInfoEntity runInfoEntity) {
-		this.runInfoEntity = runInfoEntity;
+	public void setBugEntity(BugEntity bugEntity) {
+		this.bugEntity = bugEntity;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -61,7 +60,7 @@ public class VersionEntity {
 			return false;
 		}
 
-		VersionEntity that = (VersionEntity) o;
+		BugFixCommitEntity that = (BugFixCommitEntity) o;
 
 		if (this.id != that.id) {
 			return false;

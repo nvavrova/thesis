@@ -1,6 +1,7 @@
 package vc;
 
-import helpers.StringHelper;
+import util.StreamGobbler;
+import util.StringHelper;
 
 import java.io.File;
 import java.util.*;
@@ -36,9 +37,10 @@ public class GitHandler {
 	}
 
 	@Override
-	public void finalize() throws Exception {
+	public void finalize() throws Throwable {
+		super.finalize();
 		this.goToCommit(this.commits.get(this.currentCommitIndex), this.startingCommit);
-		if (stashed) {
+		if (this.stashed) {
 			this.exec("stash apply");
 		}
 	}
@@ -101,6 +103,7 @@ public class GitHandler {
 
 	private List<String> goToCommit(String currentSha, String commitSha) throws Exception {
 		this.exec("reset --hard " + commitSha);
+		System.out.println("Git: Switching to commit " + commitSha);
 		return this.filteredDiff(currentSha, commitSha, false, "D");
 	}
 

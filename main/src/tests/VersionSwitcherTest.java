@@ -32,7 +32,6 @@ public class VersionSwitcherTest {
 
 	@After
 	public void tearDown() throws Exception {
-//		this.versionSwitcher.cleanUp();
 		try {
 			Thread.sleep(3000);
 		}

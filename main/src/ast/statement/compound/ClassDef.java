@@ -49,14 +49,6 @@ public class ClassDef extends Statement {
 		this.decorators = decorators;
 	}
 
-	public Boolean hasInheritance() {
-		return this.inheritance.size() > 0;
-	}
-
-	public Boolean nameContains(String s) {
-		return this.name.contains(s);
-	}
-
 	@Override
 	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
