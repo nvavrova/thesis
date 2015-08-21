@@ -1575,7 +1575,7 @@ public class AstBuilder {
 			}
 			else if (ctx.BIN_INTEGER() != null) {
 				//strip out the "0B" prefix
-				String s = ctx.HEX_INTEGER().getText();
+				String s = ctx.BIN_INTEGER().getText();
 				s = s.substring(2);
 				this.indent--;
 				return new Int(this.getLocInfo(ctx), new BigInteger(s, 2));
