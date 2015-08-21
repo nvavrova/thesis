@@ -5,8 +5,8 @@ import ast.expression.primary.atom.Identifier;
 import ast.expression.primary.atom.trailed.AttributeRef;
 import ast.expression.primary.atom.trailed.Call;
 import ast.expression.primary.atom.trailed.DirectCall;
+import ast.param.Param;
 import ast.param.Params;
-import ast.param.SimpleParam;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
@@ -227,7 +227,7 @@ public class ModelBuilder {
 			return paramNames;
 		}
 
-		private List<String> getParamNames(List<SimpleParam> params) {
+		private List<String> getParamNames(List<Param> params) {
 			return params.stream()
 					.map(p -> p.getId().getValue())
 					.collect(Collectors.toList());

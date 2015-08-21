@@ -12,36 +12,36 @@ import java.util.List;
  */
 public class Params extends AstNode {
 
-	private final List<SimpleParam> positionalArgs;
-	private final List<SimpleParam> args;
-	private final List<SimpleParam> kwargs;
+	private final List<Param> positionalArgs;
+	private final List<Param> args;
+	private final List<Param> kwargs;
 
 	public Params(@NotNull Integer locInfo) {
 		this(locInfo, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 	}
 
-	public Params(@NotNull Integer locInfo, @NotNull List<SimpleParam> positionalArgs, @NotNull List<SimpleParam> args, @NotNull List<SimpleParam> kwargs) {
+	public Params(@NotNull Integer locInfo, @NotNull List<Param> positionalArgs, @NotNull List<Param> args, @NotNull List<Param> kwargs) {
 		super(locInfo);
 		this.positionalArgs = positionalArgs;
 		this.args = args;
 		this.kwargs = kwargs;
 	}
 
-	public List<SimpleParam> getPositionalArgs() {
+	public List<Param> getPositionalArgs() {
 		return this.positionalArgs;
 	}
 
-	public List<SimpleParam> getArgs() {
+	public List<Param> getArgs() {
 		return this.args;
 	}
 
-	public List<SimpleParam> getKwargs() {
+	public List<Param> getKwargs() {
 		return this.kwargs;
 	}
 
 	public Boolean isEmptyExceptForSelf() {
 		if (this.positionalArgs.size() == 1 && this.args.size() == 0 && this.kwargs.size() == 0) {
-			SimpleParam p = this.positionalArgs.get(0);
+			Param p = this.positionalArgs.get(0);
 			return p.isSelf();
 		}
 		return false;
