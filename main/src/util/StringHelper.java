@@ -32,13 +32,13 @@ public class StringHelper {
 		ex.printStackTrace(pw);
 
 		stackTrace = sw.toString();
+		pw.close();
 		try {
 			sw.close();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		pw.close();
 		return stackTrace;
 	}
 }

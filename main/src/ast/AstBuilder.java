@@ -1622,10 +1622,8 @@ public class AstBuilder {
 
 		private Integer getLocInfo(ParserRuleContext ctx) {
 			Integer startLine = ctx.getStart().getLine();
-			if (ctx.getStop() == null) {
-				return this.locCounter.count(startLine, startLine);
-			}
-			return this.locCounter.count(startLine, ctx.getStop().getLine());
+			Integer stopLine = ctx.getStop() == null ? startLine : ctx.getStop().getLine();
+			return this.locCounter.count(startLine, stopLine);
 		}
 
 		private Identifier getIdentifier(TerminalNode name) {

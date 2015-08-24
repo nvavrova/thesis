@@ -20,23 +20,13 @@ public class File2AstConverter {
 	public static Map<String, Module> getTrees(List<String> filePaths) {
 		Map<String, Module> trees = new HashMap<>();
 		for (String filePath : filePaths) {
-			try {
-				Module tree = File2AstConverter.parse(filePath);
-				trees.put(filePath, tree);
-				if (tree.getErrors().size() > 0) {
-					throw new Exception(StringHelper.implode(tree.getErrors(), "\n"));
-				}
-			}
-			catch (Exception e) {
-				System.err.println(e.getMessage());
-				e.printStackTrace(System.err);
-//				throw e;
-			}
+			Module tree = File2AstConverter.parse(filePath);
+			trees.put(filePath, tree);
 		}
 		return trees;
 	}
 
-	private static Module parse(String fileName) throws Exception {
+	private static Module parse(String fileName) {
 		try {
 			org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
 			Python3Lexer lexer = new Python3Lexer(input);
@@ -51,8 +41,10 @@ public class File2AstConverter {
 		}
 		catch (Exception ex) {
 			Module m = AstBuilder.buildErrorModule(fileName);
-			m.addError("Parse Exception in " + fileName + ": \n" + StringHelper.getStackTraceString(ex));
+			String errorMsg = "Parse Exception in " + fileName + ": \n" + StringHelper.getStackTraceString(ex);
+			m.addError(errorMsg);
 
+			System.err.println(errorMsg);
 			return m;
 		}
 	}
