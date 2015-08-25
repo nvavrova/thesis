@@ -1245,8 +1245,10 @@ public class AstBuilder {
 				this.indent--;
 				return new CondComprehension(this.getLocInfo(ctx), expression, compFor);
 			}
-			if (ctx.values.size() > 0) {
-				List<Expr> values = ctx.values.stream().map(e -> (Expr) e.accept(this)).collect(Collectors.toList());
+			if (ctx.test().size() > 0) {
+				List<Expr> values = ctx.test().stream()
+						.map(e -> (Expr) e.accept(this))
+						.collect(Collectors.toList());
 				this.indent--;
 				return new EnumComprehension(this.getLocInfo(ctx), values);
 			}

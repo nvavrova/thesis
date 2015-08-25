@@ -513,21 +513,13 @@ lambdef_nocond
  ;
 
 /// or_test: and_test ('or' and_test)*
-or_test returns [List<String> operators, List<And_testContext> operands]
-@init {
-    $operators = new ArrayList<>();
-    $operands = new ArrayList<>();
-}
- : left=and_test { $operands.add($left.ctx); } ( op=OR right=and_test { $operators.add($op.text); $operands.add($right.ctx); } )*
+or_test
+ : and_test ( OR and_test )*
  ;
 
 /// and_test: not_test ('and' not_test)*
-and_test returns [List<String> operators, List<Not_testContext> operands]
-@init {
-    $operators = new ArrayList<>();
-    $operands = new ArrayList<>();
-}
- : left=not_test { $operands.add($left.ctx); } ( op=AND right=not_test { $operators.add($op.text); $operands.add($right.ctx); } )*
+and_test
+ : not_test ( AND not_test )*
  ;
 
 /// not_test: 'not' not_test | comparison
@@ -537,12 +529,11 @@ not_test
  ;
 
 /// comparison: star_expr (comp_op star_expr)*
-comparison returns [List<Comp_opContext> operators, List<Star_exprContext> operands]
+comparison returns [List<Comp_opContext> operators]
 @init {
     $operators = new ArrayList<>();
-    $operands = new ArrayList<>();
 }
- : left=star_expr { $operands.add($left.ctx); } ( op=comp_op right=star_expr { $operators.add($op.ctx); $operands.add($right.ctx); } )*
+ : star_expr ( op=comp_op star_expr { $operators.add($op.ctx); } )*
  ;
 
 /// # <> isn't actually a valid comparison operator in Python. It's here for the
@@ -649,13 +640,10 @@ atom
  ;
 
 /// testlist_comp: test ( comp_for | (',' test)* [','] )
-testlist_comp returns [List<TestContext> values]
-@init{
-    $values = new ArrayList<>();
-}
- : initial=test { $values.add($initial.ctx); } ( comp_for
-        | ( ',' val=test { $values.add($val.ctx); } )* ','?
-        )
+testlist_comp
+ : initial=test ( comp_for
+                | ( ',' test )* ','?
+                )
  ;
 
 /// trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
