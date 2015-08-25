@@ -198,12 +198,17 @@ typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefCon
      $args = new HashMap<>();
      $kwargs = new HashMap<>();
  }
- : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); } ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
-        | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
-        )?
-    )?
- | '*' g=tfpdef? { $args.put($g.ctx, null); } ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
+ : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); }
+           ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
+           ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
+         | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
+         )?
+   )?
+ | '*' g=tfpdef? { $args.put($g.ctx, null); }
+   ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
+   ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
  | '**' j=tfpdef { $kwargs.put($j.ctx, null); }
  ;
 
@@ -221,12 +226,17 @@ varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefConte
     $args = new HashMap<>();
     $kwargs = new HashMap<>();
 }
- : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )? ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-    ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); } ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )* ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
-        | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
-        )?
-    )?
- | '*' g=vfpdef? { $args.put($g.ctx, null); } ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )* ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
+ : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); }
+           ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
+           ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
+         | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
+         )?
+   )?
+ | '*' g=vfpdef? { $args.put($g.ctx, null); }
+   ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
+   ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
  | '**' j=vfpdef { $kwargs.put($j.ctx, null); }
  ;
 
@@ -437,8 +447,8 @@ if_stmt returns [Map<TestContext, SuiteContext> elifVals, List<TestContext> elif
     $elifConditions = new ArrayList<TestContext>();
 }
  : IF ifTest=test ':' ifSuite=suite
-    ( ELIF elifTest=test ':' elifSuite=suite { $elifVals.put($elifTest.ctx, $elifSuite.ctx); $elifConditions.add($elifTest.ctx); } )*
-    ( ELSE ':' elseSuite=suite )?
+   ( ELIF elifTest=test ':' elifSuite=suite { $elifVals.put($elifTest.ctx, $elifSuite.ctx); $elifConditions.add($elifTest.ctx); } )*
+   ( ELSE ':' elseSuite=suite )?
  ;
 
 /// while_stmt: 'while' test ':' suite ['else' ':' suite]
@@ -462,10 +472,10 @@ try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks, List<Exc
     $exceptions = new ArrayList<>();
 }
  : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptions.add($exKey.ctx); $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
-                   ( ELSE ':' elseBlock=suite )?
-                   ( FINALLY ':' finallyBlock=suite )?
-                 | FINALLY ':' finallyBlock=suite
-                 )
+                            ( ELSE ':' elseBlock=suite )?
+                            ( FINALLY ':' finallyBlock=suite )?
+                          | FINALLY ':' finallyBlock=suite
+                          )
  ;
 
 /// with_stmt: 'with' with_item (',' with_item)*  ':' suite
@@ -687,11 +697,11 @@ dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContex
     $setValues = new ArrayList<>();
 }
  : dictVar=test ':' dictExpr=test ( comp_for
-                 | ( ',' dictKey=test ':' dictVal=test { $dictValues.put($dictKey.ctx, $dictVal.ctx); } )* ','?
-                 )
+                                  | ( ',' dictKey=test ':' dictVal=test { $dictValues.put($dictKey.ctx, $dictVal.ctx); } )* ','?
+                                  )
  | setVar=test ( comp_for
-        | ( ',' setVal=test { $setValues.add($setVal.ctx); } )* ','?
-        )
+               | ( ',' setVal=test { $setValues.add($setVal.ctx); } )* ','?
+               )
  ;
 
 /// classdef: 'class' NAME ['(' [arglist] ')'] ':' suite
@@ -707,10 +717,10 @@ arglist returns [List<ArgumentContext> positionalArgs]
     $positionalArgs = new ArrayList<>();
 }
  : ( optArg=argument ',' { $positionalArgs.add($optArg.ctx); } )*
- ( arg=argument { $positionalArgs.add($arg.ctx); } ','?
-     | '*' args=test ( ',' optArg2=argument { $positionalArgs.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
-     | '**' kwargs=test
- )
+   ( arg=argument { $positionalArgs.add($arg.ctx); } ','?
+   | '*' args=test ( ',' optArg2=argument { $positionalArgs.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
+   | '**' kwargs=test
+   )
  ;
 
 /// # The reason that keywords are test nodes instead of NAME is that using NAME
