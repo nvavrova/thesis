@@ -263,6 +263,12 @@ public interface Python2Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWith_stmt(Python2Parser.With_stmtContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link Python2Parser#except_clause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExcept_clause(Python2Parser.Except_clauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link Python2Parser#suite}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -1,6 +1,40 @@
-grammar Python2;
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 by Bart Kiers
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Project      : Python3-parser; an ANTLR4 grammar for Python 3
+ *                https://github.com/bkiers/Python-parser
+ * Developed by : Bart Kiers, bart@big-o.nl
+ */
+grammar Python;
+
+// All comments that start with "///" are copy-pasted from
+// The Python Language Reference: https://docs.python.org/3.3/reference/grammar.html
 
 tokens { INDENT, DEDENT }
+
 
 @header
 {
@@ -44,7 +78,7 @@ tokens { INDENT, DEDENT }
       }
 
       // First emit an extra line break that serves as the end of the statement.
-      this.emit(commonToken(Python2Parser.NEWLINE, "\n"));
+      this.emit(commonToken(PythonParser.NEWLINE, "\n"));
 
       // Now emit as much DEDENT tokens as needed.
       while (!indents.isEmpty()) {
@@ -53,7 +87,7 @@ tokens { INDENT, DEDENT }
       }
 
       // Put the EOF back on the token stream.
-      this.emit(commonToken(Python2Parser.EOF, "<EOF>"));
+      this.emit(commonToken(PythonParser.EOF, "<EOF>"));
     }
 
     Token next = super.nextToken();
@@ -67,7 +101,7 @@ tokens { INDENT, DEDENT }
   }
 
   private Token createDedent() {
-    CommonToken dedent = commonToken(Python2Parser.DEDENT, "");
+    CommonToken dedent = commonToken(PythonParser.DEDENT, "");
     dedent.setLine(this.lastToken.getLine());
     return dedent;
   }
@@ -113,43 +147,98 @@ tokens { INDENT, DEDENT }
  * parser rules
  */
 
+/// single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE
 single_input
  : NEWLINE
  | simple_stmt
  | compound_stmt NEWLINE
  ;
 
+/// file_input: (NEWLINE | stmt)* ENDMARKER
 file_input
- : ( NEWLINE | stmt )*  EOF
+ : ( NEWLINE | stmt )* last_stmt? EOF
  ;
 
+/// eval_input: testlist NEWLINE* ENDMARKER
 eval_input
  : NEWLINE* testlist NEWLINE* EOF
  ;
 
-decorators
- : decorator+
- ;
-
+/// decorator: '@' dotted_name [ '(' [arglist] ')' ] NEWLINE
 decorator
  : '@' dotted_name ( '(' arglist? ')' )? NEWLINE
  ;
 
+/// decorators: decorator+
+decorators
+ : decorator+
+ ;
+
+/// decorated: decorators (classdef | funcdef)
+decorated
+ : decorators ( classdef | funcdef )
+ ;
+
+/// funcdef: 'def' NAME parameters ['->' test] ':' suite
 funcdef
- : decorators? DEF NAME parameters ':' suite
+ : DEF NAME parameters ( '->' test )? ':' suite
  ;
 
+/// parameters: '(' [typedargslist] ')'
 parameters
- : '(' varargslist? ')'
+ : '(' typedargslist? ')'
  ;
 
-varargslist
- : vfpdef ( '=' test )? ( ',' vfpdef ( '=' test )? )* ( ',' ( '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
-                                                            | '**' vfpdef
-                                                            )?
-                                                      )?
- | '*' vfpdef ( ',' '**' vfpdef )?
- | '**' vfpdef
+/// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
+///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
+///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
+typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefContext, TestContext> args, Map<TfpdefContext, TestContext> kwargs]
+ @init {
+     $positional = new HashMap<>();
+     $args = new HashMap<>();
+     $kwargs = new HashMap<>();
+ }
+ : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); }
+           ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
+           ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
+         | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
+         )?
+   )?
+ | '*' g=tfpdef? { $args.put($g.ctx, null); }
+   ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
+   ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
+ | '**' j=tfpdef { $kwargs.put($j.ctx, null); }
+ ;
+
+/// tfpdef: NAME [':' test]
+tfpdef
+ : NAME ( ':' test )?
+ | '(' vfplist ')'
+ ;
+
+/// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
+///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
+///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
+varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefContext, TestContext> args, Map<VfpdefContext, TestContext> kwargs]
+@init {
+    $positional = new HashMap<>();
+    $args = new HashMap<>();
+    $kwargs = new HashMap<>();
+}
+ : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); }
+           ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
+           ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
+         | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
+         )?
+   )?
+ | '*' g=vfpdef? { $args.put($g.ctx, null); }
+   ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
+   ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
+ | '**' j=vfpdef { $kwargs.put($j.ctx, null); }
  ;
 
 vfpdef
@@ -161,19 +250,23 @@ vfplist
  : vfpdef (',' vfpdef)* (',')?
  ;
 
+/// stmt: simple_stmt | compound_stmt
 stmt
  : simple_stmt
  | compound_stmt
  ;
 
+/// simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 simple_stmt
  : small_stmt ( ';' small_stmt )* ';'? NEWLINE
  ;
 
-//last_stmt
-// : small_stmt ( ';' small_stmt )* ';'?
-// ;
+last_stmt
+ : small_stmt ( ';' small_stmt )* ';'?
+ ;
 
+/// small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
+///              import_stmt | global_stmt | nonlocal_stmt | assert_stmt)
 small_stmt
  : expr_stmt
  | print_stmt
@@ -182,21 +275,37 @@ small_stmt
  | flow_stmt
  | import_stmt
  | global_stmt
+ | nonlocal_stmt
  | exec_stmt
  | assert_stmt
  ;
 
-expr_stmt
- : testlist ( (augassign yield_expr)
-            | (augassign testlist)
-            | ('=' (testlist|yield_expr))+
-            )?
+/// expr_stmt: testlist_star_expr (augassign (yield_expr|testlist) |
+///                      ('=' (yield_expr|testlist_star_expr))*)
+expr_stmt returns [List<ParserRuleContext> chainedAssign]
+@init {
+    $chainedAssign = new ArrayList<>();
+}
+ : target=testlist_star_expr { $chainedAssign.add($target.ctx); } ( augassign ( assignYield=yield_expr | assignTest=testlist)
+                                                                  | ( '=' ( ayi=yield_expr { $chainedAssign.add($ayi.ctx); }
+                                                                          | atsl=testlist_star_expr { $chainedAssign.add($atsl.ctx); }
+                                                                          )
+                                                                    )*
+                                                                  )
  ;
 
+/// testlist_star_expr: (test|star_expr) (',' (test|star_expr))* [',']
+testlist_star_expr
+ : ( test | star_expr ) ( ',' ( test |  star_expr ) )* ','?
+ ;
+
+/// augassign: ('+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' |
+///             '<<=' | '>>=' | '**=' | '//=')
 augassign
  : op='+='
  | op='-='
  | op='*='
+ | op='@=' // PEP 465
  | op='/='
  | op='%='
  | op='&='
@@ -209,17 +318,20 @@ augassign
  ;
 
 print_stmt
- : 'print' (testlist | '>>' testlist)?
+ : 'print' (testlist | '>>' testlist)? //TODO: fix this, doesn't cover all cases, e.g. print(configs, file=config_file) -> problem with the =
  ;
 
+/// del_stmt: 'del' exprlist
 del_stmt
  : DEL exprlist
  ;
 
+/// pass_stmt: 'pass'
 pass_stmt
  : PASS
  ;
 
+/// flow_stmt: break_stmt | continue_stmt | return_stmt | raise_stmt | yield_stmt
 flow_stmt
  : break_stmt
  | continue_stmt
@@ -228,38 +340,51 @@ flow_stmt
  | yield_stmt
  ;
 
+/// break_stmt: 'break'
 break_stmt
  : BREAK
  ;
 
+/// continue_stmt: 'continue'
 continue_stmt
  : CONTINUE
  ;
 
+/// return_stmt: 'return' [testlist]
 return_stmt
  : RETURN testlist?
  ;
 
+/// yield_stmt: yield_expr
 yield_stmt
  : yield_expr
  ;
 
+/// raise_stmt: 'raise' [test ['from' test]]
 raise_stmt
- : RAISE ( test (',' test (',' test)? )? )?
+ : RAISE ( except=test ( FROM source=test | ',' test (',' test)? )? )?
  ;
 
+/// import_stmt: import_name | import_from
 import_stmt
  : import_name
  | import_from
  ;
 
+/// import_name: 'import' dotted_as_names
 import_name
  : IMPORT dotted_as_names
  ;
 
-import_from
- : FROM ( '.'* dotted_name
-        | '.'+
+/// # note below: the ('.' | '...') is necessary because '...' is tokenized as ELLIPSIS
+/// import_from: ('from' (('.' | '...')* dotted_name | ('.' | '...')+)
+///               'import' ('*' | '(' import_as_names ')' | import_as_names))
+import_from returns [List<String> prefixes]
+@init{
+    $prefixes = new ArrayList<>();
+}
+ : FROM ( ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )* dotted_name
+        | ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )+
         )
    IMPORT ( '*'
           | '(' import_as_names ')'
@@ -267,22 +392,27 @@ import_from
           )
  ;
 
+/// import_as_name: NAME ['as' NAME]
 import_as_name
  : NAME ( AS NAME )?
  ;
 
+/// dotted_as_name: dotted_name ['as' NAME]
 dotted_as_name
  : dotted_name ( AS NAME )?
  ;
 
+/// import_as_names: import_as_name (',' import_as_name)* [',']
 import_as_names
  : import_as_name ( ',' import_as_name )* ','?
  ;
 
+/// dotted_as_names: dotted_as_name (',' dotted_as_name)*
 dotted_as_names
  : dotted_as_name ( ',' dotted_as_name )*
  ;
 
+/// dotted_name: NAME ('.' NAME)*
 dotted_name returns [List<String> names]
 @init{
     $names = new ArrayList<>();
@@ -290,6 +420,7 @@ dotted_name returns [List<String> names]
  : name=NAME { $names.add($name.text); } ( '.' otherName=NAME { $names.add($otherName.text); } )*
  ;
 
+/// global_stmt: 'global' NAME (',' NAME)*
 global_stmt returns [List<String> names]
 @init{
     $names = new ArrayList<>();
@@ -297,14 +428,24 @@ global_stmt returns [List<String> names]
  : GLOBAL name=NAME { $names.add($name.text); } ( ',' otherName=NAME { $names.add($otherName.text); } )*
  ;
 
+/// nonlocal_stmt: 'nonlocal' NAME (',' NAME)*
+nonlocal_stmt returns [List<String> names]
+ @init{
+     $names = new ArrayList<>();
+ }
+ : NONLOCAL name=NAME { $names.add($name.text); } ( ',' otherName=NAME { $names.add($otherName.text); } )*
+ ;
+
 exec_stmt
  : EXEC expr (IN test (',' test)? )?
  ;
 
+/// assert_stmt: 'assert' test [',' test]
 assert_stmt
  : ASSERT assertion=test ( ',' assertionError=test )?
  ;
 
+/// compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
 compound_stmt
  : if_stmt
  | while_stmt
@@ -313,8 +454,10 @@ compound_stmt
  | with_stmt
  | funcdef
  | classdef
+ | decorated
  ;
 
+/// if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 if_stmt returns [Map<TestContext, SuiteContext> elifVals, List<TestContext> elifConditions]
 @init{
     $elifVals = new HashMap<TestContext, SuiteContext>();
@@ -325,60 +468,106 @@ if_stmt returns [Map<TestContext, SuiteContext> elifVals, List<TestContext> elif
    ( ELSE ':' elseSuite=suite )?
  ;
 
+/// while_stmt: 'while' test ':' suite ['else' ':' suite]
 while_stmt
  : WHILE test ':' body=suite ( ELSE ':' elseBody=suite )?
  ;
 
+/// for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
 for_stmt
  : FOR exprlist IN testlist ':' body=suite ( ELSE ':' elseBody=suite )?
  ;
 
-try_stmt
- : TRY ':' tryBlock=suite ( ( except_clause ':' suite )+
+/// try_stmt: ('try' ':' suite
+///            ((except_clause ':' suite)+
+///       ['else' ':' suite]
+///       ['finally' ':' suite] |
+///      'finally' ':' suite))
+try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks, List<Except_clauseContext> exceptions]
+@init{
+    $exceptBlocks = new HashMap<>();
+    $exceptions = new ArrayList<>();
+}
+ : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptions.add($exKey.ctx); $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
                             ( ELSE ':' elseBlock=suite )?
                             ( FINALLY ':' finallyBlock=suite )?
                           | FINALLY ':' finallyBlock=suite
                           )
  ;
 
+/// with_stmt: 'with' with_item (',' with_item)*  ':' suite
 with_stmt
- : WITH test ( (AS | NAME) expr )? ':' suite
+ : WITH with_item ( ',' with_item )* ':' suite
+ | WITH test ( (AS | NAME) expr )? ':' suite
  ;
 
+/// with_item: test ['as' expr]
+with_item
+ : test ( AS expr )?
+ ;
+
+/// # NB compile.c makes sure that the default except clause is last
+/// except_clause: 'except' [test ['as' NAME]]
+// : EXCEPT ( test ( AS NAME )? )?
 except_clause
- : EXCEPT ( test ( ',' test )? )?
+ : EXCEPT ( test ( AS NAME | ',' test )? )?
  ;
 
+/// suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
 suite
  : simple_stmt
  | NEWLINE INDENT stmt+ DEDENT
  ;
 
+/// test: or_test ['if' or_test 'else' test] | lambdef
 test
  : value=or_test ( IF condition=or_test ELSE test )?
  | lambdef
  ;
 
+/// test_nocond: or_test | lambdef_nocond
+test_nocond
+ : or_test
+ | lambdef_nocond
+ ;
+
+/// lambdef: 'lambda' [varargslist] ':' test
+lambdef
+ : LAMBDA varargslist? ':' test
+ ;
+
+/// lambdef_nocond: 'lambda' [varargslist] ':' test_nocond
+lambdef_nocond
+ : LAMBDA varargslist? ':' test_nocond
+ ;
+
+/// or_test: and_test ('or' and_test)*
 or_test
  : and_test ( OR and_test )*
  ;
 
+/// and_test: not_test ('and' not_test)*
 and_test
  : not_test ( AND not_test )*
  ;
 
+/// not_test: 'not' not_test | comparison
 not_test
  : NOT not_test
  | comparison
  ;
 
+/// comparison: star_expr (comp_op star_expr)*
 comparison returns [List<Comp_opContext> operators]
 @init {
     $operators = new ArrayList<>();
 }
- : expr ( op=comp_op expr { $operators.add($op.ctx); } )*
+ : star_expr ( op=comp_op star_expr { $operators.add($op.ctx); } )*
  ;
 
+/// # <> isn't actually a valid comparison operator in Python. It's here for the
+/// # sake of a __future__ import described in PEP 401
+/// comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in'|'is'|'is' 'not'
 comp_op returns [String operator]
 @init{
     $operator = "";
@@ -396,18 +585,27 @@ comp_op returns [String operator]
  | op=IS neg=NOT { $operator = $op.text + " " + $neg.text; }
  ;
 
+/// star_expr: ['*'] expr
+star_expr
+ : '*'? expr
+ ;
+
+/// expr: xor_expr ('|' xor_expr)*
 expr
  : xor_expr ( '|' xor_expr )*
  ;
 
+/// xor_expr: and_expr ('^' and_expr)*
 xor_expr
  : and_expr ( '^' and_expr )*
  ;
 
+/// and_expr: shift_expr ('&' shift_expr)*
 and_expr
  : shift_expr ( '&' shift_expr )*
  ;
 
+/// shift_expr: arith_expr (('<<'|'>>') arith_expr)*
 shift_expr returns [List<String> operators]
 @init {
     $operators = new ArrayList<>();
@@ -417,6 +615,7 @@ shift_expr returns [List<String> operators]
               )*
  ;
 
+/// arith_expr: term (('+'|'-') term)*
 arith_expr returns [List<String> operators]
 @init {
     $operators = new ArrayList<>();
@@ -426,6 +625,7 @@ arith_expr returns [List<String> operators]
         )*
  ;
 
+/// term: factor (('*'|'/'|'%'|'//') factor)*
 term returns [List<String> operators]
 @init {
     $operators = new ArrayList<>();
@@ -434,9 +634,11 @@ term returns [List<String> operators]
           | op='/' factor { $operators.add($op.text); }
           | op='%' factor { $operators.add($op.text); }
           | op='//' factor { $operators.add($op.text); }
+          | op='@' factor { $operators.add($op.text); } // PEP 465
           )*
  ;
 
+/// factor: ('+'|'-'|'~') factor | power
 factor
  : op='+' factor
  | op='-' factor
@@ -444,115 +646,138 @@ factor
  | power
  ;
 
+/// power: atom trailer* ['**' factor]
 power
  : atom trailer* ( '**' factor )?
  ;
 
+/// atom: ('(' [yield_expr|testlist_comp] ')' |
+///        '[' [testlist_comp] ']' |
+///        '{' [dictorsetmaker] '}' |
+///        NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
 atom
  : '(' ( yield_expr | testlist_comp )? ')'
- | '[' listmaker? ']'
- | '{' dictmaker? '}'
+ | '[' testlist_comp? ']' //TODO: check this
+ | '{' dictorsetmaker? '}'
  | '`' testlist '`'
  | NAME
  | number
  | string+
+ | ellipsis='...'
  | NONE
  | TRUE
  | FALSE
  ;
 
-listmaker
- : test ( list_for | (',' test)* ) (',')?
- ;
-
+/// testlist_comp: test ( comp_for | (',' test)* [','] )
 testlist_comp
  : initial=test ( comp_for
                 | ( ',' test )* ','?
                 )
  ;
 
-lambdef
- : LAMBDA varargslist? ':' test
- ;
-
+/// trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
 trailer
  : callBracket='(' arglist? ')'
  | '[' subscriptlist ']'
  | '.' NAME
  ;
 
+/// subscriptlist: subscript (',' subscript)* [',']
 subscriptlist
  : subscript ( ',' subscript )* ','?
  ;
 
+/// subscript: test | [test] ':' [test] [sliceop]
 subscript
  : '.' '.' '.'
- | lowerBound=test (':' upperBound=test? stride=sliceop?)?
- | ':' upperBound=test? stride=sliceop?
+ | index=test
+ | lowerBound=test? ':' upperBound=test? stride=sliceop?
  ;
 
+/// sliceop: ':' [test]
 sliceop
  : ':' test?
  ;
 
+/// exprlist: star_expr (',' star_expr)* [',']
 exprlist
- : expr ( ',' expr )* ','?
+ : star_expr ( ',' star_expr )* ','?
  ;
 
+/// testlist: test (',' test)* [',']
 testlist
  : test ( ',' test )* ','?
  ;
 
-dictmaker
- : test ':' test (',' test ':' test)* (',')?
+/// dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |
+///                   (test (comp_for | (',' test)* [','])) )
+dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContext> dictValues]
+@init{
+    $dictValues = new HashMap<>();
+    $setValues = new ArrayList<>();
+}
+ : dictVar=test ':' dictExpr=test ( comp_for
+                                  | ( ',' dictKey=test ':' dictVal=test { $dictValues.put($dictKey.ctx, $dictVal.ctx); } )* ','?
+                                  )
+ | setVar=test ( comp_for
+               | ( ',' setVal=test { $setValues.add($setVal.ctx); } )* ','?
+               )
  ;
 
+/// classdef: 'class' NAME ['(' [arglist] ')'] ':' suite
 classdef
- : CLASS NAME ( '(' testlist? ')' )? ':' suite
+ : CLASS NAME ( '(' arglist? ')' )? ':' suite
  ;
 
-arglist
-: argument (',' argument)* ( ',' ( '*' test (',' '**' test)?
-                                 | '**' test
-                                 )?
-                           )?
- | '*' test (',' '**' test)?
- | '**' test
+/// arglist: (argument ',')* (argument [',']
+///                          |'*' test (',' argument)* [',' '**' test]
+///                          |'**' test)
+arglist returns [List<ArgumentContext> positionalArgs]
+@init{
+    $positionalArgs = new ArrayList<>();
+}
+ : ( optArg=argument ',' { $positionalArgs.add($optArg.ctx); } )*
+   ( arg=argument { $positionalArgs.add($arg.ctx); } ','?
+   | '*' args=test ( ',' optArg2=argument { $positionalArgs.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
+   | '**' kwargs=test
+   )
  ;
 
+/// # The reason that keywords are test nodes instead of NAME is that using NAME
+/// # results in an ambiguity. ast.c makes sure it's a NAME.
+/// argument: test [comp_for] | test '=' test  # Really [keyword '='] test
 argument
  : value=test condition=comp_for?
  | name=test '=' value=test
  ;
 
-list_iter
- : list_for
- | list_if
- ;
-
-list_for
- : 'for' exprlist 'in' testlist (list_iter)?
- ;
-
-list_if
- : 'if' test (list_iter)?
- ;
-
+/// comp_iter: comp_for | comp_if
 comp_iter
  : comp_for
  | comp_if
  ;
 
+/// comp_for: 'for' exprlist 'in' or_test [comp_iter]
 comp_for
  : FOR exprlist IN or_test comp_iter?
  ;
 
+/// comp_if: 'if' test_nocond [comp_iter]
 comp_if
- : IF test comp_iter?
+ : IF test_nocond comp_iter?
+ | IF test comp_iter? //TODO: check this
  ;
 
+/// yield_expr: 'yield' [testlist]
 yield_expr
- : YIELD testlist?
+ : YIELD yield_arg?
+ ;
+
+/// yield_arg: 'from' test | testlist
+yield_arg
+ : FROM test
+ | testlist
  ;
 
 string
@@ -566,6 +791,7 @@ number
  | IMAG_NUMBER
  ;
 
+/// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
 integer
  : DECIMAL_INTEGER
  | OCT_INTEGER
@@ -584,6 +810,7 @@ FROM : 'from';
 IMPORT : 'import';
 AS : 'as';
 GLOBAL : 'global';
+NONLOCAL : 'nonlocal';
 EXEC : 'exec';
 ASSERT : 'assert';
 IF : 'if';
@@ -637,7 +864,7 @@ NEWLINE
        }
        else if (indent > previous) {
          indents.push(indent);
-         emit(commonToken(Python2Parser.INDENT, spaces));
+         emit(commonToken(PythonParser.INDENT, spaces));
        }
        else {
          // Possibly emit more than 1 DEDENT token.
@@ -650,40 +877,51 @@ NEWLINE
    }
  ;
 
+/// identifier   ::=  id_start id_continue*
 NAME
  : ID_START ID_CONTINUE*
  ;
 
+/// stringliteral   ::=  [stringprefix](shortstring | longstring)
+/// stringprefix    ::=  "r" | "R"
 STRING_LITERAL
  : [uU]? [rR]? ( SHORT_STRING | LONG_STRING )
  ;
 
+/// bytesliteral   ::=  bytesprefix(shortbytes | longbytes)
+/// bytesprefix    ::=  "b" | "B" | "br" | "Br" | "bR" | "BR"
 BYTES_LITERAL
  : [bB] [rR]? ( SHORT_BYTES | LONG_BYTES )
  ;
 
+/// decimalinteger ::=  nonzerodigit digit* | "0"+
 DECIMAL_INTEGER
  : NON_ZERO_DIGIT DIGIT*
  | '0'+
  ;
 
+/// octinteger     ::=  "0" ("o" | "O") octdigit+
 OCT_INTEGER
  : '0' [oO] OCT_DIGIT+
  ;
 
+/// hexinteger     ::=  "0" ("x" | "X") hexdigit+
 HEX_INTEGER
  : '0' [xX] HEX_DIGIT+
  ;
 
+/// bininteger     ::=  "0" ("b" | "B") bindigit+
 BIN_INTEGER
  : '0' [bB] BIN_DIGIT+
  ;
 
+/// floatnumber   ::=  pointfloat | exponentfloat
 FLOAT_NUMBER
  : POINT_FLOAT
  | EXPONENT_FLOAT
  ;
 
+/// imagnumber ::=  (floatnumber | intpart) ("j" | "J")
 IMAG_NUMBER
  : ( FLOAT_NUMBER | INT_PART ) [jJ]
  ;
@@ -752,85 +990,107 @@ UNKNOWN_CHAR
  * fragments
  */
 
+/// shortstring     ::=  "'" shortstringitem* "'" | '"' shortstringitem* '"'
+/// shortstringitem ::=  shortstringchar | stringescapeseq
+/// shortstringchar ::=  <any source character except "\" or newline or the quote>
 fragment SHORT_STRING
  : '\'' ( STRING_ESCAPE_SEQ | LINE_JOINING | ~[\\\r\n'] )* '\''
  | '"' ( STRING_ESCAPE_SEQ | LINE_JOINING | ~[\\\r\n"] )* '"'
  ;
 
+/// longstring      ::=  "'''" longstringitem* "'''" | '"""' longstringitem* '"""'
 fragment LONG_STRING
  : '\'\'\'' LONG_STRING_ITEM*? '\'\'\''
  | '"""' LONG_STRING_ITEM*? '"""'
  ;
 
+/// longstringitem  ::=  longstringchar | stringescapeseq
 fragment LONG_STRING_ITEM
  : LONG_STRING_CHAR
  | STRING_ESCAPE_SEQ
  ;
 
+/// longstringchar  ::=  <any source character except "\">
 fragment LONG_STRING_CHAR
  : ~'\\'
  ;
 
+/// stringescapeseq ::=  "\" <any source character>
 fragment STRING_ESCAPE_SEQ
  : '\\' .
  ;
 
+/// nonzerodigit   ::=  "1"..."9"
 fragment NON_ZERO_DIGIT
  : [1-9]
  ;
 
+/// digit          ::=  "0"..."9"
 fragment DIGIT
  : [0-9]
  ;
 
+/// octdigit       ::=  "0"..."7"
 fragment OCT_DIGIT
  : [0-7]
  ;
 
+/// hexdigit       ::=  digit | "a"..."f" | "A"..."F"
 fragment HEX_DIGIT
  : [0-9a-fA-F]
  ;
 
+/// bindigit       ::=  "0" | "1"
 fragment BIN_DIGIT
  : [01]
  ;
 
+/// pointfloat    ::=  [intpart] fraction | intpart "."
 fragment POINT_FLOAT
  : INT_PART? FRACTION
  | INT_PART '.'
  ;
 
+/// exponentfloat ::=  (intpart | pointfloat) exponent
 fragment EXPONENT_FLOAT
  : ( INT_PART | POINT_FLOAT ) EXPONENT
  ;
 
+/// intpart       ::=  digit+
 fragment INT_PART
  : DIGIT+
  ;
 
+/// fraction      ::=  "." digit+
 fragment FRACTION
  : '.' DIGIT+
  ;
 
+/// exponent      ::=  ("e" | "E") ["+" | "-"] digit+
 fragment EXPONENT
  : [eE] [+-]? DIGIT+
  ;
 
+/// shortbytes     ::=  "'" shortbytesitem* "'" | '"' shortbytesitem* '"'
+/// shortbytesitem ::=  shortbyteschar | bytesescapeseq
 fragment SHORT_BYTES
  : '\'' ( SHORT_BYTES_CHAR_NO_SINGLE_QUOTE | BYTES_ESCAPE_SEQ )* '\''
  | '"' ( SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE | BYTES_ESCAPE_SEQ )* '"'
  ;
 
+/// longbytes      ::=  "'''" longbytesitem* "'''" | '"""' longbytesitem* '"""'
 fragment LONG_BYTES
  : '\'\'\'' LONG_BYTES_ITEM*? '\'\'\''
  | '"""' LONG_BYTES_ITEM*? '"""'
  ;
 
+/// longbytesitem  ::=  longbyteschar | bytesescapeseq
 fragment LONG_BYTES_ITEM
  : LONG_BYTES_CHAR
  | BYTES_ESCAPE_SEQ
  ;
 
+/// shortbyteschar ::=  <any ASCII character except "\" or newline or the quote>
 fragment SHORT_BYTES_CHAR_NO_SINGLE_QUOTE
  : [\u0000-\u0009]
  | [\u000B-\u000C]
@@ -847,11 +1107,13 @@ fragment SHORT_BYTES_CHAR_NO_DOUBLE_QUOTE
  | [\u005D-\u007F]
  ;
 
+/// longbyteschar  ::=  <any ASCII character except "\">
 fragment LONG_BYTES_CHAR
  : [\u0000-\u005B]
  | [\u005D-\u007F]
  ;
 
+/// bytesescapeseq ::=  "\" <any ASCII character>
 fragment BYTES_ESCAPE_SEQ
  : '\\' [\u0000-\u007F]
  ;
@@ -864,6 +1126,7 @@ fragment LINE_JOINING
  : '\\' SPACES? ( '\r'? '\n' | '\r' )
  ;
 
+/// id_start     ::=  <all characters in general categories Lu, Ll, Lt, Lm, Lo, Nl, the underscore, and characters with the Other_ID_Start property>
 fragment ID_START
  : '_'
  | [A-Z]
@@ -1194,6 +1457,7 @@ fragment ID_START
  | [\uFFDA-\uFFDC]
  ;
 
+/// id_continue  ::=  <all characters in id_start, plus characters in the categories Mn, Mc, Nd, Pc and others with the Other_ID_Continue property>
 fragment ID_CONTINUE
  : ID_START
  | [0-9]
