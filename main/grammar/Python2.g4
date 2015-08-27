@@ -209,7 +209,7 @@ augassign
  ;
 
 print_stmt
- : 'print' (testlist | '>>' testlist)?
+ : PRINT (testlist | '>>' testlist)?
  ;
 
 del_stmt
@@ -606,6 +606,7 @@ TRUE : 'True';
 FALSE : 'False';
 CLASS : 'class';
 YIELD : 'yield';
+PRINT : 'print';
 DEL : 'del';
 PASS : 'pass';
 CONTINUE : 'continue';

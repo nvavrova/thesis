@@ -215,7 +215,7 @@ typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefCon
 /// tfpdef: NAME [':' test]
 tfpdef
  : NAME ( ':' test )?
- | '(' vfplist ')'
+ | '(' vfplist ')' //TODO: can't I remove this?
  ;
 
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
@@ -318,7 +318,9 @@ augassign
  ;
 
 print_stmt
- : 'print' (testlist | '>>' testlist)? //TODO: fix this, doesn't cover all cases, e.g. print(configs, file=config_file) -> problem with the =
+ : PRINT ( ( test (',' test)* ','? )?
+         | '>>' test ( (',' test)+ ','? )?
+         )
  ;
 
 /// del_stmt: 'del' exprlist
@@ -510,7 +512,7 @@ with_item
 /// except_clause: 'except' [test ['as' NAME]]
 // : EXCEPT ( test ( AS NAME )? )?
 except_clause
- : EXCEPT ( test ( AS NAME | ',' test )? )?
+ : EXCEPT ( test ( ( AS | ',' ) test )? )?
  ;
 
 /// suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
@@ -833,6 +835,7 @@ TRUE : 'True';
 FALSE : 'False';
 CLASS : 'class';
 YIELD : 'yield';
+PRINT : 'print';
 DEL : 'del';
 PASS : 'pass';
 CONTINUE : 'continue';
