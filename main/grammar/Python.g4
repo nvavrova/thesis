@@ -320,6 +320,7 @@ augassign
 print_stmt
  : PRINT ( ( test (',' test)* ','? )?
          | '>>' test ( (',' test)+ ','? )?
+         | '(' arglist? ')'
          )
  ;
 
