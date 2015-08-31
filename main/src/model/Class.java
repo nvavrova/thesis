@@ -240,7 +240,8 @@ public class Class {
 	public boolean isBlob() {
 		return (this.isLargeClass() || this.hasLowCohesion()) &&
 				(this.hasControllerName() || this.hasControllerMethods())
-				&& this.relatedDataClassesCount() > 1;
+				;
+				//&& this.relatedDataClassesCount() > 1;
 	}
 
 	public boolean isSwissArmyKnife() {
@@ -258,13 +259,13 @@ public class Class {
 
 
 	private boolean isDataClass() {
-		//TODO: figure out how to redefine a DataClass for Python
-		return this.publicVariablesCount() > 10;
+		return this.publicVariablesCount() > 8;
 //		return this.getNumberOfAccessors() > 5;
 	}
 
 	private boolean privateFieldsWithOneMethod() {
-		return this.privateVariablesCount() > 10 && this.methodCount() == 1;
+		return //this.privateVariablesCount() > 10 &&
+				this.methodCount() == 1;
 	}
 
 	private Integer getNumberOfAccessors() {
@@ -279,11 +280,11 @@ public class Class {
 	}
 
 	private boolean hasLowCohesion() {
-		return this.calculateLcom() > 5;
+		return this.calculateLcom() > 628;
 	}
 
 	private boolean isLargeClass() {
-		return this.loc > 800;
+		return this.loc > 229;
 	}
 
 	private boolean isPrivateVariable(String varName) {
@@ -322,7 +323,7 @@ public class Class {
 	}
 
 	private boolean hasTooManyParents() {
-		return this.parents.size() > 2;
+		return this.parents.size() >= 2;
 	}
 
 	private boolean hasLongMethod() {
@@ -335,7 +336,7 @@ public class Class {
 	}
 
 	private boolean hasTooManyMethodsWithNoParams() {
-		return this.methodsWithNoParamsCount() > 8;
+		return this.methodsWithNoParamsCount() > 6;
 	}
 
 	private Integer relatedPrivateFieldsWithOneMethodCount() {
