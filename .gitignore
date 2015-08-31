@@ -14,5 +14,8 @@ logs/*
 #build
 build/*
 
+# local config
+*.properties
+
 #Git API Token
 token.txt
