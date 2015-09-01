@@ -2,11 +2,11 @@ package main;
 
 import ast.AstBuilder;
 import ast.Module;
-import gen.Python3Lexer;
-import gen.Python3Parser;
-import util.StringHelper;
+import gen.PythonLexer;
+import gen.PythonParser;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import util.StringHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +29,10 @@ public class File2AstConverter {
 	private static Module parse(String fileName) {
 		try {
 			org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
-			Python3Lexer lexer = new Python3Lexer(input);
+			PythonLexer lexer = new PythonLexer(input);
 
 			org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-			Python3Parser parser = new Python3Parser(tokens);
+			PythonParser parser = new PythonParser(tokens);
 			parser.setErrorHandler(new BailErrorStrategy());
 
 			ParserRuleContext context = parser.file_input();

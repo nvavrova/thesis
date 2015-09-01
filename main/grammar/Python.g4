@@ -181,7 +181,7 @@ decorated
 
 /// funcdef: 'def' NAME parameters ['->' test] ':' suite
 funcdef
- : DEF NAME parameters ( '->' test )? ':' suite
+ : DEF name=(NAME | PRINT | EXEC) parameters ( '->' test )? ':' suite //added print and exec because they are tokens in Python2 but not in Python3
  ;
 
 /// parameters: '(' [typedargslist] ')'
@@ -320,7 +320,7 @@ augassign
 print_stmt
  : PRINT ( ( test (',' test)* ','? )?
          | '>>' test ( (',' test)+ ','? )?
-         | '(' arglist? ')'
+//         | '(' arglist? ')'
          )
  ;
 
@@ -663,7 +663,7 @@ atom
  | '[' testlist_comp? ']' //TODO: check this
  | '{' dictorsetmaker? '}'
  | '`' testlist '`'
- | NAME
+ | NAME | PRINT | EXEC //added print and exec because they are tokens in Python2 but not in Python3
  | number
  | string+
  | ellipsis='...'
@@ -683,7 +683,7 @@ testlist_comp
 trailer
  : callBracket='(' arglist? ')'
  | '[' subscriptlist ']'
- | '.' NAME
+ | '.' (NAME | PRINT | EXEC)
  ;
 
 /// subscriptlist: subscript (',' subscript)* [',']
@@ -792,6 +792,7 @@ number
  : integer
  | FLOAT_NUMBER
  | IMAG_NUMBER
+ | LONG
  ;
 
 /// integer        ::=  decimalinteger | octinteger | hexinteger | bininteger
@@ -898,12 +899,6 @@ BYTES_LITERAL
  : [bB] [rR]? ( SHORT_BYTES | LONG_BYTES )
  ;
 
-/// decimalinteger ::=  nonzerodigit digit* | "0"+
-DECIMAL_INTEGER
- : NON_ZERO_DIGIT DIGIT*
- | '0'+
- ;
-
 /// octinteger     ::=  "0" ("o" | "O") octdigit+
 OCT_INTEGER
  : '0' [oO] OCT_DIGIT+
@@ -917,6 +912,18 @@ HEX_INTEGER
 /// bininteger     ::=  "0" ("b" | "B") bindigit+
 BIN_INTEGER
  : '0' [bB] BIN_DIGIT+
+ ;
+
+/// decimalinteger ::=  nonzerodigit digit* | "0"+
+DECIMAL_INTEGER
+ : DIGIT+
+ ;
+
+LONG
+ : OCT_INTEGER 'L'
+ | HEX_INTEGER 'L'
+ | BIN_INTEGER 'L'
+ | DECIMAL_INTEGER 'L'
  ;
 
 /// floatnumber   ::=  pointfloat | exponentfloat
@@ -993,7 +1000,6 @@ UNKNOWN_CHAR
 /*
  * fragments
  */
-
 /// shortstring     ::=  "'" shortstringitem* "'" | '"' shortstringitem* '"'
 /// shortstringitem ::=  shortstringchar | stringescapeseq
 /// shortstringchar ::=  <any source character except "\" or newline or the quote>
