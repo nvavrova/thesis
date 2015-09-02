@@ -2,19 +2,35 @@ package ast.param;
 
 import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Created by Nik on 23-06-2015
+ * Created by Nik on 01-09-2015
  */
-public class SimpleParam extends Param {
+public abstract class SimpleParam extends Param {
 
-	public SimpleParam(@NotNull Integer locInfo, @NotNull Identifier id) {
-		super(locInfo, id);
+	private final Identifier id;
+
+	public SimpleParam(@NotNull Integer locInfo, Identifier id) {
+		super(locInfo);
+		this.id = id;
+	}
+
+	public Identifier getId() {
+		return this.id;
 	}
 
 	@Override
-	public <T> T accept(Visitor<T> visitor) {
-		return visitor.visit(this);
+	public boolean isSelf() {
+		return this.id.isSelf();
+	}
+
+	@Override
+	public List<String> getNames() {
+		List<String> names = new ArrayList<>();
+		names.add(this.id.getValue());
+		return names;
 	}
 }

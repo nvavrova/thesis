@@ -1,22 +1,22 @@
 package ast.expression.comprehension;
 
-import ast.expression.ExprNoCond;
-import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
+import ast.expression.Expr;
+import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Created by Nik on 17-06-2015
  */
 public class CompIf extends CompIter {
 
-	private final ExprNoCond expression;
+	private final Expr expression;
 
-	public CompIf(@NotNull Integer locInfo, CompIter nextLink, @NotNull ExprNoCond expression) {
+	public CompIf(@NotNull Integer locInfo, CompIter nextLink, @NotNull Expr expression) {
 		super(locInfo, nextLink);
 		this.expression = expression;
 	}
 
-	public ExprNoCond getExpression() {
+	public Expr getExpression() {
 		return this.expression;
 	}
 

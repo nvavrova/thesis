@@ -186,7 +186,8 @@ funcdef
 
 /// parameters: '(' [typedargslist] ')'
 parameters
- : '(' typedargslist? ')'
+ : '(' typedargslist ')'
+ | '(' varargslist? ')'
  ;
 
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
@@ -215,7 +216,6 @@ typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefCon
 /// tfpdef: NAME [':' test]
 tfpdef
  : NAME ( ':' test )?
- | '(' vfplist ')' //TODO: can't I remove this?
  ;
 
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
@@ -365,7 +365,7 @@ yield_stmt
 
 /// raise_stmt: 'raise' [test ['from' test]]
 raise_stmt
- : RAISE ( except=test ( FROM source=test | ',' test (',' test)? )? )?
+ : RAISE ( type=test ( FROM source=test | ',' value=test (',' trace=test)? )? )?
  ;
 
 /// import_stmt: import_name | import_from
@@ -389,7 +389,7 @@ import_from returns [List<String> prefixes]
  : FROM ( ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )* dotted_name
         | ( prefix=('.' | '...') { $prefixes.add($prefix.text); } )+
         )
-   IMPORT ( '*'
+   IMPORT ( star='*'
           | '(' import_as_names ')'
           | import_as_names
           )
@@ -440,7 +440,7 @@ nonlocal_stmt returns [List<String> names]
  ;
 
 exec_stmt
- : EXEC expr (IN test (',' test)? )?
+ : EXEC expr (IN vars=test (',' localVars=test)? )?
  ;
 
 /// assert_stmt: 'assert' test [',' test]
@@ -501,19 +501,18 @@ try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks, List<Exc
 /// with_stmt: 'with' with_item (',' with_item)*  ':' suite
 with_stmt
  : WITH with_item ( ',' with_item )* ':' suite
- | WITH test ( (AS | NAME) expr )? ':' suite
  ;
 
 /// with_item: test ['as' expr]
 with_item
- : test ( AS expr )?
+ : test ( (AS | NAME) expr )?
  ;
 
 /// # NB compile.c makes sure that the default except clause is last
 /// except_clause: 'except' [test ['as' NAME]]
 // : EXCEPT ( test ( AS NAME )? )?
 except_clause
- : EXCEPT ( test ( ( AS | ',' ) test )? )?
+ : EXCEPT ( type=test ( ( AS | ',' ) name=test )? )?
  ;
 
 /// suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
@@ -660,7 +659,7 @@ power
 ///        NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
 atom
  : '(' ( yield_expr | testlist_comp )? ')'
- | '[' testlist_comp? ']' //TODO: check this
+ | '[' testlist_comp? ']'
  | '{' dictorsetmaker? '}'
  | '`' testlist '`'
  | NAME | PRINT | EXEC //added print and exec because they are tokens in Python2 but not in Python3
@@ -683,7 +682,7 @@ testlist_comp
 trailer
  : callBracket='(' arglist? ')'
  | '[' subscriptlist ']'
- | '.' (NAME | PRINT | EXEC)
+ | '.' name=(NAME | PRINT | EXEC)
  ;
 
 /// subscriptlist: subscript (',' subscript)* [',']
@@ -763,13 +762,13 @@ comp_iter
 
 /// comp_for: 'for' exprlist 'in' or_test [comp_iter]
 comp_for
- : FOR exprlist IN or_test comp_iter?
+ : FOR exprlist IN or_test (',' or_test)* comp_iter?
  ;
 
 /// comp_if: 'if' test_nocond [comp_iter]
 comp_if
  : IF test_nocond comp_iter?
- | IF test comp_iter? //TODO: check this
+ | IF test comp_iter?
  ;
 
 /// yield_expr: 'yield' [testlist]

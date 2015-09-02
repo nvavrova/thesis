@@ -1,9 +1,11 @@
 package ast.expression.comprehension;
 
+import ast.Visitor;
 import ast.expression.Expr;
 import ast.statement.simple.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
+
+import java.util.List;
 
 /**
  * Created by Nik on 17-06-2015
@@ -11,9 +13,9 @@ import ast.Visitor;
 public class CompFor extends CompIter {
 
 	private final ExprList targets;
-	private final Expr source;
+	private final List<Expr> source;
 
-	public CompFor(@NotNull Integer locInfo, CompIter nextLink, @NotNull ExprList targets, @NotNull Expr source) {
+	public CompFor(@NotNull Integer locInfo, CompIter nextLink, @NotNull ExprList targets, @NotNull List<Expr> source) {
 		super(locInfo, nextLink);
 		this.targets = targets;
 		this.source = source;
@@ -23,7 +25,7 @@ public class CompFor extends CompIter {
 		return this.targets;
 	}
 
-	public Expr getSource() {
+	public List<Expr> getSource() {
 		return this.source;
 	}
 

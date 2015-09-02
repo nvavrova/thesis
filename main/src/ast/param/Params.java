@@ -1,9 +1,10 @@
 package ast.param;
 
 import ast.AstNode;
-import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
+import org.antlr.v4.runtime.misc.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,6 +46,14 @@ public class Params extends AstNode {
 			return p.isSelf();
 		}
 		return false;
+	}
+
+	public List<String> getParamNames() {
+		List<String> names = new ArrayList<>();
+		this.positionalArgs.forEach(p -> names.addAll(p.getNames()));
+		this.args.forEach(p -> names.addAll(p.getNames()));
+		this.kwargs.forEach(p -> names.addAll(p.getNames()));
+		return names;
 	}
 
 	@Override

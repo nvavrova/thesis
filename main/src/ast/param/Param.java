@@ -2,24 +2,19 @@ package ast.param;
 
 import ast.AstNode;
 import ast.expression.Expr;
-import ast.expression.primary.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
+
+import java.util.List;
 
 /**
  * Created by Nik on 08-07-2015
  */
 public abstract class Param extends AstNode {
 
-	private final Identifier id;
 	private Expr defaultVal;
 
-	public Param(@NotNull Integer locInfo, @NotNull Identifier id) {
+	public Param(@NotNull Integer locInfo) {
 		super(locInfo);
-		this.id = id;
-	}
-
-	public Identifier getId() {
-		return this.id;
 	}
 
 	public Expr getDefaultVal() {
@@ -34,7 +29,9 @@ public abstract class Param extends AstNode {
 		return this.defaultVal != null;
 	}
 
-	public Boolean isSelf() {
-		return this.id.isSelf();
+	public boolean isSelf() {
+		return false;
 	}
+
+	public abstract List<String> getNames();
 }

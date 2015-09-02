@@ -17,6 +17,7 @@ import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.Not;
 import ast.expression.primary.atom.*;
 import ast.expression.primary.atom.Float;
+import ast.expression.primary.atom.Long;
 import ast.expression.primary.atom.trailed.*;
 import ast.expression.primary.trailer.ArgList;
 import ast.expression.primary.trailer.SliceBound;
@@ -26,8 +27,9 @@ import ast.expression.unary.Invert;
 import ast.expression.unary.Minus;
 import ast.expression.unary.Plus;
 import ast.expression.unary.Unary;
+import ast.param.ListParam;
 import ast.param.Params;
-import ast.param.SimpleParam;
+import ast.param.UntypedParam;
 import ast.param.TypedParam;
 import ast.path.DottedPath;
 import ast.path.SimplePath;
@@ -87,19 +89,25 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(SimpleParam n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
 	public T visit(Params n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
+	public T visit(ListParam n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
 	public T visit(TypedParam n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(UntypedParam n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -129,6 +137,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
+	public T visit(Exec n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
 	public T visit(ExprList n) {
 		this.visitChildren(n);
 		return null;
@@ -141,13 +155,13 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(SimpleImport n) {
+	public T visit(ImportFrom n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
-	public T visit(ImportFrom n) {
+	public T visit(ImportPaths n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -164,6 +178,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
+	public T visit(Print n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
 	public T visit(Break n) {
 		return null;
 	}
@@ -174,7 +194,13 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(Raise n) {
+	public T visit(RaiseEx n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(RaiseFrom n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -330,6 +356,11 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
+	public T visit(Long n) {
+		return null;
+	}
+
+	@Override
 	public T visit(None n) {
 		return null;
 	}
@@ -342,6 +373,11 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Str n) {
+		return null;
+	}
+
+	@Override
+	public T visit(StrConversion n) {
 		return null;
 	}
 
@@ -504,7 +540,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getName().accept(this);
 	}
 
-	public void visitChildren(SimpleParam n) {
+	public void visitChildren(UntypedParam n) {
 		n.getId().accept(this);
 
 		if (n.hasDefaultVal()) {
@@ -516,6 +552,10 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getArgs().forEach(p -> p.accept(this));
 		n.getKwargs().forEach(p -> p.accept(this));
 		n.getPositionalArgs().forEach(p -> p.accept(this));
+	}
+
+	public void visitChildren(ListParam n) {
+		n.getParams().forEach(p -> p.accept(this));
 	}
 
 	public void visitChildren(TypedParam n) {
@@ -566,6 +606,16 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getItems().accept(this);
 	}
 
+	public void visitChildren(Exec n) {
+		n.getTarget().accept(this);
+		if (n.hasVars()) {
+			n.getVars().accept(this);
+		}
+		if (n.hasLocalVars()) {
+			n.getLocalVars().accept(this);
+		}
+	}
+
 	public void visitChildren(ExprList n) {
 		n.getValues().forEach(e -> e.accept(this));
 	}
@@ -574,28 +624,43 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getIdentifiers().forEach(i -> i.accept(this));
 	}
 
-	public void visitChildren(SimpleImport n) {
-		n.getPaths().forEach(p -> p.accept(this));
-	}
-
 	public void visitChildren(ImportFrom n) {
 		if (n.hasModule()) {
 			n.getModule().accept(this);
 		}
 		n.getPaths().forEach(p -> p.accept(this));
+	}
 
+	public void visitChildren(ImportPaths n) {
+		n.getPaths().forEach(p -> p.accept(this));
 	}
 
 	public void visitChildren(Nonlocal n) {
 		n.getIdentifiers().forEach(i -> i.accept(this));
 	}
 
-	public void visitChildren(Raise n) {
-		if (n.hasSource()) {
-			n.getSource().accept(this);
-		}
+	public void visitChildren(Print n) {
+		n.getExpressions().forEach(e -> e.accept(this));
+	}
+
+	public void visitChildren(RaiseEx n) {
 		if (n.hasType()) {
 			n.getType().accept(this);
+		}
+		if (n.hasValue()) {
+			n.getValue().accept(this);
+		}
+		if (n.hasTrace()) {
+			n.getTrace().accept(this);
+		}
+	}
+
+	public void visitChildren(RaiseFrom n) {
+		if (n.hasType()) {
+			n.getType().accept(this);
+		}
+		if (n.hasSource()) {
+			n.getSource().accept(this);
 		}
 	}
 
@@ -618,6 +683,9 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	public void visitChildren(Except n) {
 		if (n.hasException()) {
 			n.getException().accept(this);
+		}
+		if (n.hasAlias()) {
+			n.getAlias().accept(this);
 		}
 	}
 
@@ -687,6 +755,9 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		if (n.hasAlias()) {
 			n.getAlias().accept(this);
 		}
+		if (n.hasName()) {
+			n.getName().accept(this);
+		}
 	}
 
 	public void visitChildren(Comparison n) {
@@ -707,7 +778,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(LambdaNoCond n) {
-		n.getParameters().accept(this);
+		n.getParameters().accept(this); //TODO: fix null pointer here
 		n.getExpression().accept(this);
 	}
 
@@ -782,7 +853,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		if (n.hasNextLink()) {
 			n.getNextLink().accept(this);
 		}
-		n.getSource().accept(this);
+		n.getSource().forEach(s -> s.accept(this));
 		n.getTargets().accept(this);
 	}
 

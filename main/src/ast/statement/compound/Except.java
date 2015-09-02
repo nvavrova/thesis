@@ -11,9 +11,9 @@ import ast.Visitor;
 public class Except extends Statement {
 
 	private final Expr exception;
-	private final String alias;
+	private final Expr alias;
 
-	public Except(@NotNull Integer locInfo, Expr exception, String alias) {
+	public Except(@NotNull Integer locInfo, Expr exception, Expr alias) {
 		super(locInfo);
 		this.exception = exception;
 		this.alias = alias;
@@ -23,7 +23,7 @@ public class Except extends Statement {
 		return this.exception;
 	}
 
-	public String getAlias() {
+	public Expr getAlias() {
 		return this.alias;
 	}
 
