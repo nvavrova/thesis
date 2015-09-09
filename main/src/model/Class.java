@@ -211,6 +211,13 @@ public class Class {
 		return this.methods.size();
 	}
 
+	public Integer publicMethodCount() {
+		Long l = this.methods.values().stream()
+				.filter(Method::isPrivate)
+				.count();
+		return l.intValue();
+	}
+
 	public Integer variablesCount() {
 		return this.variables.size();
 	}
@@ -259,13 +266,13 @@ public class Class {
 
 
 	private boolean isDataClass() {
-		return this.publicVariablesCount() > 8;
+		return this.publicVariablesCount() > 11;
 //		return this.getNumberOfAccessors() > 5;
 	}
 
-	private boolean privateFieldsWithOneMethod() {
+	private boolean privateFieldsWithOnePublicMethod() {
 		return //this.privateVariablesCount() > 10 &&
-				this.methodCount() == 1;
+				this.publicMethodCount() == 1;
 	}
 
 	private Integer getNumberOfAccessors() {
@@ -280,11 +287,11 @@ public class Class {
 	}
 
 	private boolean hasLowCohesion() {
-		return this.calculateLcom() > 628;
+		return this.calculateLcom() > 564;
 	}
 
 	private boolean isLargeClass() {
-		return this.loc > 229;
+		return this.loc > 186;
 	}
 
 	private boolean isPrivateVariable(String varName) {
@@ -323,7 +330,7 @@ public class Class {
 	}
 
 	private boolean hasTooManyParents() {
-		return this.parents.size() >= 2;
+		return this.parents.size() > 1;
 	}
 
 	private boolean hasLongMethod() {
@@ -336,12 +343,12 @@ public class Class {
 	}
 
 	private boolean hasTooManyMethodsWithNoParams() {
-		return this.methodsWithNoParamsCount() > 6;
+		return this.methodsWithNoParamsCount() > 7;
 	}
 
 	private Integer relatedPrivateFieldsWithOneMethodCount() {
 		Long count = this.dependentOn.values().stream()
-				.filter(Class::privateFieldsWithOneMethod)
+				.filter(Class::privateFieldsWithOnePublicMethod)
 				.count();
 		return count.intValue();
 	}

@@ -5,8 +5,6 @@ import ast.expression.primary.atom.Identifier;
 import ast.expression.primary.atom.trailed.AttributeRef;
 import ast.expression.primary.atom.trailed.Call;
 import ast.expression.primary.atom.trailed.DirectCall;
-import ast.param.Param;
-import ast.param.Params;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
@@ -78,10 +76,9 @@ public class ModelBuilder {
 		}
 
 		@Override
-		public Void visit(SimpleImport n) {
+		public Void visit(ImportPaths n) {
 			for (Path p : n.getPaths()) {
-				String alias = p.hasAlias() ? p.getAlias().getValue() : p.getPath();
-				this.linker.addImport(this.currentFilePath, p.getPath(), alias);
+				this.linker.addImport(this.currentFilePath, p.getPath(), this.getAlias(p));
 			}
 			this.visitChildren(n);
 			return null;
@@ -90,11 +87,14 @@ public class ModelBuilder {
 		@Override
 		public Void visit(ImportFrom n) {
 			for (Path p : n.getPaths()) {
-				String alias = p.hasAlias() ? p.getAlias().getValue() : p.getPath();
-				this.linker.addImport(this.currentFilePath, n.getModule().getPath(), p.getPath(), alias);
+				this.linker.addImport(this.currentFilePath, n.getModule().getPath(), p.getPath(), this.getAlias(p));
 			}
 			this.visitChildren(n);
 			return null;
+		}
+
+		private String getAlias(Path p) {
+			return p.hasAlias() ? p.getAlias().getValue() : p.getPath();
 		}
 	}
 
@@ -115,7 +115,7 @@ public class ModelBuilder {
 
 		public void build(Collection<ast.Module> trees) {
 			for (ast.Module m : trees) {
-				this.currentFilePath = m.getFilePath();
+				this.currentFilePath = m.getFilePath(); //TODO: fix null pointer here
 				m.accept(this);
 			}
 		}
@@ -185,7 +185,7 @@ public class ModelBuilder {
 
 			if (this.inClass()) {
 
-				List<String> paramNames = this.getParamNames(n.getParams()).stream()
+				List<String> paramNames = n.getParams().getParamNames().stream()
 						.filter(p -> !p.equals(SELF_KEYWORD))
 						.collect(Collectors.toList());
 
@@ -218,19 +218,6 @@ public class ModelBuilder {
 			}
 			this.addVar(n.getValue());
 			return null;
-		}
-
-		private List<String> getParamNames(Params params) {
-			List<String> paramNames = this.getParamNames(params.getPositionalArgs());
-			paramNames.addAll(this.getParamNames(params.getArgs()));
-			paramNames.addAll(this.getParamNames(params.getKwargs()));
-			return paramNames;
-		}
-
-		private List<String> getParamNames(List<Param> params) {
-			return params.stream()
-					.map(p -> p.getId().getValue())
-					.collect(Collectors.toList());
 		}
 
 		@Override

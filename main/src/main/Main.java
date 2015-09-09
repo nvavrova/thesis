@@ -2,14 +2,15 @@ package main;
 
 import db.DataHandler;
 import db.pojo.ProjectEntity;
-import model.Project;
+import gen.PythonLexer;
+import gen.PythonParser;
+import model.*;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
 import util.StringHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,16 +18,43 @@ public class Main {
 
 	private static String CSV_DELIMITER = ";";
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 
-//		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
-//		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
-//		System.setOut(out);
-//		System.setErr(err);
+		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
+		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
+		System.setOut(out);
+		System.setErr(err);
+//
+		if (args.length > 0) {
+			Main.processSupplied(args);
+		}
+		else {
+			DataHandler.loadProjects().forEach(Main::handleLatestProjectVersion);
+		}
 
-		Main.createStatsCsv(DataHandler.loadProjects());
 
-//		DataHandler.loadProjects().forEach(Main::handleAllProjectVersions);
+//		Main.createStatsCsv(DataHandler.loadProjects());
+	}
+
+	private static void processSupplied(String[] args) {
+		List<String> allFiles = FileHelper.getPythonFilePaths(new File(args[0]));
+		for (String fileName : allFiles) {
+			System.out.println(fileName);
+			try {
+					org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
+					PythonLexer lexer = new PythonLexer(input);
+
+					org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
+					PythonParser parser = new PythonParser(tokens);
+					parser.setErrorHandler(new BailErrorStrategy());
+
+					ParserRuleContext context = parser.file_input();
+
+			}
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	private static void handleLatestProjectVersion(ProjectEntity projectEntity) {
@@ -38,7 +66,7 @@ public class Main {
 			VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
 			Project project = versionSwitcher.getLatestProjectVersion();
 
-			dataHandler.save(project);
+//			dataHandler.save(project);
 		}
 		catch (Exception ex) {
 
@@ -76,7 +104,7 @@ public class Main {
 		header.add("# of defined globals");
 		csv.println(StringHelper.implode(header, CSV_DELIMITER));
 
-		DataHandler.loadProjects().forEach(project -> Main.createStatsCsv(project, csv));
+		projectEntities.forEach(project -> Main.createStatsCsv(project, csv));
 	}
 
 	private static void createStatsCsv(ProjectEntity projectEntity, PrintStream csv) {
@@ -117,11 +145,11 @@ public class Main {
 			VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
 			Project project = versionSwitcher.getFirstProjectVersion();
 
-			dataHandler.save(project);
+//			dataHandler.save(project);
 
 			while (!versionSwitcher.isAtLatestVersion()) {
 				project = versionSwitcher.getNextProjectVersion();
-				dataHandler.save(project);
+//				dataHandler.save(project);
 			}
 
 		}
@@ -130,7 +158,7 @@ public class Main {
 		}
 	}
 
-	private static void handleException (Exception ex) {
+	private static void handleException(Exception ex) {
 		System.err.println("EXCEPTION: " + ex.getMessage());
 		ex.printStackTrace();
 	}

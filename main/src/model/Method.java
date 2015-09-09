@@ -46,23 +46,27 @@ public class Method {
 		return this.usedClassVars;
 	}
 
-	public Boolean isAccessor() {
+	public boolean isAccessor() {
 		return this.isAccessor;
 	}
 
-	public Boolean isController() {
+	public boolean isController() {
 		return Helper.isControllerName(this.name);
 	}
 
-	public Boolean hasVariableIntersection(Method m) {
+	public boolean hasVariableIntersection(Method m) {
 		return !Helper.areSetsDisjoint(this.usedClassVars, m.getUsedClassVars());
 	}
 
-	public Boolean isLongMethod() {
+	public boolean isLongMethod() {
 		return this.loc > 100;
 	}
 
-	public Boolean hasNoParams() {
+	public boolean hasNoParams() {
 		return this.params.size() == 0;
+	}
+
+	public boolean isPrivate() {
+		return this.name.startsWith("__") && !this.name.endsWith("__");
 	}
 }
