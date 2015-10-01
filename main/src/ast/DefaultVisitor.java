@@ -14,6 +14,7 @@ import ast.expression.comprehension.CompFor;
 import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
+import ast.expression.logical.Comparison;
 import ast.expression.logical.Not;
 import ast.expression.primary.atom.*;
 import ast.expression.primary.atom.Float;

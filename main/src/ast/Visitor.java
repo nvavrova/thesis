@@ -10,6 +10,7 @@ import ast.expression.comprehension.CompIf;
 import ast.expression.comprehension.CondComprehension;
 import ast.expression.comprehension.EnumComprehension;
 import ast.expression.logical.And;
+import ast.expression.logical.Comparison;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
 import ast.expression.primary.atom.*;

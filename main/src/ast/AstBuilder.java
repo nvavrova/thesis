@@ -8,6 +8,7 @@ import ast.expression.*;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
 import ast.expression.logical.And;
+import ast.expression.logical.Comparison;
 import ast.expression.logical.Not;
 import ast.expression.logical.Or;
 import ast.expression.primary.atom.*;
@@ -88,14 +89,10 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitFile_input(@NotNull PythonParser.File_inputContext ctx) {
-			//      ( NEWLINE | stmt )* last_stmt? EOF
+			//      ( NEWLINE | stmt )* EOF
 			List<ast.statement.Statement> children = new ArrayList<>();
 			if (ctx.stmt() != null) {
 				ctx.stmt().forEach(e -> children.addAll(((CollectionWrapper<ast.statement.Statement>) e.accept(this)).items));
-			}
-			if (ctx.last_stmt() != null) {
-				CollectionWrapper<ast.statement.Statement> ls = (CollectionWrapper<ast.statement.Statement>) ctx.last_stmt().accept(this);
-				children.addAll(ls.getItems());
 			}
 			return new Module(this.filePath, this.locCounter.count(), children);
 		}
@@ -146,13 +143,17 @@ public class AstBuilder {
 		}
 
 		@Override
+		public AstNode visitName(PythonParser.NameContext ctx) {
+			return null;
+		}
+
+		@Override
 		public AstNode visitFuncdef(@NotNull PythonParser.FuncdefContext ctx) {
-			//      DEF (NAME | PRINT | EXEC) parameters ( '->' test )? ':' suite
+			//      DEF name parameters ( '->' test )? ':' suite
 			Params params = (Params) ctx.parameters().accept(this);
 			Expr returnType = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
 			Suite suite = this.process(ctx.suite());
-			TerminalNode name = ctx.NAME() != null ? ctx.NAME() : (ctx.PRINT() != null ? ctx.PRINT() : ctx.EXEC());
-			Identifier identifier = this.getIdentifier(name);
+			Identifier identifier = (Identifier) ctx.name().accept(this);
 			return new Function(this.getLocInfo(ctx), identifier, returnType, suite, params);
 		}
 
@@ -184,8 +185,8 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitTfpdef(@NotNull PythonParser.TfpdefContext ctx) {
-			//      NAME ( ':' test )?
-			Identifier id = this.getIdentifier(ctx.NAME());
+			//      name ( ':' test )?
+			Identifier id = (Identifier) ctx.name().accept(this);
 			if (ctx.test() != null) {
 				Expr returnType = (Expr) ctx.test().accept(this);
 				return new TypedParam(this.getLocInfo(ctx), id, returnType);
@@ -209,9 +210,9 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitVfpdef(@NotNull PythonParser.VfpdefContext ctx) {
-			//      NAME | '(' vfplist ')'
-			if (ctx.NAME() != null) {
-				Identifier id = this.getIdentifier(ctx.NAME());
+			//      name | '(' vfplist ')'
+			if (ctx.name() != null) {
+				Identifier id = (Identifier) ctx.name().accept(this);
 				return new UntypedParam(this.getLocInfo(ctx), id);
 			}
 			if (ctx.vfplist() != null) {
@@ -246,15 +247,6 @@ public class AstBuilder {
 		@Override
 		public AstNode visitSimple_stmt(@NotNull PythonParser.Simple_stmtContext ctx) {
 			//      small_stmt ( ';' small_stmt )* ';'? NEWLINE
-			List<ast.statement.Statement> statements = ctx.small_stmt().stream()
-					.map(e -> (ast.statement.Statement) e.accept(this))
-					.collect(Collectors.toList());
-			return new CollectionWrapper<>(this.getLocInfo(ctx), statements);
-		}
-
-		@Override
-		public AstNode visitLast_stmt(PythonParser.Last_stmtContext ctx) {
-			//      small_stmt ( ';' small_stmt )* ';'?
 			List<ast.statement.Statement> statements = ctx.small_stmt().stream()
 					.map(e -> (ast.statement.Statement) e.accept(this))
 					.collect(Collectors.toList());
@@ -493,20 +485,21 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitImport_as_name(@NotNull PythonParser.Import_as_nameContext ctx) {
-			//      NAME ( AS NAME )?
-			SimplePath simplePath = new SimplePath(this.getLocInfo(ctx), ctx.NAME().get(0).getText());
-			if (ctx.NAME().size() == 2) {
-				simplePath.setAlias(this.getIdentifier(ctx.NAME().get(1)));
+			//      name ( AS name )?
+			SimplePath simplePath = new SimplePath(this.getLocInfo(ctx), ctx.name().get(0).getText());
+			if (ctx.name().size() == 2) {
+				Identifier alias = (Identifier) ctx.name().get(1).accept(this);
+				simplePath.setAlias(alias);
 			}
 			return simplePath;
 		}
 
 		@Override
 		public AstNode visitDotted_as_name(@NotNull PythonParser.Dotted_as_nameContext ctx) {
-			//      dotted_name ( AS NAME )?
+			//      dotted_name ( AS name )?
 			DottedPath path = (DottedPath) ctx.dotted_name().accept(this);
-			if (ctx.NAME() != null) {
-				Identifier id = this.getIdentifier(ctx.NAME());
+			if (ctx.name() != null) {
+				Identifier id = (Identifier) ctx.name().accept(this);
 				path.setAlias(id);
 			}
 			return path;
@@ -681,7 +674,7 @@ public class AstBuilder {
 		public AstNode visitWith_item(@NotNull PythonParser.With_itemContext ctx) {
 			//      test ( (AS | NAME) expr )?
 			Expr item = (Expr) ctx.test().accept(this);
-			Identifier name = ctx.NAME() == null ? null : (Identifier) ctx.NAME().accept(this);
+			Identifier name = ctx.name() == null ? null : (Identifier) ctx.name().accept(this);
 			Expr alias = ctx.expr() == null ? null : (Expr) ctx.expr().accept(this);
 			return new WithItem(this.getLocInfo(ctx), item, name, alias);
 		}
@@ -690,7 +683,7 @@ public class AstBuilder {
 		public AstNode visitExcept_clause(@NotNull PythonParser.Except_clauseContext ctx) {
 			//      EXCEPT ( test ( ( AS | ',' ) test )? )?
 			Expr exception = ctx.type == null ? null : (Expr) ctx.type.accept(this);
-			Expr alias = ctx.name == null ? null : (Expr) ctx.name.accept(this);
+			Expr alias = ctx.exName == null ? null : (Expr) ctx.exName.accept(this);
 			return new Except(this.getLocInfo(ctx), exception, alias);
 		}
 
@@ -953,7 +946,7 @@ public class AstBuilder {
 			//		| '[' testlist_comp? ']'
 			//		| '{' dictorsetmaker? '}'
 			//      | '`' testlist '`'
-			//		| NAME | PRINT | EXEC
+			//		| name
 			//      | number | string+ | '...' | NONE | TRUE | FALSE
 			if (ctx.yield_expr() != null) {
 				return ctx.yield_expr().accept(this);
@@ -968,14 +961,8 @@ public class AstBuilder {
 				ExprList l = (ExprList) ctx.testlist().accept(this);
 				return new StrConversion(this.getLocInfo(ctx), l);
 			}
-			if (ctx.NAME() != null) {
-				return this.getIdentifier(ctx.NAME());
-			}
-			if (ctx.PRINT() != null) {
-				return this.getIdentifier(ctx.PRINT());
-			}
-			if (ctx.EXEC() != null) {
-				return this.getIdentifier(ctx.EXEC());
+			if (ctx.name() != null) {
+				return ctx.name().accept(this);
 			}
 			if (ctx.number() != null) {
 				return ctx.number().accept(this);
@@ -1037,9 +1024,8 @@ public class AstBuilder {
 			if (ctx.subscriptlist() != null) {
 				return ctx.subscriptlist().accept(this); //SubscriptSliceList
 			}
-			if (ctx.name != null) {
-				TerminalNode name = ctx.NAME() != null ? ctx.NAME() : (ctx.PRINT() != null ? ctx.PRINT() : ctx.EXEC());
-				return this.getIdentifier(name); //Identifier
+			if (ctx.name() != null) {
+				return ctx.name().accept(this); //Identifier
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1146,9 +1132,9 @@ public class AstBuilder {
 		@Override
 		public AstNode visitArgument(@NotNull PythonParser.ArgumentContext ctx) {
 			//      test comp_for? | test '=' test
-			if (ctx.name != null) {
+			if (ctx.argName != null) {
 				Expr value = (Expr) ctx.value.accept(this);
-				Identifier id = (Identifier) ctx.name.accept(this);
+				Identifier id = (Identifier) ctx.argName.accept(this);
 				return new Kwarg(this.getLocInfo(ctx), value, id);
 			}
 			if (ctx.value != null) {

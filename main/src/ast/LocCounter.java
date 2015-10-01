@@ -20,12 +20,12 @@ public class LocCounter {
 	}
 
 	public Integer count() {
-		List<String> lines = this.fileHelper.getFileContents();
+		List<String> lines = this.fileHelper.getFileLines();
 		return this.count(lines);
 	}
 
 	public Integer count(Integer startLine, Integer endLine) {
-		List<String> lines = this.fileHelper.getFileContents(startLine - 1, endLine);
+		List<String> lines = this.fileHelper.getFileLines(startLine - 1, endLine);
 		return this.count(lines);
 	}
 
