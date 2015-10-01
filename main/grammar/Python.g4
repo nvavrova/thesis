@@ -156,7 +156,7 @@ single_input
 
 /// file_input: (NEWLINE | stmt)* ENDMARKER
 file_input
- : ( NEWLINE | stmt )* last_stmt? EOF
+ : (NEWLINE | stmt)* EOF
  ;
 
 /// eval_input: testlist NEWLINE* ENDMARKER
@@ -179,9 +179,16 @@ decorated
  : decorators ( classdef | funcdef )
  ;
 
+name
+ : NAME
+ | PRINT
+ | EXEC
+ | NONLOCAL
+ ;
+
 /// funcdef: 'def' NAME parameters ['->' test] ':' suite
 funcdef
- : DEF name=(NAME | PRINT | EXEC) parameters ( '->' test )? ':' suite //added print and exec because they are tokens in Python2 but not in Python3
+ : DEF name parameters ( '->' test )? ':' suite //added print and exec because they are keywords in Python2 but not in Python3, nonlocal is a keyword in Python3 but not Python2
  ;
 
 /// parameters: '(' [typedargslist] ')'
@@ -215,7 +222,7 @@ typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefCon
 
 /// tfpdef: NAME [':' test]
 tfpdef
- : NAME ( ':' test )?
+ : name ( ':' test )?
  ;
 
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
@@ -242,7 +249,7 @@ varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefConte
  ;
 
 vfpdef
- : NAME
+ : name
  | '(' vfplist ')'
  ;
 
@@ -259,10 +266,6 @@ stmt
 /// simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 simple_stmt
  : small_stmt ( ';' small_stmt )* ';'? NEWLINE
- ;
-
-last_stmt
- : small_stmt ( ';' small_stmt )* ';'?
  ;
 
 /// small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
@@ -397,12 +400,12 @@ import_from returns [List<String> prefixes]
 
 /// import_as_name: NAME ['as' NAME]
 import_as_name
- : NAME ( AS NAME )?
+ : name ( AS name )?
  ;
 
 /// dotted_as_name: dotted_name ['as' NAME]
 dotted_as_name
- : dotted_name ( AS NAME )?
+ : dotted_name ( AS name )?
  ;
 
 /// import_as_names: import_as_name (',' import_as_name)* [',']
@@ -420,7 +423,7 @@ dotted_name returns [List<String> names]
 @init{
     $names = new ArrayList<>();
 }
- : name=NAME { $names.add($name.text); } ( '.' otherName=NAME { $names.add($otherName.text); } )*
+ : firstName=name { $names.add($name.text); } ( '.' otherName=name { $names.add($otherName.text); } )*
  ;
 
 /// global_stmt: 'global' NAME (',' NAME)*
@@ -428,7 +431,7 @@ global_stmt returns [List<String> names]
 @init{
     $names = new ArrayList<>();
 }
- : GLOBAL name=NAME { $names.add($name.text); } ( ',' otherName=NAME { $names.add($otherName.text); } )*
+ : GLOBAL firstName=name { $names.add($name.text); } ( ',' otherName=name { $names.add($otherName.text); } )*
  ;
 
 /// nonlocal_stmt: 'nonlocal' NAME (',' NAME)*
@@ -436,7 +439,7 @@ nonlocal_stmt returns [List<String> names]
  @init{
      $names = new ArrayList<>();
  }
- : NONLOCAL name=NAME { $names.add($name.text); } ( ',' otherName=NAME { $names.add($otherName.text); } )*
+ : NONLOCAL firstName=name { $names.add($name.text); } ( ',' otherName=name { $names.add($otherName.text); } )*
  ;
 
 exec_stmt
@@ -505,14 +508,14 @@ with_stmt
 
 /// with_item: test ['as' expr]
 with_item
- : test ( (AS | NAME) expr )?
+ : test ( (AS | name) expr )?
  ;
 
 /// # NB compile.c makes sure that the default except clause is last
 /// except_clause: 'except' [test ['as' NAME]]
 // : EXCEPT ( test ( AS NAME )? )?
 except_clause
- : EXCEPT ( type=test ( ( AS | ',' ) name=test )? )?
+ : EXCEPT ( type=test ( ( AS | ',' ) exName=test )? )?
  ;
 
 /// suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
@@ -662,7 +665,7 @@ atom
  | '[' testlist_comp? ']'
  | '{' dictorsetmaker? '}'
  | '`' testlist '`'
- | NAME | PRINT | EXEC //added print and exec because they are tokens in Python2 but not in Python3
+ | name
  | number
  | string+
  | ellipsis='...'
@@ -682,7 +685,7 @@ testlist_comp
 trailer
  : callBracket='(' arglist? ')'
  | '[' subscriptlist ']'
- | '.' name=(NAME | PRINT | EXEC)
+ | '.' name
  ;
 
 /// subscriptlist: subscript (',' subscript)* [',']
@@ -751,7 +754,7 @@ arglist returns [List<ArgumentContext> positionalArgs]
 /// argument: test [comp_for] | test '=' test  # Really [keyword '='] test
 argument
  : value=test condition=comp_for?
- | name=test '=' value=test
+ | argName=test '=' value=test
  ;
 
 /// comp_iter: comp_for | comp_if

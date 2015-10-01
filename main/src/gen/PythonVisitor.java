@@ -53,6 +53,12 @@ public interface PythonVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDecorated(PythonParser.DecoratedContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#name}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitName(PythonParser.NameContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#funcdef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -106,12 +112,6 @@ public interface PythonVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSimple_stmt(PythonParser.Simple_stmtContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link PythonParser#last_stmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitLast_stmt(PythonParser.Last_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#small_stmt}.
 	 * @param ctx the parse tree

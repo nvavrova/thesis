@@ -1,5 +1,6 @@
-package ast.expression;
+package ast.expression.logical;
 
+import ast.expression.Expr;
 import ast.expression.logical.Logical;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
