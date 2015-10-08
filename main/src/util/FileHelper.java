@@ -42,10 +42,19 @@ public class FileHelper {
 
 	private List<String> readFile() {
 		try {
-			FileReader fr = new FileReader(this.filePath);
-			BufferedReader br = new BufferedReader(fr);
+			FileInputStream fis = new FileInputStream(this.filePath);
+			InputStreamReader inStrReader = new InputStreamReader(fis);
+			BufferedReader br = new BufferedReader(inStrReader);
+
 			List<String> res = br.lines().collect(Collectors.toList());
-			fr.close();
+
+			//hack to fix wrong encoding of ISO-8859-1
+			if (res.size() > 1 && res.get(0).startsWith("\u00EF\u00BB\u00BF")) {
+				res.set(0, res.get(0).substring(3));
+			}
+
+			fis.close();
+			inStrReader.close();
 			br.close();
 
 			return res;

@@ -922,10 +922,10 @@ DECIMAL_INTEGER
  ;
 
 LONG
- : OCT_INTEGER 'L'
- | HEX_INTEGER 'L'
- | BIN_INTEGER 'L'
- | DECIMAL_INTEGER 'L'
+ : OCT_INTEGER [lL]
+ | HEX_INTEGER [lL]
+ | BIN_INTEGER [lL]
+ | DECIMAL_INTEGER [lL]
  ;
 
 /// floatnumber   ::=  pointfloat | exponentfloat

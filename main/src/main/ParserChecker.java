@@ -7,9 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -24,12 +22,12 @@ public class ParserChecker {
 	//args[1] = the destination to which the unparsable files will be copied to
 	public static void main(String[] args) throws IOException {
 
-		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
-		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
-		System.setOut(out);
-		System.setErr(err);
+//		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
+//		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
+//		System.setOut(out);
+//		System.setErr(err);
 
-		ParserChecker.collectUnparsable(args[0], args[1]);
+		ParserChecker.collectUnparsable(args[0], args.length == 2 ? args[1] : null);
 	}
 
 	private static void collectUnparsable(String path, String destination) {
@@ -50,12 +48,14 @@ public class ParserChecker {
 				ParserRuleContext context = parser.file_input();
 			}
 			catch (Exception ex) {
-				ex.printStackTrace();
-				try {
-					Files.copy(Paths.get(fileName), Paths.get(destination + "file_" + (i++) + ".py"), StandardCopyOption.REPLACE_EXISTING);
-				}
-				catch (IOException e) {
-					ParserChecker.handleException(e);
+				ParserChecker.handleException(ex);
+				if (destination != null) {
+					try {
+						Files.copy(Paths.get(fileName), Paths.get(destination + "\\file_" + (i++) + ".py"), StandardCopyOption.REPLACE_EXISTING);
+					}
+					catch (IOException e) {
+						ParserChecker.handleException(e);
+					}
 				}
 			}
 		}
