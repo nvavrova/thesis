@@ -4,7 +4,7 @@ import db.DataHandler;
 import db.pojo.ProjectEntity;
 import gen.PythonLexer;
 import gen.PythonParser;
-import model.*;
+import model.Project;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
@@ -25,23 +25,26 @@ public class Main {
 		System.setOut(out);
 		System.setErr(err);
 //
-		if (args.length > 0) {
-			Main.processSupplied(args);
-		}
-		else {
-			DataHandler.loadProjects().forEach(Main::handleLatestProjectVersion);
-		}
+//		if (args.length > 0) {
+//			Main.collectUnparsable(args);
+//		}
+//		else {
+//			DataHandler.loadProjects().forEach(Main::handleLatestProjectVersion);
+//		}
 
 
-//		Main.createStatsCsv(DataHandler.loadProjects());
+		Main.createStatsCsv(DataHandler.loadProjects());
 	}
 
-	private static void processSupplied(String[] args) {
+	private static void collectUnparsable(String[] args) {
 		List<String> allFiles = FileHelper.getPythonFilePaths(new File(args[0]));
+		int i = 0;
 		for (String fileName : allFiles) {
 			System.out.println(fileName);
 			try {
-					org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
+					FileHelper fh = new FileHelper(fileName);
+					String contents = fh.getTrimmedFileContents();
+					org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
 					PythonLexer lexer = new PythonLexer(input);
 
 					org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
@@ -53,6 +56,12 @@ public class Main {
 			}
 			catch (Exception ex) {
 				ex.printStackTrace();
+//				try {
+//					Files.copy(Paths.get(fileName), Paths.get("D:\\intellij_projects\\thesis\\test\\grammar\\file_" + (i++) +".py"), StandardCopyOption.REPLACE_EXISTING);
+//				}
+//				catch (IOException e) {
+//					e.printStackTrace();
+//				}
 			}
 		}
 	}
@@ -91,6 +100,7 @@ public class Main {
 		PrintStream csv = new PrintStream(new FileOutputStream(FileHelper.getRunFileName("stats", "csv")));
 
 		List<String> header = new ArrayList<>();
+		header.add("project");
 		header.add("module");
 		header.add("class name");
 		header.add("# of private variables");
@@ -117,6 +127,7 @@ public class Main {
 
 			for (model.Class c : project.getClasses()) {
 				List<String> line = new ArrayList<>();
+				line.add(project.getFolderPath());
 				line.add(c.getModule().getFilePath());
 				line.add(c.getName());
 				line.add(String.valueOf(c.privateVariablesCount()));

@@ -1,18 +1,17 @@
 package tests;
 
 import ast.AstBuilder;
-import gen.Python3Lexer;
-import gen.Python3Parser;
-import util.FileHelper;
+import gen.PythonLexer;
+import gen.PythonParser;
 import main.VersionSwitcher;
 import model.Class;
 import model.ModelBuilder;
 import model.Module;
 import model.Project;
 import org.antlr.v4.runtime.ParserRuleContext;
+import util.FileHelper;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,17 +21,13 @@ import java.util.stream.Collectors;
 public class TestHelper {
 
 	public static ast.Module parseFile(String fileName) {
-		org.antlr.v4.runtime.CharStream input = null;
-		try {
-			input = new org.antlr.v4.runtime.ANTLRFileStream(fileName);
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		Python3Lexer lexer = new Python3Lexer(input);
+		FileHelper fh = new FileHelper(fileName);
+		String contents = fh.getTrimmedFileContents();
+		org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
+		PythonLexer lexer = new PythonLexer(input);
 
 		org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-		Python3Parser parser = new Python3Parser(tokens);
+		PythonParser parser = new PythonParser(tokens);
 
 		ParserRuleContext context = parser.file_input();
 		AstBuilder astBuilder = new AstBuilder(context, fileName);

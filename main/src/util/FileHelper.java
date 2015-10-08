@@ -23,13 +23,21 @@ public class FileHelper {
 		this.lines = this.readFile();
 	}
 
-	public List<String> getFileContents() {
+	public List<String> getFileLines() {
 		return this.lines;
 	}
 
-	public List<String> getFileContents(Integer start, Integer end) {
+	public List<String> getFileLines(Integer start, Integer end) {
 		end = Math.min(end, this.lines.size()); //in case last line is empty, when the BufferedReader doesn't collect it
 		return this.lines.subList(start, end);
+	}
+
+	public String getTrimmedFileContents() {
+		StringBuilder sb = new StringBuilder();
+		this.lines.stream()
+//				.filter(l -> l.trim().length() > 0)
+				.forEach(l -> sb.append(l.trim().length() != 0 ? l : "").append("\n"));
+		return sb.toString();
 	}
 
 	private List<String> readFile() {
