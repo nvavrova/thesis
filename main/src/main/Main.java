@@ -2,17 +2,13 @@ package main;
 
 import db.DataHandler;
 import db.pojo.ProjectEntity;
-import gen.PythonLexer;
-import gen.PythonParser;
 import model.Project;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
-import util.StringHelper;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
 public class Main {
 
@@ -24,47 +20,10 @@ public class Main {
 		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
 		System.setOut(out);
 		System.setErr(err);
-//
-//		if (args.length > 0) {
-//			Main.collectUnparsable(args);
-//		}
-//		else {
-//			DataHandler.loadProjects().forEach(Main::handleLatestProjectVersion);
-//		}
 
-
-		Main.createStatsCsv(DataHandler.loadProjects());
+		DataHandler.loadProjects().forEach(Main::handleLatestProjectVersion);
 	}
 
-	private static void collectUnparsable(String[] args) {
-		List<String> allFiles = FileHelper.getPythonFilePaths(new File(args[0]));
-		int i = 0;
-		for (String fileName : allFiles) {
-			System.out.println(fileName);
-			try {
-					FileHelper fh = new FileHelper(fileName);
-					String contents = fh.getTrimmedFileContents();
-					org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
-					PythonLexer lexer = new PythonLexer(input);
-
-					org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-					PythonParser parser = new PythonParser(tokens);
-					parser.setErrorHandler(new BailErrorStrategy());
-
-					ParserRuleContext context = parser.file_input();
-
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
-//				try {
-//					Files.copy(Paths.get(fileName), Paths.get("D:\\intellij_projects\\thesis\\test\\grammar\\file_" + (i++) +".py"), StandardCopyOption.REPLACE_EXISTING);
-//				}
-//				catch (IOException e) {
-//					e.printStackTrace();
-//				}
-			}
-		}
-	}
 
 	private static void handleLatestProjectVersion(ProjectEntity projectEntity) {
 		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
@@ -89,59 +48,6 @@ public class Main {
 		System.out.println("Name: " + projectEntity.getDiskLocation());
 		try {
 			Main.processProject(projectEntity);
-		}
-		catch (Exception ex) {
-			Main.handleException(ex);
-		}
-		System.out.println("-----------------------------------------------------------------------------------------------------------");
-	}
-
-	private static void createStatsCsv(List<ProjectEntity> projectEntities) throws FileNotFoundException {
-		PrintStream csv = new PrintStream(new FileOutputStream(FileHelper.getRunFileName("stats", "csv")));
-
-		List<String> header = new ArrayList<>();
-		header.add("project");
-		header.add("module");
-		header.add("class name");
-		header.add("# of private variables");
-		header.add("# of public variables");
-		header.add("# of accessors");
-		header.add("LCOM");
-		header.add("LOC");
-		header.add("# of parents");
-		header.add("# of methods with no params");
-		header.add("# of used globals");
-		header.add("# of defined globals");
-		csv.println(StringHelper.implode(header, CSV_DELIMITER));
-
-		projectEntities.forEach(project -> Main.createStatsCsv(project, csv));
-	}
-
-	private static void createStatsCsv(ProjectEntity projectEntity, PrintStream csv) {
-		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
-		System.out.println("Name: " + projectEntity.getDiskLocation());
-		try {
-			File projectFolder = new File(projectEntity.getDiskLocation());
-			VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
-			Project project = versionSwitcher.getLatestProjectVersion();
-
-			for (model.Class c : project.getClasses()) {
-				List<String> line = new ArrayList<>();
-				line.add(project.getFolderPath());
-				line.add(c.getModule().getFilePath());
-				line.add(c.getName());
-				line.add(String.valueOf(c.privateVariablesCount()));
-				line.add(String.valueOf(c.publicVariablesCount()));
-				line.add(String.valueOf(c.getAccessorCount()));
-				line.add(String.valueOf(c.getLcom()));
-				line.add(String.valueOf(c.getLoc()));
-				line.add(String.valueOf(c.parentsCount()));
-				line.add(String.valueOf(c.methodsWithNoParamsCount()));
-				line.add(String.valueOf(c.usedGlobalsCount()));
-				line.add(String.valueOf(c.definedGlobalsCount()));
-
-				csv.println(StringHelper.implode(line, CSV_DELIMITER));
-			}
 		}
 		catch (Exception ex) {
 			Main.handleException(ex);
