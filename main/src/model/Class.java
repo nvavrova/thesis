@@ -119,12 +119,8 @@ public class Class {
 				|| this.varReferences.contains(alias) || this.methodReferences.contains(alias);
 	}
 
-	public void addAccessor(String name, Integer loc, List<String> params) {
-		this.addMethod(name, loc, params, true);
-	}
-
-	public void addMethod(String name, Integer loc, List<String> params) {
-		this.addMethod(name, loc, params, false);
+	public void addMethod(Method method) {
+		this.methods.put(name, method);
 	}
 
 
@@ -358,11 +354,6 @@ public class Class {
 				.filter(c -> c.isDataClass())
 				.count();
 		return count.intValue();
-	}
-
-	private void addMethod(String name, Integer loc, List<String> params, Boolean isAccessor) {
-		Method method = new Method(name, this, loc, params, isAccessor);
-		this.methods.put(name, method);
 	}
 
 	private Integer calculateLcom() {

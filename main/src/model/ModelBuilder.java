@@ -184,17 +184,13 @@ public class ModelBuilder {
 		public Void visit(Function n) {
 
 			if (this.inClass()) {
-
 				List<String> paramNames = n.getParams().getParamNames().stream()
 						.filter(p -> !p.equals(SELF_KEYWORD))
 						.collect(Collectors.toList());
 
-				if (n.isAccessor()) {
-					this.getCurrentClass().addAccessor(n.getNameString(), n.getLocInfo(), paramNames);
-				}
-				else {
-					this.getCurrentClass().addMethod(n.getNameString(), n.getLocInfo(), paramNames);
-				}
+				Class cls = this.getCurrentClass();
+				Method method = new Method(n.getNameString(), cls, n.getLocInfo(), paramNames, n.isAccessor());
+				cls.addMethod(method);
 			}
 			this.visitChildren(n);
 			return null;

@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
  */
 public class Project {
 
-	private final File folder;
 	private final Map<String, Module> modules;
+	private final File folder;
 	private String version;
 
 	public Project(File folder) {

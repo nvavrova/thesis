@@ -12,8 +12,6 @@ import java.io.PrintStream;
 
 public class Main {
 
-	private static String CSV_DELIMITER = ";";
-
 	public static void main(String[] args) throws IOException {
 
 		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
