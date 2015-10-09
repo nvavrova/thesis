@@ -1,7 +1,7 @@
 package ast.argument;
 
 import ast.Visitor;
-import ast.expression.comprehension.CompFor;
+import ast.expression.comp_iter.CompFor;
 import ast.expression.Expr;
 
 /**

@@ -1,9 +1,9 @@
 package ast.statement.simple;
 
-import ast.expression.primary.atom.Identifier;
+import ast.Visitor;
+import ast.expression.no_cond.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
 import java.util.List;
 

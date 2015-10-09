@@ -10,14 +10,14 @@ public class Conditional extends Expr {
 
 	private final Expr value;
 	private final Expr condition;
-	private final Expr conditionFalseValue;
+	private final Expr falseValue;
 
 	public Conditional(@NotNull Integer locInfo, @NotNull Expr value, @NotNull Expr condition,
-	                   @NotNull Expr conditionFalseValue) {
+	                   @NotNull Expr falseValue) {
 		super(locInfo);
 		this.value = value;
 		this.condition = condition;
-		this.conditionFalseValue = conditionFalseValue;
+		this.falseValue = falseValue;
 	}
 
 	public Expr getValue() {
@@ -28,8 +28,8 @@ public class Conditional extends Expr {
 		return this.condition;
 	}
 
-	public Expr getConditionFalseValue() {
-		return this.conditionFalseValue;
+	public Expr getFalseValue() {
+		return this.falseValue;
 	}
 
 	@Override

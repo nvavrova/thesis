@@ -1,10 +1,10 @@
 package ast.statement.compound;
 
+import ast.Visitor;
 import ast.expression.Expr;
-import ast.expression.primary.atom.Identifier;
+import ast.expression.no_cond.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
 /**
  * Created by Nik on 25-06-2015

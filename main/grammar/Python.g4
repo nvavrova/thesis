@@ -207,24 +207,22 @@ parameters
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
 ///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
 ///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
-typedargslist returns [Map<TfpdefContext, TestContext> positional, Map<TfpdefContext, TestContext> args, Map<TfpdefContext, TestContext> kwargs]
- @init {
-     $positional = new HashMap<>();
-     $args = new HashMap<>();
-     $kwargs = new HashMap<>();
- }
- : a=tfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
-   ( ',' b=tfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-   ( ',' ( '*' c=tfpdef? { $args.put($c.ctx, null); }
-           ( ',' d=tfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
-           ( ',' '**' e=tfpdef { $kwargs.put($e.ctx, null); } )?
-         | '**' f=tfpdef { $kwargs.put($f.ctx, null); }
+typedargslist returns [Map<TfpdefContext, TestContext> regular]
+@init{
+    $regular = new HashMap<>();
+}
+ : a=tfpdef { $regular.put($a.ctx, null); } ( '=' aVal=test { $regular.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=tfpdef { $regular.put($b.ctx, null); } ( '=' bVal=test { $regular.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' positional=tfpdef?
+           ( ',' c=tfpdef { $regular.put($c.ctx, null); } ( '=' cVal=test { $regular.put($c.ctx, $cVal.ctx); } )? )*
+           ( ',' '**' keyword=tfpdef )?
+         | '**' keyword=tfpdef
          )?
    )?
- | '*' g=tfpdef? { $args.put($g.ctx, null); }
-   ( ',' h=tfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
-   ( ',' '**' i=tfpdef { $kwargs.put($i.ctx, null); } )?
- | '**' j=tfpdef { $kwargs.put($j.ctx, null); }
+ | '*' positional=tfpdef?
+   ( ',' d=tfpdef { $regular.put($d.ctx, null); } ( '=' eVal=test { $regular.put($d.ctx, $eVal.ctx); } )? )*
+   ( ',' '**' keyword=tfpdef )?
+ | '**' keyword=tfpdef
  ;
 
 /// tfpdef: NAME [':' test]
@@ -235,24 +233,22 @@ tfpdef
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
 ///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
 ///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
-varargslist returns [Map<VfpdefContext, TestContext> positional, Map<VfpdefContext, TestContext> args, Map<VfpdefContext, TestContext> kwargs]
+varargslist returns [Map<VfpdefContext, TestContext> regular]
 @init {
-    $positional = new HashMap<>();
-    $args = new HashMap<>();
-    $kwargs = new HashMap<>();
+    $regular = new HashMap<>();
 }
- : a=vfpdef { $positional.put($a.ctx, null); } ( '=' aVal=test { $positional.put($a.ctx, $aVal.ctx); } )?
-   ( ',' b=vfpdef { $positional.put($b.ctx, null); } ( '=' bVal=test { $positional.put($b.ctx, $bVal.ctx); } )? )*
-   ( ',' ( '*' c=vfpdef? { $args.put($c.ctx, null); }
-           ( ',' d=vfpdef { $positional.put($d.ctx, null); } ( '=' dVal=test { $positional.put($d.ctx, $dVal.ctx); } )? )*
-           ( ',' '**' e=vfpdef { $kwargs.put($e.ctx, null); } )?
-         | '**' f=vfpdef { $kwargs.put($f.ctx, null); }
+ : a=vfpdef { $regular.put($a.ctx, null); } ( '=' aVal=test { $regular.put($a.ctx, $aVal.ctx); } )?
+   ( ',' b=vfpdef { $regular.put($b.ctx, null); } ( '=' bVal=test { $regular.put($b.ctx, $bVal.ctx); } )? )*
+   ( ',' ( '*' positional=vfpdef?
+           ( ',' c=vfpdef { $regular.put($c.ctx, null); } ( '=' cVal=test { $regular.put($c.ctx, $cVal.ctx); } )? )*
+           ( ',' '**' keyword=vfpdef )?
+         | '**' keyword=vfpdef
          )?
    )?
- | '*' g=vfpdef? { $args.put($g.ctx, null); }
-   ( ',' h=vfpdef { $positional.put($h.ctx, null); } ( '=' hVal=test { $positional.put($h.ctx, $hVal.ctx); } )? )*
-   ( ',' '**' i=vfpdef { $kwargs.put($i.ctx, null); } )?
- | '**' j=vfpdef { $kwargs.put($j.ctx, null); }
+ | '*' positional=vfpdef?
+   ( ',' d=vfpdef { $regular.put($d.ctx, null); } ( '=' dVal=test { $regular.put($d.ctx, $dVal.ctx); } )? )*
+   ( ',' '**' keyword=vfpdef )?
+ | '**' keyword=vfpdef
  ;
 
 vfpdef

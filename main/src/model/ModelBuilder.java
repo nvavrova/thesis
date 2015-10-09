@@ -1,10 +1,10 @@
 package model;
 
 import ast.DefaultVisitor;
-import ast.expression.primary.atom.Identifier;
-import ast.expression.primary.atom.trailed.AttributeRef;
-import ast.expression.primary.atom.trailed.Call;
-import ast.expression.primary.atom.trailed.DirectCall;
+import ast.expression.no_cond.atom.Identifier;
+import ast.expression.no_cond.atom.trailed.AttributeRef;
+import ast.expression.no_cond.atom.trailed.Call;
+import ast.expression.no_cond.atom.trailed.DirectCall;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;

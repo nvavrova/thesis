@@ -2,7 +2,7 @@ package ast.param;
 
 import ast.Visitor;
 import ast.expression.Expr;
-import ast.expression.primary.atom.Identifier;
+import ast.expression.no_cond.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**

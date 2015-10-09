@@ -4,29 +4,36 @@ import ast.argument.*;
 import ast.argument.Argument;
 import ast.argument.SimpleArgument;
 import ast.expression.*;
-import ast.expression.Arithmetic;
-import ast.expression.bitwise.And;
-import ast.expression.bitwise.Bitwise;
-import ast.expression.bitwise.Or;
-import ast.expression.bitwise.Xor;
-import ast.expression.comprehension.CompFor;
-import ast.expression.comprehension.CompIf;
-import ast.expression.comprehension.CondComprehension;
-import ast.expression.comprehension.EnumComprehension;
-import ast.expression.logical.Comparison;
-import ast.expression.logical.Not;
-import ast.expression.primary.atom.*;
-import ast.expression.primary.atom.Float;
-import ast.expression.primary.atom.Long;
-import ast.expression.primary.atom.trailed.*;
-import ast.expression.primary.trailer.ArgList;
-import ast.expression.primary.trailer.SliceBound;
-import ast.expression.primary.trailer.SubscriptIndex;
-import ast.expression.primary.trailer.SubscriptSliceList;
-import ast.expression.unary.Invert;
-import ast.expression.unary.Minus;
-import ast.expression.unary.Plus;
-import ast.expression.unary.Unary;
+import ast.expression.no_cond.Arithmetic;
+import ast.expression.no_cond.atom.maker.DictMaker;
+import ast.expression.no_cond.atom.maker.SetMaker;
+import ast.expression.no_cond.atom.numeric.Imaginary;
+import ast.expression.no_cond.atom.numeric.Int;
+import ast.expression.no_cond.bitwise.And;
+import ast.expression.no_cond.bitwise.Bitwise;
+import ast.expression.no_cond.bitwise.Or;
+import ast.expression.no_cond.bitwise.Xor;
+import ast.expression.comp_iter.CompFor;
+import ast.expression.comp_iter.CompIf;
+import ast.expression.no_cond.atom.comprehension.CondComprehension;
+import ast.expression.no_cond.atom.comprehension.EnumComprehension;
+import ast.expression.no_cond.logical.Comparison;
+import ast.expression.no_cond.logical.Not;
+import ast.expression.no_cond.LambdaNoCond;
+import ast.expression.no_cond.Power;
+import ast.expression.no_cond.Shift;
+import ast.expression.no_cond.atom.*;
+import ast.expression.no_cond.atom.numeric.Float;
+import ast.expression.no_cond.atom.numeric.Long;
+import ast.expression.no_cond.atom.trailed.*;
+import ast.expression.no_cond.trailer.ArgList;
+import ast.expression.no_cond.trailer.SliceBound;
+import ast.expression.no_cond.trailer.SubscriptIndex;
+import ast.expression.no_cond.trailer.SubscriptSliceList;
+import ast.expression.no_cond.unary.Invert;
+import ast.expression.no_cond.unary.Minus;
+import ast.expression.no_cond.unary.Plus;
+import ast.expression.no_cond.unary.Unary;
 import ast.param.ListParam;
 import ast.param.Params;
 import ast.param.UntypedParam;
@@ -466,7 +473,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(ast.expression.logical.And n) {
+	public T visit(ast.expression.no_cond.logical.And n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -478,7 +485,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(ast.expression.logical.Or n) {
+	public T visit(ast.expression.no_cond.logical.Or n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -568,9 +575,9 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Params n) {
-		n.getArgs().forEach(p -> p.accept(this));
-		n.getKwargs().forEach(p -> p.accept(this));
-		n.getPositionalArgs().forEach(p -> p.accept(this));
+		n.getPositional().forEach(p -> p.accept(this));
+		n.getKeyword().forEach(p -> p.accept(this));
+		n.getRegular().forEach(p -> p.accept(this));
 	}
 
 	public void visitChildren(ListParam n) {
@@ -786,7 +793,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	public void visitChildren(Conditional n) {
 		n.getValue().accept(this);
 		n.getCondition().accept(this);
-		n.getConditionFalseValue().accept(this);
+		n.getFalseValue().accept(this);
 	}
 
 	public void visitChildren(Lambda n) {
@@ -892,7 +899,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getValues().forEach(e -> e.accept(this));
 	}
 
-	public void visitChildren(ast.expression.logical.And n) {
+	public void visitChildren(ast.expression.no_cond.logical.And n) {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 
@@ -900,7 +907,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getExpression().accept(this);
 	}
 
-	public void visitChildren(ast.expression.logical.Or n) {
+	public void visitChildren(ast.expression.no_cond.logical.Or n) {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 

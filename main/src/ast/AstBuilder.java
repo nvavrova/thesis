@@ -3,21 +3,29 @@ package ast;
 import ast.argument.*;
 import ast.argument.Argument;
 import ast.argument.SimpleArgument;
+import ast.expression.comp_iter.CompFor;
+import ast.expression.comp_iter.CompIf;
+import ast.expression.comp_iter.CompIter;
 import ast.expression.*;
-import ast.expression.bitwise.Xor;
-import ast.expression.comprehension.*;
-import ast.expression.logical.And;
-import ast.expression.logical.Comparison;
-import ast.expression.logical.Not;
-import ast.expression.logical.Or;
-import ast.expression.primary.atom.*;
-import ast.expression.primary.atom.Float;
-import ast.expression.primary.atom.Long;
-import ast.expression.primary.atom.trailed.TrailedAtomBuilder;
-import ast.expression.primary.trailer.*;
-import ast.expression.unary.Invert;
-import ast.expression.unary.Minus;
-import ast.expression.unary.Plus;
+import ast.expression.no_cond.atom.maker.DictMaker;
+import ast.expression.no_cond.atom.maker.SetMaker;
+import ast.expression.no_cond.atom.numeric.Imaginary;
+import ast.expression.no_cond.atom.numeric.Int;
+import ast.expression.no_cond.bitwise.Xor;
+import ast.expression.no_cond.atom.comprehension.*;
+import ast.expression.no_cond.logical.And;
+import ast.expression.no_cond.logical.Comparison;
+import ast.expression.no_cond.logical.Not;
+import ast.expression.no_cond.logical.Or;
+import ast.expression.no_cond.*;
+import ast.expression.no_cond.atom.*;
+import ast.expression.no_cond.atom.numeric.Float;
+import ast.expression.no_cond.atom.numeric.Long;
+import ast.expression.no_cond.atom.trailed.TrailedAtomBuilder;
+import ast.expression.no_cond.trailer.*;
+import ast.expression.no_cond.unary.Invert;
+import ast.expression.no_cond.unary.Minus;
+import ast.expression.no_cond.unary.Plus;
 import ast.param.*;
 import ast.path.DottedPath;
 import ast.path.Path;
@@ -190,10 +198,13 @@ public class AstBuilder {
 			//		                     )?
 			//		| '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
 			//		| '**' tfpdef
-			List<Param> positional = this.getTfpParams(ctx.positional);
-			List<Param> args = this.getTfpParams(ctx.args);
-			List<Param> kwargs = this.getTfpParams(ctx.kwargs);
-			return new Params(this.getLocInfo(ctx), positional, args, kwargs);
+			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
+			upcasted.putAll(ctx.regular);
+			List<Param> regular = this.getParameters(upcasted);
+
+			Param positional = (Param) ctx.positional.accept(this);
+			Param keyword = (Param) ctx.keyword.accept(this);
+			return new Params(this.getLocInfo(ctx), regular, positional, keyword);
 		}
 
 		@Override
@@ -215,10 +226,13 @@ public class AstBuilder {
 			//		                     )?
 			//		| '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
 			//		| '**' vfpdef
-			List<Param> positional = this.getVfpParams(ctx.positional);
-			List<Param> args = this.getVfpParams(ctx.args);
-			List<Param> kwargs = this.getVfpParams(ctx.kwargs);
-			return new Params(this.getLocInfo(ctx), positional, args, kwargs);
+			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
+			upcasted.putAll(ctx.regular);
+			List<Param> regular = this.getParameters(upcasted);
+
+			Param positional = (Param) ctx.positional.accept(this);
+			Param keyword = (Param) ctx.keyword.accept(this);
+			return new Params(this.getLocInfo(ctx), regular, positional, keyword);
 		}
 
 		@Override
@@ -767,7 +781,7 @@ public class AstBuilder {
 		public AstNode visitLambdef_nocond(@NotNull PythonParser.Lambdef_nocondContext ctx) {
 			//      LAMBDA varargslist? ':' test_nocond
 			Params parameters = ctx.varargslist() == null ? null : (Params) ctx.varargslist().accept(this);
-			ExprNoCond expr = (ExprNoCond) ctx.test_nocond().accept(this);
+			NonConditional expr = (NonConditional) ctx.test_nocond().accept(this);
 			return new LambdaNoCond(this.getLocInfo(ctx), expr, parameters);
 		}
 
@@ -851,7 +865,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new ast.expression.bitwise.Or(this.getLocInfo(ctx), operands);
+			return new ast.expression.no_cond.bitwise.Or(this.getLocInfo(ctx), operands);
 		}
 
 		@Override
@@ -875,7 +889,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new ast.expression.bitwise.And(this.getLocInfo(ctx), operands);
+			return new ast.expression.no_cond.bitwise.And(this.getLocInfo(ctx), operands);
 		}
 
 		@Override
@@ -1332,18 +1346,6 @@ public class AstBuilder {
 
 		private Identifier getIdentifier(TerminalNode name) {
 			return new Identifier(this.getLocInfo(name), name.getText());
-		}
-
-		private List<Param> getVfpParams(Map<PythonParser.VfpdefContext, PythonParser.TestContext> params) {
-			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
-			upcasted.putAll(params);
-			return this.getParameters(upcasted);
-		}
-
-		private List<Param> getTfpParams(Map<PythonParser.TfpdefContext, PythonParser.TestContext> params) {
-			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
-			upcasted.putAll(params);
-			return this.getParameters(upcasted);
 		}
 
 		private List<Param> getParameters(Map<ParserRuleContext, PythonParser.TestContext> params) {

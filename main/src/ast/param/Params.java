@@ -13,36 +13,44 @@ import java.util.List;
  */
 public class Params extends AstNode {
 
-	private final List<Param> positionalArgs;
-	private final List<Param> args;
-	private final List<Param> kwargs;
+	private final List<Param> regular;
+	private final Param positional;
+	private final Param keyword;
 
 	public Params(@NotNull Integer locInfo) {
-		this(locInfo, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+		this(locInfo, Collections.emptyList(), null, null);
 	}
 
-	public Params(@NotNull Integer locInfo, @NotNull List<Param> positionalArgs, @NotNull List<Param> args, @NotNull List<Param> kwargs) {
+	public Params(@NotNull Integer locInfo, @NotNull List<Param> regular, Param positional, Param keyword) {
 		super(locInfo);
-		this.positionalArgs = positionalArgs;
-		this.args = args;
-		this.kwargs = kwargs;
+		this.regular = regular;
+		this.positional = positional;
+		this.keyword = keyword;
 	}
 
-	public List<Param> getPositionalArgs() {
-		return this.positionalArgs;
+	public List<Param> getRegular() {
+		return this.regular;
 	}
 
-	public List<Param> getArgs() {
-		return this.args;
+	public Boolean hasPositionalParam() {
+		return this.positional != null;
 	}
 
-	public List<Param> getKwargs() {
-		return this.kwargs;
+	public Param getPositional() {
+		return this.positional;
+	}
+
+	public Boolean hasKeywordParam() {
+		return this.keyword != null;
+	}
+
+	public Param getKeyword() {
+		return this.keyword;
 	}
 
 	public Boolean isEmptyExceptForSelf() {
-		if (this.positionalArgs.size() == 1 && this.args.size() == 0 && this.kwargs.size() == 0) {
-			Param p = this.positionalArgs.get(0);
+		if (this.regular.size() == 1 && !this.hasPositionalParam() && !this.hasKeywordParam()) {
+			Param p = this.regular.get(0);
 			return p.isSelf();
 		}
 		return false;
@@ -50,9 +58,13 @@ public class Params extends AstNode {
 
 	public List<String> getParamNames() {
 		List<String> names = new ArrayList<>();
-		this.positionalArgs.forEach(p -> names.addAll(p.getNames()));
-		this.args.forEach(p -> names.addAll(p.getNames()));
-		this.kwargs.forEach(p -> names.addAll(p.getNames()));
+		this.regular.forEach(p -> names.addAll(p.getNames()));
+		if (this.hasPositionalParam()) {
+			names.addAll(this.positional.getNames());
+		}
+		if (this.hasKeywordParam()) {
+			names.addAll(this.keyword.getNames());
+		}
 		return names;
 	}
 

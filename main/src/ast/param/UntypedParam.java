@@ -1,8 +1,8 @@
 package ast.param;
 
-import ast.expression.primary.atom.Identifier;
-import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
+import ast.expression.no_cond.atom.Identifier;
+import org.antlr.v4.runtime.misc.NotNull;
 
 /**
  * Created by Nik on 23-06-2015

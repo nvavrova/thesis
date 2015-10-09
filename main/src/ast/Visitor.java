@@ -1,27 +1,36 @@
 package ast;
 
 import ast.argument.*;
-import ast.expression.*;
-import ast.expression.bitwise.Xor;
-import ast.expression.comprehension.CompFor;
-import ast.expression.comprehension.CompIf;
-import ast.expression.comprehension.CondComprehension;
-import ast.expression.comprehension.EnumComprehension;
-import ast.expression.logical.And;
-import ast.expression.logical.Comparison;
-import ast.expression.logical.Not;
-import ast.expression.logical.Or;
-import ast.expression.primary.atom.*;
-import ast.expression.primary.atom.Float;
-import ast.expression.primary.atom.Long;
-import ast.expression.primary.atom.trailed.*;
-import ast.expression.primary.trailer.ArgList;
-import ast.expression.primary.trailer.SliceBound;
-import ast.expression.primary.trailer.SubscriptIndex;
-import ast.expression.primary.trailer.SubscriptSliceList;
-import ast.expression.unary.Invert;
-import ast.expression.unary.Minus;
-import ast.expression.unary.Plus;
+import ast.expression.Conditional;
+import ast.expression.Lambda;
+import ast.expression.comp_iter.CompFor;
+import ast.expression.comp_iter.CompIf;
+import ast.expression.no_cond.Arithmetic;
+import ast.expression.no_cond.LambdaNoCond;
+import ast.expression.no_cond.Power;
+import ast.expression.no_cond.Shift;
+import ast.expression.no_cond.atom.*;
+import ast.expression.no_cond.atom.numeric.Float;
+import ast.expression.no_cond.atom.numeric.Imaginary;
+import ast.expression.no_cond.atom.numeric.Int;
+import ast.expression.no_cond.atom.numeric.Long;
+import ast.expression.no_cond.atom.comprehension.CondComprehension;
+import ast.expression.no_cond.atom.comprehension.EnumComprehension;
+import ast.expression.no_cond.atom.maker.DictMaker;
+import ast.expression.no_cond.atom.maker.SetMaker;
+import ast.expression.no_cond.atom.trailed.*;
+import ast.expression.no_cond.bitwise.Xor;
+import ast.expression.no_cond.logical.And;
+import ast.expression.no_cond.logical.Comparison;
+import ast.expression.no_cond.logical.Not;
+import ast.expression.no_cond.logical.Or;
+import ast.expression.no_cond.trailer.ArgList;
+import ast.expression.no_cond.trailer.SliceBound;
+import ast.expression.no_cond.trailer.SubscriptIndex;
+import ast.expression.no_cond.trailer.SubscriptSliceList;
+import ast.expression.no_cond.unary.Invert;
+import ast.expression.no_cond.unary.Minus;
+import ast.expression.no_cond.unary.Plus;
 import ast.param.ListParam;
 import ast.param.Params;
 import ast.param.TypedParam;
@@ -112,8 +121,8 @@ public interface Visitor<T> {
 	T visit(Arithmetic n);
 
 	//.............................................. BITWISE ..............................................\\
-	T visit(ast.expression.bitwise.And n);
-	T visit(ast.expression.bitwise.Or n);
+	T visit(ast.expression.no_cond.bitwise.And n);
+	T visit(ast.expression.no_cond.bitwise.Or n);
 	T visit(Xor n);
 
 	//........................................... COMPREHENSION ...........................................\\
