@@ -59,6 +59,12 @@ public interface PythonVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitName(PythonParser.NameContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PythonParser#async_funcdef}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAsync_funcdef(PythonParser.Async_funcdefContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PythonParser#funcdef}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -268,6 +274,12 @@ public interface PythonVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCompound_stmt(PythonParser.Compound_stmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PythonParser#async_stmt}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAsync_stmt(PythonParser.Async_stmtContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PythonParser#if_stmt}.
 	 * @param ctx the parse tree

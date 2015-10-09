@@ -1,8 +1,6 @@
 package ast;
 
-import ast.arg.ArgCond;
-import ast.arg.Kwarg;
-import ast.arg.SimpleArg;
+import ast.argument.*;
 import ast.expression.*;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.CompFor;
@@ -48,9 +46,11 @@ public interface Visitor<T> {
 	//-----------------------------------------------------------------------------------------------------\\
 	//------------------------------------------------ ARG ------------------------------------------------\\
 	//-----------------------------------------------------------------------------------------------------\\
+	T visit(Arg n);
+	T visit(CondArgument n);
+	T visit(DefValArgument n);
 	T visit(Kwarg n);
-	T visit(SimpleArg n);
-	T visit(ArgCond n);
+	T visit(SimpleArgument n);
 
 	//-----------------------------------------------------------------------------------------------------\\
 	//----------------------------------------------- PARAM -----------------------------------------------\\

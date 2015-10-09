@@ -176,7 +176,7 @@ decorators
 
 /// decorated: decorators (classdef | funcdef)
 decorated
- : decorators ( classdef | funcdef )
+ : decorators ( classdef | funcdef | async_funcdef )
  ;
 
 name
@@ -184,6 +184,13 @@ name
  | PRINT
  | EXEC
  | NONLOCAL
+ | ASYNC
+ | AWAIT
+ ;
+
+
+async_funcdef
+ : ASYNC funcdef
  ;
 
 /// funcdef: 'def' NAME parameters ['->' test] ':' suite
@@ -461,6 +468,11 @@ compound_stmt
  | funcdef
  | classdef
  | decorated
+ | async_stmt
+ ;
+
+async_stmt
+ : ASYNC (funcdef | with_stmt | for_stmt)
  ;
 
 /// if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
@@ -653,7 +665,7 @@ factor
 
 /// power: atom trailer* ['**' factor]
 power
- : atom trailer* ( '**' factor )?
+ : AWAIT? atom trailer* ( '**' factor )?
  ;
 
 /// atom: ('(' [yield_expr|testlist_comp] ')' |
@@ -675,10 +687,14 @@ atom
  ;
 
 /// testlist_comp: test ( comp_for | (',' test)* [','] )
-testlist_comp
- : initial=test ( comp_for
-                | ( ',' test )* ','?
-                )
+testlist_comp returns [List<ParserRuleContext> vals]
+@init{
+    $vals = new ArrayList<>();
+}
+ : (v=test { $vals.add($v.ctx); } | s=star_expr { $vals.add($s.ctx); })
+   ( comp_for
+   | ( ',' (v=test { $vals.add($v.ctx); } | s=star_expr { $vals.add($s.ctx); } ) )* ','?
+   )
  ;
 
 /// trailer: '(' [arglist] ')' | '[' subscriptlist ']' | '.' NAME
@@ -732,21 +748,14 @@ dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContex
 
 /// classdef: 'class' NAME ['(' [arglist] ')'] ':' suite
 classdef
- : CLASS NAME ( '(' arglist? ')' )? ':' suite
+ : CLASS name ( '(' arglist? ')' )? ':' suite
  ;
 
 /// arglist: (argument ',')* (argument [',']
 ///                          |'*' test (',' argument)* [',' '**' test]
 ///                          |'**' test)
-arglist returns [List<ArgumentContext> positionalArgs]
-@init{
-    $positionalArgs = new ArrayList<>();
-}
- : ( optArg=argument ',' { $positionalArgs.add($optArg.ctx); } )*
-   ( arg=argument { $positionalArgs.add($arg.ctx); } ','?
-   | '*' args=test ( ',' optArg2=argument { $positionalArgs.add($optArg2.ctx); } )* ( ',' '**' kwargs=test )?
-   | '**' kwargs=test
-   )
+arglist
+ : argument (',' argument)* ','?
  ;
 
 /// # The reason that keywords are test nodes instead of NAME is that using NAME
@@ -755,6 +764,8 @@ arglist returns [List<ArgumentContext> positionalArgs]
 argument
  : value=test condition=comp_for?
  | argName=test '=' value=test
+ | '**' kwarg=test
+ | '*' arg=test
  ;
 
 /// comp_iter: comp_for | comp_if
@@ -809,6 +820,8 @@ integer
  * lexer rules
  */
 
+ASYNC : 'async';
+AWAIT : 'await';
 DEF : 'def';
 RETURN : 'return';
 RAISE : 'raise';

@@ -21,6 +21,7 @@ public class Function extends Statement {
 	private final Expr returnType;
 	private final Suite body;
 	private final Params params;
+	private Boolean async;
 	private List<Decorator> decorators;
 
 	public Function(@NotNull Integer locInfo, @NotNull Identifier name, Expr returnType, @NotNull Suite body, @NotNull Params params) {
@@ -30,6 +31,7 @@ public class Function extends Statement {
 		this.body = body;
 		this.params = params;
 		this.decorators = Collections.emptyList();
+		this.async = false;
 	}
 
 	public Identifier getName() {
@@ -60,8 +62,16 @@ public class Function extends Statement {
 		return this.name.getValue();
 	}
 
+	public void markAsAsync() {
+		this.async = true;
+	}
+
 	public Boolean hasReturnType() {
 		return this.returnType != null;
+	}
+
+	public Boolean isAsync() {
+		return this.async;
 	}
 
 	public Boolean isAccessor() {

@@ -1,9 +1,8 @@
 package ast;
 
-import ast.arg.Arg;
-import ast.arg.ArgCond;
-import ast.arg.Kwarg;
-import ast.arg.SimpleArg;
+import ast.argument.*;
+import ast.argument.Argument;
+import ast.argument.SimpleArgument;
 import ast.expression.*;
 import ast.expression.Arithmetic;
 import ast.expression.bitwise.And;
@@ -72,19 +71,31 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
+	public T visit(Arg n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(DefValArgument n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
 	public T visit(Kwarg n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
-	public T visit(SimpleArg n) {
+	public T visit(SimpleArgument n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
-	public T visit(ArgCond n) {
+	public T visit(CondArgument n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -526,19 +537,26 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		}
 	}
 
-	public void visitChildren(SimpleArg n) {
+	public void visitChildren(Arg n) {
 		n.getValue().accept(this);
 	}
 
-
-	private void visitChildren(ArgCond n) {
+	private void visitChildren(CondArgument n) {
 		n.getValue().accept(this);
 		n.getCondition().accept(this);
 	}
 
-	public void visitChildren(Kwarg n) {
+	public void visitChildren(DefValArgument n) {
 		n.getValue().accept(this);
 		n.getName().accept(this);
+	}
+
+	public void visitChildren(SimpleArgument n) {
+		n.getValue().accept(this);
+	}
+
+	public void visitChildren(Kwarg n) {
+		n.getValue().accept(this);
 	}
 
 	public void visitChildren(UntypedParam n) {
@@ -597,8 +615,8 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 		n.getName().accept(this);
 
-		for (Arg arg : n.getInheritance()) {
-			arg.accept(this);
+		for (Argument argument : n.getInheritance()) {
+			argument.accept(this);
 		}
 		n.getDecorators().forEach(d -> d.accept(this));
 	}
@@ -887,14 +905,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(ArgList n) {
-		if (n.hasArgs()) {
-			n.getArgs().accept(this);
-		}
-		if (n.hasKwargs()) {
-			n.getKwargs().accept(this);
-		}
-
-		n.getPositional().forEach(p -> p.accept(this));
+		n.getArguments().forEach(p -> p.accept(this));
 	}
 
 	public void visitChildren(SubscriptIndex n) {

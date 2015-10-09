@@ -1,4 +1,4 @@
-package ast.arg;
+package ast.argument;
 
 import ast.expression.Expr;
 import ast.Visitor;
@@ -6,9 +6,9 @@ import ast.Visitor;
 /**
  * Created by Nik on 23-06-2015
  */
-public class SimpleArg extends Arg {
+public class SimpleArgument extends Argument {
 
-	public SimpleArg(Integer locInfo, Expr value) {
+	public SimpleArgument(Integer locInfo, Expr value) {
 		super(locInfo, value);
 	}
 

@@ -1,9 +1,8 @@
 package ast;
 
-import ast.arg.Arg;
-import ast.arg.ArgCond;
-import ast.arg.Kwarg;
-import ast.arg.SimpleArg;
+import ast.argument.*;
+import ast.argument.Argument;
+import ast.argument.SimpleArgument;
 import ast.expression.*;
 import ast.expression.bitwise.Xor;
 import ast.expression.comprehension.*;
@@ -126,7 +125,7 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitDecorated(@NotNull PythonParser.DecoratedContext ctx) {
-			//      decorators ( classdef | funcdef )
+			//      decorators ( classdef | funcdef | async_funcdef)
 			CollectionWrapper<Decorator> decorators = (CollectionWrapper<Decorator>) ctx.decorators().accept(this);
 			if (ctx.classdef() != null) {
 				ClassDef classDef = (ClassDef) ctx.classdef().accept(this);
@@ -139,12 +138,26 @@ public class AstBuilder {
 				function.setDecorators(decorators.getItems());
 				return function;
 			}
+
+			if (ctx.async_funcdef() != null) {
+				Function function = (Function) ctx.async_funcdef().accept(this);
+				function.setDecorators(decorators.getItems());
+				return function;
+			}
+
 			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
 		public AstNode visitName(PythonParser.NameContext ctx) {
-			return null;
+			return new Identifier(this.getLocInfo(ctx), ctx.getText());
+		}
+
+		@Override
+		public AstNode visitAsync_funcdef(PythonParser.Async_funcdefContext ctx) {
+			Function f = (Function) ctx.funcdef().accept(this);
+			f.markAsAsync();
+			return f;
 		}
 
 		@Override
@@ -571,7 +584,7 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitCompound_stmt(@NotNull PythonParser.Compound_stmtContext ctx) {
-			//      if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
+			//      if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt
 			if (ctx.if_stmt() != null) {
 				return ctx.if_stmt().accept(this);
 			}
@@ -596,7 +609,15 @@ public class AstBuilder {
 			if (ctx.decorated() != null) {
 				return ctx.decorated().accept(this);
 			}
+			if (ctx.async_stmt() != null) {
+				return ctx.async_stmt().accept(this);
+			}
 			throw new IllegalArgumentException("Unknown context");
+		}
+
+		@Override
+		public AstNode visitAsync_stmt(PythonParser.Async_stmtContext ctx) {
+			return null;
 		}
 
 		@Override
@@ -712,9 +733,6 @@ public class AstBuilder {
 				return ctx.lambdef().accept(this);
 			}
 
-			if (ctx.value == null) {
-				System.out.println("");
-			}
 			Expr value = (Expr) ctx.value.accept(this);
 			if (ctx.condition == null) {
 				return value;
@@ -997,17 +1015,18 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitTestlist_comp(@NotNull PythonParser.Testlist_compContext ctx) {
-			//      test ( comp_for | ( ',' test )* ','? )
-			if (ctx.comp_for() != null) {
-				Expr expression = (Expr) ctx.initial.accept(this);
-				CompFor compFor = (CompFor) ctx.comp_for().accept(this);
-				return new CondComprehension(this.getLocInfo(ctx), expression, compFor);
-			}
-			if (ctx.test().size() > 0) {
-				List<Expr> values = ctx.test().stream()
-						.map(e -> (Expr) e.accept(this))
+			//      (test | star_expr) ( comp_for | ( ',' (test | star_expr) )* ','? )
+
+			if (ctx.vals.size() > 0) {
+				if (ctx.comp_for() != null) {
+					Expr expression = (Expr) ctx.vals.get(0).accept(this);
+					CompFor compFor = (CompFor) ctx.comp_for().accept(this);
+					return new CondComprehension(this.getLocInfo(ctx), expression, compFor);
+				}
+				List<Expr> vals = ctx.vals.stream()
+						.map(v -> (Expr) v.accept(this))
 						.collect(Collectors.toList());
-				return new EnumComprehension(this.getLocInfo(ctx), values);
+				return new EnumComprehension(this.getLocInfo(ctx), vals);
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
@@ -1019,7 +1038,7 @@ public class AstBuilder {
 				if (ctx.arglist() != null) {
 					return ctx.arglist().accept(this);
 				}
-				return new ArgList(this.getLocInfo(ctx));
+				return new ArgList(this.getLocInfo(ctx), Collections.emptyList());
 			}
 			if (ctx.subscriptlist() != null) {
 				return ctx.subscriptlist().accept(this); //SubscriptSliceList
@@ -1106,12 +1125,12 @@ public class AstBuilder {
 		@Override
 		public AstNode visitClassdef(@NotNull PythonParser.ClassdefContext ctx) {
 			//      CLASS NAME ( '(' arglist? ')' )? ':' suite
-			Identifier id = this.getIdentifier(ctx.NAME());
+			Identifier id = (Identifier) ctx.name().accept(this);
 			Suite suite = (Suite) ctx.suite().accept(this);
 			if (ctx.arglist() != null) {
 				ArgList argList = (ArgList) ctx.arglist().accept(this);
-				List<SimpleArg> args = argList.getPositional().stream()
-						.map(a -> (SimpleArg) a)
+				List<SimpleArgument> args = argList.getArguments().stream()
+						.map(a -> (SimpleArgument) a)
 						.collect(Collectors.toList());
 				return new ClassDef(this.getLocInfo(ctx), id, suite, args);
 			}
@@ -1120,30 +1139,36 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitArglist(@NotNull PythonParser.ArglistContext ctx) {
-			//      ( argument ',' )* ( argument ','? | '*' test ( ',' argument )* ( ',' '**' test )? | '**' test )
-			List<Arg> positional = ctx.positionalArgs.stream()
-					.map(e -> (Arg) e.accept(this))
+			//      argument (',' argument)* ','?
+			List<Argument> arguments = ctx.argument().stream()
+					.map(e -> (Argument) e.accept(this))
 					.collect(Collectors.toList());
-			Expr args = ctx.args == null ? null : (Expr) ctx.args.accept(this);
-			Expr kwargs = ctx.kwargs == null ? null : (Expr) ctx.kwargs.accept(this);
-			return new ArgList(this.getLocInfo(ctx), positional, args, kwargs);
+			return new ArgList(this.getLocInfo(ctx), arguments);
 		}
 
 		@Override
 		public AstNode visitArgument(@NotNull PythonParser.ArgumentContext ctx) {
-			//      test comp_for? | test '=' test
+			//      test comp_for? | test '=' test | '**' test | '*' test
 			if (ctx.argName != null) {
 				Expr value = (Expr) ctx.value.accept(this);
 				Identifier id = (Identifier) ctx.argName.accept(this);
-				return new Kwarg(this.getLocInfo(ctx), value, id);
+				return new DefValArgument(this.getLocInfo(ctx), value, id);
 			}
 			if (ctx.value != null) {
 				Expr value = (Expr) ctx.value.accept(this);
 				if (ctx.condition != null) {
 					CompFor condition = (CompFor) ctx.condition.accept(this);
-					return new ArgCond(this.getLocInfo(ctx), value, condition);
+					return new CondArgument(this.getLocInfo(ctx), value, condition);
 				}
-				return new SimpleArg(this.getLocInfo(ctx), value);
+				return new SimpleArgument(this.getLocInfo(ctx), value);
+			}
+			if (ctx.arg != null) {
+				Expr value = (Expr) ctx.arg.accept(this);
+				return new Arg(this.getLocInfo(ctx), value);
+			}
+			if (ctx.kwarg != null) {
+				Expr value = (Expr) ctx.arg.accept(this);
+				return new Kwarg(this.getLocInfo(ctx), value);
 			}
 			throw new IllegalArgumentException("Unknown context");
 		}
