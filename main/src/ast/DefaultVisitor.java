@@ -575,9 +575,13 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Params n) {
-		n.getPositional().forEach(p -> p.accept(this));
-		n.getKeyword().forEach(p -> p.accept(this));
 		n.getRegular().forEach(p -> p.accept(this));
+		if (n.hasPositionalParam()) {
+			n.getPositional().accept(this);
+		}
+		if (n.hasKeywordParam()) {
+			n.getKeyword().accept(this);
+		}
 	}
 
 	public void visitChildren(ListParam n) {
