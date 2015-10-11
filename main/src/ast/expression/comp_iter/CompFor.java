@@ -2,7 +2,7 @@ package ast.expression.comp_iter;
 
 import ast.Visitor;
 import ast.expression.Expr;
-import ast.statement.simple.ExprList;
+import ast.expression.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;

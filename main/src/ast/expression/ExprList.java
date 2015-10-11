@@ -1,7 +1,6 @@
-package ast.statement.simple;
+package ast.expression;
 
 import ast.Visitor;
-import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.List;
 /**
  * Created by Nik on 29-06-2015
  */
-public class ExprList extends ast.statement.Statement {
+public class ExprList extends ast.expression.Expr {
 
 	private final List<Expr> values;
 

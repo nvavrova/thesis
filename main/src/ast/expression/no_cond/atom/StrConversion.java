@@ -1,7 +1,7 @@
 package ast.expression.no_cond.atom;
 
 import ast.Visitor;
-import ast.statement.simple.ExprList;
+import ast.expression.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**

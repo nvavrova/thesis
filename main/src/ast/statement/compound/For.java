@@ -1,7 +1,7 @@
 package ast.statement.compound;
 
 import ast.Suite;
-import ast.statement.simple.ExprList;
+import ast.expression.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 

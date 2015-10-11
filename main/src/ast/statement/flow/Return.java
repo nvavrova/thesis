@@ -1,6 +1,6 @@
 package ast.statement.flow;
 
-import ast.statement.simple.ExprList;
+import ast.expression.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
