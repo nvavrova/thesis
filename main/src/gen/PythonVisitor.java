@@ -1,4 +1,4 @@
-// Generated from C:/workspace_intellij/thesis/main/grammar\Python.g4 by ANTLR 4.5.1
+// Generated from D:/intellij_projects/thesis/main/grammar\Python.g4 by ANTLR 4.5.1
 package gen;
 
     import java.util.List;

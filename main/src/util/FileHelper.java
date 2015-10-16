@@ -1,9 +1,8 @@
 package util;
 
-import java.io.*;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,56 +13,6 @@ import java.util.stream.Collectors;
 public class FileHelper {
 
 	public static final String PYTHON_EXTENSION = ".py";
-
-	private final String filePath;
-	private final List<String> lines;
-
-	public FileHelper(String filePath) {
-		this.filePath = filePath;
-		this.lines = this.readFile();
-	}
-
-	public List<String> getFileLines() {
-		return this.lines;
-	}
-
-	public List<String> getFileLines(Integer start, Integer end) {
-		end = Math.min(end, this.lines.size()); //in case last line is empty, when the BufferedReader doesn't collect it
-		return this.lines.subList(start, end);
-	}
-
-	public String getTrimmedFileContents() {
-		StringBuilder sb = new StringBuilder();
-		this.lines.stream()
-//				.filter(l -> l.trim().length() > 0)
-				.forEach(l -> sb.append(l.trim().length() != 0 ? l : "").append("\n"));
-		return sb.toString();
-	}
-
-	private List<String> readFile() {
-		try {
-			FileInputStream fis = new FileInputStream(this.filePath);
-			InputStreamReader inStrReader = new InputStreamReader(fis);
-			BufferedReader br = new BufferedReader(inStrReader);
-
-			List<String> res = br.lines().collect(Collectors.toList());
-
-			//hack to fix wrong encoding of ISO-8859-1
-			if (res.size() > 1 && res.get(0).startsWith("\u00EF\u00BB\u00BF")) {
-				res.set(0, res.get(0).substring(3));
-			}
-
-			fis.close();
-			inStrReader.close();
-			br.close();
-
-			return res;
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		return Collections.emptyList();
-	}
 
 	public static String getLogName(String type) {
 		return getRunFileName(type, "log");

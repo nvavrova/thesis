@@ -1,6 +1,7 @@
 # Test data
 data/*
 notes/*
+test-data/*
 
 # Intellij
 .idea/

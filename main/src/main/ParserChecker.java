@@ -5,13 +5,13 @@ import gen.PythonParser;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
+import util.FileOpener;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,50 +28,38 @@ public class ParserChecker {
 //		System.setOut(out);
 //		System.setErr(err);
 
-		ParserChecker.collectUnparsables(args[0], args.length == 2 ? args[1] : null);
+		ParserChecker.collectUnparsable(args[0], args.length == 2 ? args[1] : null);
 	}
 
-	private static void collectUnparsables(String path, String destination) {
+	private static void collectUnparsable(String path, String destination) {
 		List<String> allFiles = FileHelper.getPythonFilePaths(new File(path));
 		int i = 0;
 		for (String fileName : allFiles) {
-			Boolean parsable = collectUnparsable(fileName, destination, i);
-			if (parsable) {
-				i++;
+			System.out.println(fileName);
+			try {
+				FileOpener fo = new FileOpener(fileName);
+				String contents = fo.getTrimmedContents();
+				org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
+				PythonLexer lexer = new PythonLexer(input);
+
+				org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
+				PythonParser parser = new PythonParser(tokens);
+				parser.setErrorHandler(new BailErrorStrategy());
+
+				ParserRuleContext context = parser.file_input();
 			}
-		}
-	}
-
-	private static Boolean collectUnparsable(String filePath, String destination, int counter) {
-		try {
-			FileHelper fh = new FileHelper(filePath);
-			String contents = fh.getTrimmedFileContents();
-			org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
-			PythonLexer lexer = new PythonLexer(input);
-
-			org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-			PythonParser parser = new PythonParser(tokens);
-			parser.setErrorHandler(new BailErrorStrategy());
-
-			Date start = new Date();
-			ParserRuleContext context = parser.file_input();
-			Date end = new Date();
-			System.out.println("Parsing " + filePath + "\nDuration: " + ((end.getTime() - start.getTime()) / 1000.0)
-					+ "seconds\n-------------------------------------------------------------");
-			return true;
-		}
-		catch (Exception ex) {
-			ParserChecker.handleException(ex);
-			if (destination != null) {
-				try {
-					Files.copy(Paths.get(filePath), Paths.get(destination + "\\file_" + String.format("%03d", counter) + ".py"), StandardCopyOption.REPLACE_EXISTING);
-				}
-				catch (IOException e) {
-					ParserChecker.handleException(e);
+			catch (Exception ex) {
+				ParserChecker.handleException(ex);
+				if (destination != null) {
+					try {
+						Files.copy(Paths.get(fileName), Paths.get(destination + "\\file_" + (i++) + ".py"), StandardCopyOption.REPLACE_EXISTING);
+					}
+					catch (IOException e) {
+						ParserChecker.handleException(e);
+					}
 				}
 			}
 		}
-		return false;
 	}
 
 	private static void handleException(Exception ex) {

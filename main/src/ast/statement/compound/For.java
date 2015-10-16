@@ -1,9 +1,9 @@
 package ast.statement.compound;
 
 import ast.Suite;
+import ast.Visitor;
 import ast.expression.ExprList;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
 /**
  * Created by Nik on 17-06-2015
@@ -14,6 +14,7 @@ public class For extends ast.statement.Statement {
 	private final ExprList source;
 	private final Suite body;
 	private final Suite elseBody;
+	private Boolean async;
 
 	public For(@NotNull Integer locInfo, @NotNull ExprList iterator, @NotNull ExprList source, @NotNull Suite body, Suite elseBody) {
 		super(locInfo);
@@ -21,6 +22,7 @@ public class For extends ast.statement.Statement {
 		this.source = source;
 		this.body = body;
 		this.elseBody = elseBody;
+		this.async = false;
 	}
 
 	public ExprList getIterator() {
@@ -41,6 +43,14 @@ public class For extends ast.statement.Statement {
 
 	public Boolean hasElseBody () {
 		return this.elseBody != null;
+	}
+
+	public void markAsAsync() {
+		this.async = true;
+	}
+
+	public Boolean isAsync() {
+		return this.async;
 	}
 
 	@Override

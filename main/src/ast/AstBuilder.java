@@ -3,29 +3,29 @@ package ast;
 import ast.argument.*;
 import ast.argument.Argument;
 import ast.argument.SimpleArgument;
-import ast.expression.comp_iter.CompFor;
-import ast.expression.comp_iter.CompIf;
-import ast.expression.comp_iter.CompIter;
+import ast.expression.compiter.CompFor;
+import ast.expression.compiter.CompIf;
+import ast.expression.compiter.CompIter;
 import ast.expression.*;
-import ast.expression.no_cond.atom.maker.DictMaker;
-import ast.expression.no_cond.atom.maker.SetMaker;
-import ast.expression.no_cond.atom.numeric.Imaginary;
-import ast.expression.no_cond.atom.numeric.Int;
-import ast.expression.no_cond.bitwise.Xor;
-import ast.expression.no_cond.atom.comprehension.*;
-import ast.expression.no_cond.logical.And;
-import ast.expression.no_cond.logical.Comparison;
-import ast.expression.no_cond.logical.Not;
-import ast.expression.no_cond.logical.Or;
-import ast.expression.no_cond.*;
-import ast.expression.no_cond.atom.*;
-import ast.expression.no_cond.atom.numeric.Float;
-import ast.expression.no_cond.atom.numeric.Long;
-import ast.expression.no_cond.atom.trailed.TrailedAtomBuilder;
-import ast.expression.no_cond.trailer.*;
-import ast.expression.no_cond.unary.Invert;
-import ast.expression.no_cond.unary.Minus;
-import ast.expression.no_cond.unary.Plus;
+import ast.expression.nocond.atom.maker.DictMaker;
+import ast.expression.nocond.atom.maker.SetMaker;
+import ast.expression.nocond.atom.numeric.Imaginary;
+import ast.expression.nocond.atom.numeric.Int;
+import ast.expression.nocond.bitwise.Xor;
+import ast.expression.nocond.atom.comprehension.*;
+import ast.expression.nocond.logical.And;
+import ast.expression.nocond.logical.Comparison;
+import ast.expression.nocond.logical.Not;
+import ast.expression.nocond.logical.Or;
+import ast.expression.nocond.*;
+import ast.expression.nocond.atom.*;
+import ast.expression.nocond.atom.numeric.Float;
+import ast.expression.nocond.atom.numeric.Long;
+import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
+import ast.expression.nocond.trailer.*;
+import ast.expression.nocond.unary.Invert;
+import ast.expression.nocond.unary.Minus;
+import ast.expression.nocond.unary.Plus;
 import ast.param.*;
 import ast.path.DottedPath;
 import ast.path.Path;
@@ -202,8 +202,8 @@ public class AstBuilder {
 			upcasted.putAll(ctx.regular);
 			List<Param> regular = this.getParameters(upcasted);
 
-			Param positional = (Param) ctx.positional.accept(this);
-			Param keyword = (Param) ctx.keyword.accept(this);
+			Param positional = ctx.positional != null ? (Param) ctx.positional.accept(this) : null;
+			Param keyword = ctx.keyword != null? (Param) ctx.keyword.accept(this) : null;
 			return new Params(this.getLocInfo(ctx), regular, positional, keyword);
 		}
 
@@ -230,8 +230,8 @@ public class AstBuilder {
 			upcasted.putAll(ctx.regular);
 			List<Param> regular = this.getParameters(upcasted);
 
-			Param positional = (Param) ctx.positional.accept(this);
-			Param keyword = (Param) ctx.keyword.accept(this);
+			Param positional = ctx.positional != null ? (Param) ctx.positional.accept(this) : null;
+			Param keyword = ctx.keyword != null ? (Param) ctx.keyword.accept(this) : null;
 			return new Params(this.getLocInfo(ctx), regular, positional, keyword);
 		}
 
@@ -631,7 +631,23 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitAsync_stmt(PythonParser.Async_stmtContext ctx) {
-			return null;
+			//      ASYNC (funcdef | with_stmt | for_stmt)
+			if (ctx.funcdef() != null) {
+				Function function = (Function) ctx.funcdef().accept(this);
+				function.markAsAsync();
+				return function;
+			}
+			else if (ctx.with_stmt() != null) {
+				With with = (With) ctx.with_stmt().accept(this);
+				with.markAsAsync();
+				return with;
+			}
+			else if (ctx.for_stmt() != null) {
+				For forStmt = (For) ctx.for_stmt().accept(this);
+				forStmt.markAsAsync();
+				return forStmt;
+			}
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
@@ -865,7 +881,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new ast.expression.no_cond.bitwise.Or(this.getLocInfo(ctx), operands);
+			return new ast.expression.nocond.bitwise.Or(this.getLocInfo(ctx), operands);
 		}
 
 		@Override
@@ -889,7 +905,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new ast.expression.no_cond.bitwise.And(this.getLocInfo(ctx), operands);
+			return new ast.expression.nocond.bitwise.And(this.getLocInfo(ctx), operands);
 		}
 
 		@Override
@@ -1181,7 +1197,7 @@ public class AstBuilder {
 				return new Arg(this.getLocInfo(ctx), value);
 			}
 			if (ctx.kwarg != null) {
-				Expr value = (Expr) ctx.arg.accept(this);
+				Expr value = (Expr) ctx.kwarg.accept(this);
 				return new Kwarg(this.getLocInfo(ctx), value);
 			}
 			throw new IllegalArgumentException("Unknown context");
@@ -1377,7 +1393,7 @@ public class AstBuilder {
 
 		private Suite processOptional(PythonParser.SuiteContext node) {
 			if (node == null) {
-				return null;//new Suite(this.getLocInfo(node), Collections.emptyList());
+				return null;
 			}
 			return this.process(node);
 		}

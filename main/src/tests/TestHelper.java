@@ -3,13 +3,14 @@ package tests;
 import ast.AstBuilder;
 import gen.PythonLexer;
 import gen.PythonParser;
-import main.VersionSwitcher;
+import process.VersionSwitcher;
 import model.Class;
 import model.ModelBuilder;
 import model.Module;
 import model.Project;
 import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
+import util.FileOpener;
 
 import java.io.File;
 import java.util.*;
@@ -21,8 +22,8 @@ import java.util.stream.Collectors;
 public class TestHelper {
 
 	public static ast.Module parseFile(String fileName) {
-		FileHelper fh = new FileHelper(fileName);
-		String contents = fh.getTrimmedFileContents();
+		FileOpener fo = new FileOpener(fileName);
+		String contents = fo.getTrimmedContents();
 		org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
 		PythonLexer lexer = new PythonLexer(input);
 

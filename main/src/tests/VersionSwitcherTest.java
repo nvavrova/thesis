@@ -1,6 +1,6 @@
 package tests;
 
-import main.VersionSwitcher;
+import process.VersionSwitcher;
 import model.Class;
 import model.Module;
 import model.Project;

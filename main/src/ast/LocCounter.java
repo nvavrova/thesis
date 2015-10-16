@@ -1,6 +1,6 @@
 package ast;
 
-import util.FileHelper;
+import util.FileOpener;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -13,19 +13,19 @@ public class LocCounter {
 
 	private static final Pattern emptyOrComment = Pattern.compile("([ \t]*|[ \t]*#.*)");
 
-	private final FileHelper fileHelper;
+	private final FileOpener fileOpener;
 
 	public LocCounter(String module) {
-		this.fileHelper = new FileHelper(module);
+		this.fileOpener = new FileOpener(module);
 	}
 
 	public Integer count() {
-		List<String> lines = this.fileHelper.getFileLines();
+		List<String> lines = this.fileOpener.getLines();
 		return this.count(lines);
 	}
 
 	public Integer count(Integer startLine, Integer endLine) {
-		List<String> lines = this.fileHelper.getFileLines(startLine - 1, endLine);
+		List<String> lines = this.fileOpener.getLines(startLine - 1, endLine);
 		return this.count(lines);
 	}
 

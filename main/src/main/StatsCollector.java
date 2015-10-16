@@ -1,7 +1,10 @@
 package main;
 
+import ast.Module;
 import db.DataHandler;
 import db.pojo.ProjectEntity;
+import process.File2AstConverter;
+import model.ModelBuilder;
 import model.Project;
 import util.FileHelper;
 import util.StringHelper;
@@ -9,6 +12,7 @@ import util.StringHelper;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +34,8 @@ public class StatsCollector {
 		if (args.length > 0) {
 			File sourceFolder = new File(args[0]);
 			List<File> subfolders = FileHelper.getSubfolders(sourceFolder);
+//			List<File> subfolders = new ArrayList<>();
+//			subfolders.add(new File("D:\\intellij_projects\\thesis\\data\\asyncio"));
 			StatsCollector.createStatsCsv(subfolders);
 		}
 		else {
@@ -71,12 +77,14 @@ public class StatsCollector {
 		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
 		System.out.println("Name: " + projectFolder.getAbsolutePath());
 		try {
-			VersionSwitcher versionSwitcher = new VersionSwitcher(projectFolder);
-			Project project = versionSwitcher.getLatestProjectVersion();
+			List<String> allFiles = FileHelper.getPythonFilePaths(projectFolder);
+			Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
+			ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
+			Project project = mb.getProject();
 
 			for (model.Class c : project.getClasses()) {
 				List<String> line = new ArrayList<>();
-				line.add(project.getFolderPath());
+				line.add(project.getPath());
 				line.add(c.getModule().getFilePath());
 				line.add(c.getName());
 				line.add(String.valueOf(c.privateVariablesCount()));
