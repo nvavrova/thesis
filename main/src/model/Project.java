@@ -33,7 +33,11 @@ public class Project {
 		return this.folder;
 	}
 
-	public String getFolderPath() {
+	public String getName() {
+		return this.folder.getName();
+	}
+
+	public String getPath() {
 		return this.folder.getAbsolutePath();
 	}
 

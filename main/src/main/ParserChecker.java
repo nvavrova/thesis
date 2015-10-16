@@ -5,6 +5,7 @@ import gen.PythonParser;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
 import util.FileHelper;
+import util.FileOpener;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +37,8 @@ public class ParserChecker {
 		for (String fileName : allFiles) {
 			System.out.println(fileName);
 			try {
-				FileHelper fh = new FileHelper(fileName);
-				String contents = fh.getTrimmedFileContents();
+				FileOpener fo = new FileOpener(fileName);
+				String contents = fo.getTrimmedContents();
 				org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
 				PythonLexer lexer = new PythonLexer(input);
 

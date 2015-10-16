@@ -1,6 +1,6 @@
 package ast;
 
-import ast.expression.no_cond.trailer.ArgList;
+import ast.expression.nocond.trailer.ArgList;
 import ast.path.DottedPath;
 import org.antlr.v4.runtime.misc.NotNull;
 

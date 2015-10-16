@@ -4,7 +4,7 @@ import ast.Decorator;
 import ast.Suite;
 import ast.Visitor;
 import ast.expression.Expr;
-import ast.expression.no_cond.atom.Identifier;
+import ast.expression.nocond.atom.Identifier;
 import ast.param.Params;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;

@@ -1,7 +1,7 @@
 package ast.path;
 
 import ast.AstNode;
-import ast.expression.no_cond.atom.Identifier;
+import ast.expression.nocond.atom.Identifier;
 import org.antlr.v4.runtime.misc.NotNull;
 
 /**

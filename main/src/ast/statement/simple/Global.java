@@ -1,7 +1,7 @@
 package ast.statement.simple;
 
 import ast.Visitor;
-import ast.expression.no_cond.atom.Identifier;
+import ast.expression.nocond.atom.Identifier;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
 

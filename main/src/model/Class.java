@@ -1,7 +1,5 @@
 package model;
 
-import util.Helper;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,7 +7,6 @@ import java.util.stream.Stream;
 /**
  * Created by Nik on 30-06-2015
  */
-//TODO: decide on the constants, limits, etc.
 public class Class {
 
 	private final String name;
@@ -164,6 +161,10 @@ public class Class {
 		return this.parents.size();
 	}
 
+	public List<String> getParents() {
+		return this.parents;
+	}
+
 	public Integer usedGlobalsCount() {
 		return this.usedGlobals.size();
 	}
@@ -239,33 +240,6 @@ public class Class {
 		return count.intValue();
 	}
 
-
-	public boolean isBlob() {
-		return (this.isLargeClass() || this.hasLowCohesion()) &&
-				(this.hasControllerName() || this.hasControllerMethods())
-				;
-				//&& this.relatedDataClassesCount() > 1;
-	}
-
-	public boolean isSwissArmyKnife() {
-		return this.hasTooManyParents();
-	}
-
-	public boolean isFunctionalDecomposition() {
-		return (this.relatedPrivateFieldsWithOneMethodCount() > 2) && (this.hasProceduralName() && this.noInheritance()); //TODO
-	}
-
-	public boolean isSpaghettiCode() {
-		return this.noInheritance() && this.hasProceduralName() && this.hasLongMethod()
-				&& this.hasTooManyMethodsWithNoParams() && this.usesGlobals();
-	}
-
-
-	private boolean isDataClass() {
-		return this.publicVariablesCount() > 11;
-//		return this.getNumberOfAccessors() > 5;
-	}
-
 	private boolean privateFieldsWithOnePublicMethod() {
 		return //this.privateVariablesCount() > 10 &&
 				this.publicMethodCount() == 1;
@@ -278,16 +252,8 @@ public class Class {
 		return count.intValue();
 	}
 
-	private Boolean usesGlobals() {
+	public Boolean usesGlobals() {
 		return this.usedGlobals.size() > 0;
-	}
-
-	private boolean hasLowCohesion() {
-		return this.calculateLcom() > 564;
-	}
-
-	private boolean isLargeClass() {
-		return this.loc > 186;
 	}
 
 	private boolean isPrivateVariable(String varName) {
@@ -302,58 +268,6 @@ public class Class {
 	private Stream<String> getPublicVariablesStream() {
 		return this.variables.stream()
 				.filter(v -> !this.isPrivateVariable(v));
-	}
-
-	private Boolean hasControllerName() {
-		return Helper.isControllerName(this.name);
-	}
-
-	private Boolean hasProceduralName() {
-		return Helper.isProceduralName(this.name);
-	}
-
-	private Boolean hasControllerMethods() {
-		for (Method m : this.methods.values()) {
-			if (m.isController()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean noInheritance() {
-		return this.parents.size() == 0;
-	}
-
-	private boolean hasTooManyParents() {
-		return this.parents.size() > 1;
-	}
-
-	private boolean hasLongMethod() {
-		for (Method m : this.methods.values()) {
-			if (m.isLongMethod()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean hasTooManyMethodsWithNoParams() {
-		return this.methodsWithNoParamsCount() > 7;
-	}
-
-	private Integer relatedPrivateFieldsWithOneMethodCount() {
-		Long count = this.dependentOn.values().stream()
-				.filter(Class::privateFieldsWithOnePublicMethod)
-				.count();
-		return count.intValue();
-	}
-
-	private Integer relatedDataClassesCount() {
-		Long count = this.dependentOn.values().stream()
-				.filter(c -> c.isDataClass())
-				.count();
-		return count.intValue();
 	}
 
 	private Integer calculateLcom() {

@@ -99,7 +99,7 @@ public class Linker {
 
 
 	private List<String> getSourcePaths(String source) {
-		String projectFolder = this.project.getFolderPath();
+		String projectFolder = this.project.getPath();
 
 		assert (source.startsWith(projectFolder));
 
