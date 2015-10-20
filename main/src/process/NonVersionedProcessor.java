@@ -33,7 +33,7 @@ public class NonVersionedProcessor extends Processor {
 
 	private Project createProject(File projectFolder) {
 		List<String> allFiles = FileHelper.getPythonFilePaths(projectFolder);
-		Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
+		Map<String, Module> trees = File2Tree.getAsts(allFiles);
 		ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
 		return mb.getProject();
 	}

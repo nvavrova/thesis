@@ -3,9 +3,9 @@ package main;
 import ast.Module;
 import db.DataHandler;
 import db.pojo.ProjectEntity;
-import process.File2AstConverter;
 import model.ModelBuilder;
 import model.Project;
+import process.File2Tree;
 import util.FileHelper;
 import util.StringHelper;
 
@@ -78,7 +78,7 @@ public class StatsCollector {
 		System.out.println("Name: " + projectFolder.getAbsolutePath());
 		try {
 			List<String> allFiles = FileHelper.getPythonFilePaths(projectFolder);
-			Map<String, Module> trees = File2AstConverter.getTrees(allFiles);
+			Map<String, Module> trees = File2Tree.getAsts(allFiles);
 			ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
 			Project project = mb.getProject();
 
@@ -94,7 +94,7 @@ public class StatsCollector {
 				line.add(String.valueOf(c.getLoc()));
 				line.add(String.valueOf(c.parentsCount()));
 				line.add(String.valueOf(c.methodsWithNoParamsCount()));
-				line.add(String.valueOf(c.usedGlobalsCount()));
+				line.add(String.valueOf(c.referencedGlobalsCount()));
 				line.add(String.valueOf(c.definedGlobalsCount()));
 
 				csv.println(StringHelper.implode(line, CSV_DELIMITER));

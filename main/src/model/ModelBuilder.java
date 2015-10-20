@@ -1,6 +1,7 @@
 package model;
 
 import ast.DefaultVisitor;
+import ast.expression.ExprList;
 import ast.expression.nocond.atom.Identifier;
 import ast.expression.nocond.atom.trailed.AttributeRef;
 import ast.expression.nocond.atom.trailed.Call;
@@ -8,7 +9,10 @@ import ast.expression.nocond.atom.trailed.DirectCall;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
-import ast.statement.simple.*;
+import ast.statement.simple.Assign;
+import ast.statement.simple.Global;
+import ast.statement.simple.ImportFrom;
+import ast.statement.simple.ImportPaths;
 import util.StringHelper;
 
 import java.io.File;
@@ -103,14 +107,27 @@ public class ModelBuilder {
 
 		private String currentFilePath;
 		private final Project project;
+		private final Stack<ContentContainer> contentContainers;
+
 		private final Stack<model.Class> classes;
+		private final Stack<Method> methods;
 		private boolean inAssign;
+
+		private boolean inAssignLeft;
+		private boolean inAssignRight;
+		private String leftAssign;
+		private String rightAssign;
 
 		public BuildingVisitor(Project project) {
 			super();
 			this.project = project;
+			this.contentContainers = new Stack<>();
+
 			this.classes = new Stack<>();
+			this.methods = new Stack<>();
 			this.inAssign = false;
+			this.inAssignLeft = false;
+			this.inAssignRight = false;
 		}
 
 		public void build(Collection<ast.Module> trees) {
@@ -124,18 +141,17 @@ public class ModelBuilder {
 		public void visitChildren(ast.Module n) {
 			String filePath = n.getFilePath();
 			model.Module module = new model.Module(filePath, n.getName(), StringHelper.implode(n.getErrors(), "\n"));
+
 			this.project.addModule(module);
+
+			this.contentContainers.push(module);
 			super.visitChildren(n);
+			this.contentContainers.pop();
 		}
 
 		@Override
 		public Void visit(Global n) {
-			if (this.inClass()) {
-				n.getIdentifiers().forEach(i -> this.getCurrentClass().addGlobal(i.getValue()));
-			}
-			else {
-				n.getIdentifiers().forEach(i -> this.getCurrentModule().addGlobal(i.getValue()));
-			}
+			n.getIdentifiers().forEach(i -> this.getCurrentContainer().addGlobalDefinition(i.getValue()));
 			return null;
 		}
 
@@ -143,6 +159,25 @@ public class ModelBuilder {
 		public void visitChildren(Assign n) {
 			this.inAssign = true;
 			super.visitChildren(n);
+			for (int i = 0; i < (n.getExprElements().size() - 1); i++) {
+				this.inAssignLeft = true;
+				ExprList left = n.getExprElements().get(i);
+				left.accept(this);
+				this.inAssignLeft = false;
+
+				this.inAssignRight = true;
+				ExprList right = n.getExprElements().get(i);
+				right.accept(this);
+				this.inAssignRight = false;
+
+				//TODO: add the assign values into vars at some point (probably at Identifier visit?)
+				if (this.leftAssign != null && this.rightAssign != null) {
+					this.getCurrentContainer().addAssign(leftAssign, rightAssign);
+				}
+
+				this.leftAssign = null;
+				this.rightAssign = null;
+			}
 			this.inAssign = false;
 		}
 
@@ -163,7 +198,9 @@ public class ModelBuilder {
 			currentModule.addClass(c);
 
 			this.classes.push(c);
+			this.contentContainers.push(c);
 			this.visitChildren(n);
+			this.contentContainers.pop();
 			this.classes.pop();
 
 			return null;
@@ -178,7 +215,6 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(Function n) {
-
 			if (this.inClass()) {
 				List<String> paramNames = n.getParams().getParamNames().stream()
 						.filter(p -> !p.equals(SELF_KEYWORD))
@@ -186,7 +222,15 @@ public class ModelBuilder {
 
 				Class cls = this.getCurrentClass();
 				Method method = new Method(n.getNameString(), cls, n.getLocInfo(), paramNames, n.isAccessor());
-				cls.addMethod(method);
+				cls.addMethodDefinition(method);
+
+				this.methods.push(method);
+				this.contentContainers.push(method);
+				this.visitChildren(n);
+				this.contentContainers.pop();
+				this.methods.pop();
+
+				return null;
 			}
 			this.visitChildren(n);
 			return null;
@@ -216,44 +260,19 @@ public class ModelBuilder {
 			return null;
 		}
 
-		@Override
-		public Void visit(Call n) {
-			this.addMethodRef(n.getBase().toString());
-			this.visitChildren(n);
-			return null;
-		}
-
-		@Override
-		public Void visit(DirectCall n) {
-			this.addMethodRef(n.getBase().toString() + "." + n.getCall().getName());
-			this.visitChildren(n);
-			return null;
-		}
-
-		@Override
-		public void visitChildren(DirectCall n) {
-			n.getBase().accept(this);
-			n.getCall().accept(this);
-		}
-
-		private void addMethodRef(String name) {
-			if (this.inClass()) {
-				this.getCurrentClass().addMethodReference(name);
-			}
-		}
-
 		private void addVar(String varFullName) {
 			String varBaseName = this.getVarBaseName(varFullName);
 			if (varBaseName != null) {
-				if (this.inMethod()) {
-					this.getCurrentClass().addVariable(varBaseName);
+				if (this.inClassMethod()) {
+					this.getCurrentClass().addVariableDefinition(varBaseName);
+					this.getCurrentMethod().addInstanceVarUse(varBaseName);
 				}
 				else if (this.inAssign) {
-					this.getCurrentClass().addVariable(SELF_KEYWORD + "." + varBaseName);
+					this.getCurrentClass().addVariableDefinition(SELF_KEYWORD + "." + varBaseName);
 				}
 			}
 			if (!this.inClass()) {
-				this.getCurrentModule().addVariable(varFullName);
+				this.getCurrentModule().addVariableDefinition(varFullName);
 			}
 			this.addVarRef(varFullName);
 
@@ -269,15 +288,19 @@ public class ModelBuilder {
 		}
 
 		private void addVarRef(List<String> refParts) {
-			this.getCurrentClass().addVarReference(StringHelper.implode(refParts, "."));
+			String varName = StringHelper.implode(refParts, ".");
+			this.getCurrentContainer().addVariableReference(varName);
+			if (this.inClassMethod()) {
+				this.getCurrentMethod().addPotentialNonInstanceVarUse(varName);
+			}
 		}
 
 		private String getVarBaseName(String varFullName) {
 			List<String> nameParts = StringHelper.explode(varFullName, ".");
-			if (this.inMethod() && nameParts.size() > 1 && this.isClassVar(varFullName)) {
+			if (this.inClassMethod() && nameParts.size() > 1 && this.isClassVar(varFullName)) {
 				return nameParts.get(0) + "." + nameParts.get(1);
 			}
-			if (this.inClass() && !this.inMethod()) {
+			if (this.inClass() && !this.inClassMethod()) {
 				return nameParts.get(0);
 			}
 			return null;
@@ -285,6 +308,24 @@ public class ModelBuilder {
 
 		private boolean isClassVar(String varName) {
 			return varName.startsWith(this.getCurrentClass().getName() + ".") || varName.startsWith(SELF_KEYWORD + ".");
+		}
+
+		@Override
+		public Void visit(Call n) {
+			this.addMethodRef(n.getBase().toString());
+			this.visitChildren(n);
+			return null;
+		}
+
+		@Override
+		public Void visit(DirectCall n) {
+			this.addMethodRef(n.getBase().toString() + "." + n.getCall().getName());
+			this.visitChildren(n);
+			return null;
+		}
+
+		private void addMethodRef(String name) {
+			this.getCurrentContainer().addMethodCall(name);
 		}
 
 		private model.Module getCurrentModule() {
@@ -298,12 +339,20 @@ public class ModelBuilder {
 			return this.classes.peek();
 		}
 
+		private Method getCurrentMethod() {
+			return this.methods.peek();
+		}
+
 		private boolean inClass() {
 			return !this.classes.isEmpty();
 		}
 
-		private boolean inMethod() {
-			return this.inClass() && !this.getCurrentClass().hasNoMethods();
+		private boolean inClassMethod() {
+			return this.inClass() && !this.methods.isEmpty();
+		}
+
+		private ContentContainer getCurrentContainer() {
+			return this.contentContainers.peek();
 		}
 	}
 }

@@ -39,7 +39,7 @@ public class VersionSwitcher {
 
 	private Project getProject() {
 		List<String> allFiles = FileHelper.getPythonFilePaths(this.projectFolder);
-		this.trees = File2AstConverter.getTrees(allFiles);
+		this.trees = File2Tree.getAsts(allFiles);
 
 		ModelBuilder mb = new ModelBuilder(this.projectFolder, this.trees.values());
 		this.project = mb.getProject();
@@ -57,7 +57,7 @@ public class VersionSwitcher {
 		List<String> changedPythonFiles = FileHelper.getPythonFilePaths(changedFiles);
 
 		this.cleanUpNonExistingFiles();
-		Map<String, Module> currentTrees = File2AstConverter.getTrees(changedPythonFiles);
+		Map<String, Module> currentTrees = File2Tree.getAsts(changedPythonFiles);
 
 		ModelBuilder builder = new ModelBuilder(this.project, this.trees, currentTrees);
 		this.project = builder.getProject();

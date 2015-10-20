@@ -2,24 +2,17 @@ package model;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by Nik on 30-06-2015
  */
-public class Class {
+public class Class extends ContentContainer {
 
 	private final String name;
 	private final Module module;
 	private final Integer loc;
 	private final List<String> parents;
 	private final Map<String, Class> dependentOn;
-	private final Map<String, Method> methods;
-	private final Set<String> variables;
-	private final Set<String> definedGlobals;
-	private final Set<String> usedGlobals;
-	private final Set<String> varReferences;
-	private final Set<String> methodReferences;
 
 	public Class(String name, Module module, Integer loc, List<String> parents) {
 		this.name = name;
@@ -27,17 +20,6 @@ public class Class {
 		this.loc = loc;
 		this.parents = parents;
 		this.dependentOn = new HashMap<>();
-		this.methods = new HashMap<>();
-		this.variables = new HashSet<>();
-		this.definedGlobals = new HashSet<>();
-		this.usedGlobals = new HashSet<>();
-		this.varReferences = new HashSet<>();
-		this.methodReferences = new HashSet<>();
-	}
-
-	public void addGlobal(String name) {
-		this.definedGlobals.add(name);
-		this.usedGlobals.add(name);
 	}
 
 	public void registerGlobals(Set<String> moduleVars) {
@@ -56,9 +38,9 @@ public class Class {
 
 	private void registerModuleDepGlobals(Set<String> moduleVars) {
 		Set<String> globals = moduleVars.stream()
-				.filter(this.varReferences::contains)
+				.filter(this.referencedVariables::contains)
 				.collect(Collectors.toSet());
-		this.usedGlobals.addAll(globals);
+		this.referencedGlobals.addAll(globals);
 	}
 
 //	private void addGlobalDefinitions(String clsAlias, Class c) {
@@ -77,15 +59,15 @@ public class Class {
 //	}
 //
 //	private Boolean referencesVar(String varName) {
-//		return this.varReferences.contains(varName);
+//		return this.referencedVariables.contains(varName);
 //	}
 
 	private void addGlobalUsesFromClass(String alias, Set<String> vars) {
 		List<String> globals = vars.stream()
 				.map(var -> alias + "." + var)
-				.filter(this.varReferences::contains)
+				.filter(this.referencedVariables::contains)
 				.collect(Collectors.toList());
-		this.usedGlobals.addAll(globals);
+		this.referencedGlobals.addAll(globals);
 	}
 
 	public void linkVarToClass(String alias, Class c) {
@@ -95,24 +77,8 @@ public class Class {
 	}
 
 	private Boolean isAliasReferenced(String alias) {
-		return this.variables.contains(alias) || this.parents.contains(alias)
-				|| this.varReferences.contains(alias) || this.methodReferences.contains(alias);
-	}
-
-	public void addMethod(Method method) {
-		this.methods.put(method.getName(), method);
-	}
-
-	public void addVariable(String varName) {
-		this.variables.add(varName);
-	}
-
-	public void addVarReference(String name) {
-		this.varReferences.add(name);
-	}
-
-	public void addMethodReference(String name) {
-		this.methodReferences.add(name);
+		return this.definedVariables.contains(alias) || this.parents.contains(alias)
+				|| this.referencedVariables.contains(alias) || this.calledMethods.contains(alias);
 	}
 
 	public String getName() {
@@ -139,92 +105,25 @@ public class Class {
 		return this.getVarsStartingWith("self.");
 	}
 
-	public Set<String> getDefinedGlobals() {
-		return this.definedGlobals;
-	}
-
 	public Set<String> getStaticVariables() {
 		return this.getVarsStartingWith(this.name + ".");
-	}
-
-	public Set<String> getVariables() {
-		return this.variables;
-	}
-
-	public Set<String> getUsedGlobals() {
-		return this.usedGlobals;
 	}
 
 	public Set<Class> getDependencies() {
 		return this.dependentOn.values().stream().collect(Collectors.toSet());
 	}
 
-	public Set<Method> getMethods() {
-		return this.methods.values().stream().collect(Collectors.toSet());
-	}
-
-	public Boolean hasNoMethods() {
-		return this.methods.size() == 0;
-	}
-
-	public Boolean usesGlobals() {
-		return this.usedGlobals.size() > 0;
-	}
-
-	public Integer methodCount() {
-		return this.methods.size();
-	}
-
-	public Integer publicMethodCount() {
-		Long l = this.methods.values().stream()
-				.filter(Method::isPrivate)
-				.count();
-		return l.intValue();
+	public Map<String, Class> getNamedDependencies() {
+		return this.dependentOn;
 	}
 
 	public Integer parentsCount() {
 		return this.parents.size();
 	}
 
-	public Integer accessorsCount() {
-		Long c = this.methods.values().stream()
-				.filter(Method::isAccessor)
-				.count();
-		return c.intValue();
-	}
-
-	public Integer usedGlobalsCount() {
-		return this.usedGlobals.size();
-	}
-
-	public Integer definedGlobalsCount() {
-		return this.definedGlobals.size();
-	}
-
-	public Integer variablesCount() {
-		return this.variables.size();
-	}
-
-	public Integer methodsWithNoParamsCount() {
-		Long count = this.methods.values().stream()
-				.filter(m -> m.paramCount() == 0)
-				.count();
-		return count.intValue();
-	}
-
-	public Integer publicVariablesCount() {
-		Long count = this.getPublicVariablesStream().count();
-		return count.intValue();
-	}
-
-	public Integer privateVariablesCount() {
-		Long count = this.getPrivateVariablesStream().count();
-		return count.intValue();
-	}
-
 	private Set<String> getVarsStartingWith(String prefix) {
 		Set<String> vars = new HashSet<>();
-		for (String s : this.variables) {
+		for (String s : this.definedVariables) {
 			if (s.startsWith(prefix)) {
 				s = s.replaceFirst(prefix, "");
 				vars.add(s);
@@ -238,30 +137,9 @@ public class Class {
 				this.publicMethodCount() == 1;
 	}
 
-	private Integer getNumberOfAccessors() {
-		Long count = this.methods.values().stream()
-				.filter(m -> m.isAccessor())
-				.count();
-		return count.intValue();
-	}
-
-	private Boolean isPrivateVariable(String varName) {
-		return varName.startsWith("_");
-	}
-
-	private Stream<String> getPrivateVariablesStream() {
-		return this.variables.stream()
-				.filter(v -> this.isPrivateVariable(v));
-	}
-
-	private Stream<String> getPublicVariablesStream() {
-		return this.variables.stream()
-				.filter(v -> !this.isPrivateVariable(v));
-	}
-
 	private Integer calculateLcom() {
 		int intersectDifference = 0; // = not intersecting amount - intersecting amount
-		List<Method> ms = this.methods.values().stream().collect(Collectors.toList());
+		List<Method> ms = this.definedMethods.values().stream().collect(Collectors.toList());
 		for (int i = 0; i < ms.size(); i++) {
 			for (int j = i + 1; j > i && j < ms.size(); j++) {
 				intersectDifference += this.lcomIntersectDifference(ms.get(i), ms.get(j));

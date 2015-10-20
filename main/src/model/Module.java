@@ -5,13 +5,11 @@ import java.util.*;
 /**
  * Created by Nik on 21-07-2015
  */
-public class Module {
+public class Module extends ContentContainer {
 
 	private final String filePath;
 	private final String name;
 	private final String error;
-	private final Set<String> variables;
-	private final Set<String> definedGlobals;
 	private final Map<String, Class> classes;
 	private final Map<String, Class> classImports;
 	private final Map<String, Module> moduleImports;
@@ -20,14 +18,12 @@ public class Module {
 		this.filePath = filePath;
 		this.name = name;
 		this.error = error;
-		this.variables = new HashSet<>();
-		this.definedGlobals = new HashSet<>();
 		this.classes = new LinkedHashMap<>();
 		this.classImports = new HashMap<>();
 		this.moduleImports = new HashMap<>();
 	}
 
-	public void link() {
+	public void resolveImportsAndDependencies() {
 		for (Class c : this.classes.values()) {
 			this.resolveClassImports(c);
 			this.resolveModuleImports(c);
@@ -40,7 +36,7 @@ public class Module {
 		Set<String> moduleGlobals = new HashSet<>();
 		for (String alias : this.moduleImports.keySet()) {
 			Module m = this.moduleImports.get(alias);
-			m.getVariables().forEach(var -> moduleVars.add(alias + "." + var));
+			m.getDefinedVariables().forEach(var -> moduleVars.add(alias + "." + var));
 			m.getDefinedGlobals().forEach(var -> moduleGlobals.add(alias + "." + var));
 		}
 		this.classes.values().forEach(c -> c.registerGlobals(moduleVars));
@@ -80,24 +76,8 @@ public class Module {
 		this.classes.put(c.getName(), c);
 	}
 
-	public void addGlobal(String var) {
-		this.definedGlobals.add(var);
-	}
-
 	public boolean containsClass(String name) {
 		return this.classes.containsKey(name);
-	}
-
-	public void addVariable(String var) {
-		this.variables.add(var);
-	}
-
-	public Set<String> getVariables() {
-		return this.variables;
-	}
-
-	public Set<String> getDefinedGlobals() {
-		return this.definedGlobals;
 	}
 
 	public Class getClass(String name) {

@@ -110,7 +110,7 @@ public class Converter {
 		clsEnt.setNrParents(c.parentsCount().shortValue());
 		clsEnt.setNrPrivateVars(c.privateVariablesCount().shortValue());
 		clsEnt.setNrPublicVars(c.publicVariablesCount().shortValue());
-		clsEnt.setNrUsedGlobals(c.usedGlobalsCount().shortValue());
+		clsEnt.setNrUsedGlobals(c.referencedGlobalsCount().shortValue());
 		return clsEnt;
 	}
 

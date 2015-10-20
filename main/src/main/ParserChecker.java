@@ -1,11 +1,8 @@
 package main;
 
-import gen.PythonLexer;
-import gen.PythonParser;
-import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import process.File2Tree;
 import util.FileHelper;
-import util.FileOpener;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,16 +34,7 @@ public class ParserChecker {
 		for (String fileName : allFiles) {
 			System.out.println(fileName);
 			try {
-				FileOpener fo = new FileOpener(fileName);
-				String contents = fo.getTrimmedContents();
-				org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
-				PythonLexer lexer = new PythonLexer(input);
-
-				org.antlr.v4.runtime.CommonTokenStream tokens = new org.antlr.v4.runtime.CommonTokenStream(lexer);
-				PythonParser parser = new PythonParser(tokens);
-				parser.setErrorHandler(new BailErrorStrategy());
-
-				ParserRuleContext context = parser.file_input();
+				ParserRuleContext context = File2Tree.getParseTree(fileName);
 			}
 			catch (Exception ex) {
 				ParserChecker.handleException(ex);
