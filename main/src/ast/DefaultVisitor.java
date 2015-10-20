@@ -138,13 +138,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(AssignExpr n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
-	public T visit(AssignYield n) {
+	public T visit(Assign n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -611,14 +605,9 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		}
 	}
 
-	public void visitChildren(AssignExpr n) {
-		n.getElements().forEach(t -> t.accept(this));
+	public void visitChildren(Assign n) {
+		n.getExprElements().forEach(t -> t.accept(this));
 		n.getYieldElements().forEach(t -> t.accept(this));
-	}
-
-	public void visitChildren(AssignYield n) {
-		n.getElements().forEach(t -> t.accept(this));
-		n.getYield().accept(this);
 	}
 
 	public void visitChildren(ClassDef n) {

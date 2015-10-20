@@ -76,8 +76,7 @@ public interface Visitor<T> {
 
 	//............................................... SIMPLE ..............................................\\
 	T visit(Assert n);
-	T visit(AssignExpr n);
-	T visit(AssignYield n);
+	T visit(Assign n);
 	T visit(Delete n);
 	T visit(Exec n);
 	T visit(ExprList n);

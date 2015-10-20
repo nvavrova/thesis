@@ -140,14 +140,7 @@ public class ModelBuilder {
 		}
 
 		@Override
-		public void visitChildren(AssignYield n) {
-			this.inAssign = true;
-			super.visitChildren(n);
-			this.inAssign = false;
-		}
-
-		@Override
-		public void visitChildren(AssignExpr n) {
+		public void visitChildren(Assign n) {
 			this.inAssign = true;
 			super.visitChildren(n);
 			this.inAssign = false;

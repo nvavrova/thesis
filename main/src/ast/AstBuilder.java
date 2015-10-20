@@ -329,14 +329,19 @@ public class AstBuilder {
 
 			//single assign (augassign)
 			if (ctx.assignYield != null) {
-				Yield yield = (Yield) ctx.assignYield.accept(this);
-				return new AssignYield(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), yield);
+				List<Yield> yieldElements = new ArrayList<>();
+				yieldElements.add((Yield) ctx.assignYield.accept(this));
+
+				List<ExprList> exprElements = new ArrayList<>();
+				exprElements.add((ExprList) ctx.target.accept(this));
+
+				return new Assign(this.getLocInfo(ctx), operator, exprElements, yieldElements);
 			}
 			if (ctx.assignTest != null) {
-				List<ExprList> targets = new ArrayList<>();
-				targets.add((ExprList) ctx.target.accept(this));
-				targets.add((ExprList) ctx.assignTest.accept(this));
-				return new AssignExpr(this.getLocInfo(ctx), operator, targets, Collections.emptyList());
+				List<ExprList> exprElements = new ArrayList<>();
+				exprElements.add((ExprList) ctx.target.accept(this));
+				exprElements.add((ExprList) ctx.assignTest.accept(this));
+				return new Assign(this.getLocInfo(ctx), operator, exprElements, Collections.emptyList());
 			}
 
 			//no assign
@@ -345,13 +350,13 @@ public class AstBuilder {
 			}
 
 			//chained assign
-			List<ExprList> elements = ctx.testlist_star_expr().stream()
+			List<ExprList> exprElements = ctx.testlist_star_expr().stream()
 					.map(a -> (ExprList) a.accept(this))
 					.collect(Collectors.toList());
 			List<Yield> yieldElements = ctx.yield_expr().stream()
 					.map(a -> (Yield) a.accept(this))
 					.collect(Collectors.toList());
-			return new AssignExpr(this.getLocInfo(ctx), operator, elements, yieldElements);
+			return new Assign(this.getLocInfo(ctx), operator, exprElements, yieldElements);
 		}
 
 
