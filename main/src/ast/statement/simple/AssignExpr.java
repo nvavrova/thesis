@@ -2,7 +2,7 @@ package ast.statement.simple;
 
 import ast.Visitor;
 import ast.expression.ExprList;
-import ast.statement.Statement;
+import ast.statement.flow.Yield;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
@@ -12,20 +12,16 @@ import java.util.List;
  */
 public class AssignExpr extends Assign {
 
-	private final Statement source;
+	private final List<Yield> yieldElements;
 
-	public AssignExpr(@NotNull Integer locInfo, String operator, ExprList targets, @NotNull Statement source) {
-		super(locInfo, operator, targets);
-		this.source = source;
+	public AssignExpr(@NotNull Integer locInfo, @NotNull String operator, @NotNull List<ExprList> elements,
+	                  @NotNull List<Yield> yieldElements) {
+		super(locInfo, operator, elements);
+		this.yieldElements = yieldElements;
 	}
 
-	public AssignExpr(@NotNull Integer locInfo, String operator, List<ExprList> targets, @NotNull Statement source) {
-		super(locInfo, operator, targets);
-		this.source = source;
-	}
-
-	public Statement getSource() {
-		return this.source;
+	public List<Yield> getYieldElements() {
+		return this.yieldElements;
 	}
 
 	@Override

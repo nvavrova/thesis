@@ -12,26 +12,26 @@ import java.util.List;
 public abstract class Assign extends ast.statement.Statement {
 
 	private final String operator;
-	private final List<ExprList> targets;
+	private final List<ExprList> elements;
 
-	public Assign(@NotNull Integer locInfo, @NotNull String operator, @NotNull ExprList targets) {
+	public Assign(@NotNull Integer locInfo, @NotNull String operator, @NotNull ExprList elements) {
 		super(locInfo);
 		this.operator = operator;
-		this.targets = new ArrayList<>();
-		this.targets.add(targets);
+		this.elements = new ArrayList<>();
+		this.elements.add(elements);
 	}
 
-	public Assign(@NotNull Integer locInfo, @NotNull String operator, @NotNull List<ExprList> targets) {
+	public Assign(@NotNull Integer locInfo, @NotNull String operator, @NotNull List<ExprList> elements) {
 		super(locInfo);
 		this.operator = operator;
-		this.targets = targets;
+		this.elements = elements;
 	}
 
 	public String getOperator() {
 		return this.operator;
 	}
 
-	public List<ExprList> getTargets() {
-		return this.targets;
+	public List<ExprList> getElements() {
+		return this.elements;
 	}
 }

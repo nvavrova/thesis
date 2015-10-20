@@ -41,7 +41,7 @@ public class Project {
 		return this.folder.getAbsolutePath();
 	}
 
-	public void registerModule(Module m) {
+	public void addModule(Module m) {
 		String modulePath = m.getFilePath();
 		this.modules.put(modulePath, m);
 	}

@@ -13,8 +13,8 @@ public class ModelBuilderTest {
 
 	@Test
 	public void collectClasses() {
-		Map<String, Class> classes = TestHelper.getClasses("collect_classes/collect_classes.py");
-		assert (classes.size() == 7);
+		Map<String, Class> classes = TestHelper.getClasses("collect_classes");
+		assert (classes.size() == 10);
 
 		assert (classes.keySet().contains("First"));
 		assert (classes.keySet().contains("Second"));
@@ -23,6 +23,9 @@ public class ModelBuilderTest {
 		assert (classes.keySet().contains("Second.Third.Fourth.Fifth"));
 		assert (classes.keySet().contains("Second.Third.Sixth"));
 		assert (classes.keySet().contains("Seventh"));
+		assert (classes.keySet().contains("First2"));
+		assert (classes.keySet().contains("First2.Second2"));
+		assert (classes.keySet().contains("Third2"));
 	}
 
 	@Test
@@ -65,15 +68,17 @@ public class ModelBuilderTest {
 		Set<String> firstTestCls = classes.get("FirstTestCls").getUsedGlobals();
 		Set<String> secondTestCls = classes.get("SecondTestCls").getUsedGlobals();
 
-		assert (usrCls.size() == 1);
+		assert (usrCls.size() == 2);
 		assert (usrCls.contains("s.var"));
+		assert (usrCls.contains("s.non_cls_glob"));
 
-		assert (firstTestCls.size() == 1);
-		assert (firstTestCls.contains("sc.first"));
+		assert (firstTestCls.size() == 0);
+		assert (!firstTestCls.contains("sc.first"));
 
-		assert (secondTestCls.size() == 2);
-		assert (secondTestCls.contains("sc.first"));
-		assert (secondTestCls.contains("sc.third"));
+		assert (secondTestCls.size() == 1);
+		assert (secondTestCls.contains("sc.cls_glob"));
+		assert (!secondTestCls.contains("sc.first"));
+		assert (!secondTestCls.contains("sc.third"));
 		assert (!secondTestCls.contains("sc.met"));
 	}
 

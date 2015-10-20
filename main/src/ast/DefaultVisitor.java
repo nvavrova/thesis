@@ -612,12 +612,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(AssignExpr n) {
-		n.getSource().accept(this);
-		n.getTargets().forEach(t -> t.accept(this));
+		n.getElements().forEach(t -> t.accept(this));
+		n.getYieldElements().forEach(t -> t.accept(this));
 	}
 
 	public void visitChildren(AssignYield n) {
-		n.getTargets().forEach(t -> t.accept(this));
+		n.getElements().forEach(t -> t.accept(this));
 		n.getYield().accept(this);
 	}
 

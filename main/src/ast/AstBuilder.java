@@ -1,27 +1,29 @@
 package ast;
 
 import ast.argument.*;
-import ast.argument.Argument;
-import ast.argument.SimpleArgument;
+import ast.expression.Conditional;
+import ast.expression.Expr;
+import ast.expression.ExprList;
+import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
 import ast.expression.compiter.CompIter;
-import ast.expression.*;
+import ast.expression.nocond.*;
+import ast.expression.nocond.atom.*;
+import ast.expression.nocond.atom.comprehension.CondComprehension;
+import ast.expression.nocond.atom.comprehension.EnumComprehension;
 import ast.expression.nocond.atom.maker.DictMaker;
 import ast.expression.nocond.atom.maker.SetMaker;
+import ast.expression.nocond.atom.numeric.Float;
 import ast.expression.nocond.atom.numeric.Imaginary;
 import ast.expression.nocond.atom.numeric.Int;
+import ast.expression.nocond.atom.numeric.Long;
+import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
 import ast.expression.nocond.bitwise.Xor;
-import ast.expression.nocond.atom.comprehension.*;
 import ast.expression.nocond.logical.And;
 import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.logical.Or;
-import ast.expression.nocond.*;
-import ast.expression.nocond.atom.*;
-import ast.expression.nocond.atom.numeric.Float;
-import ast.expression.nocond.atom.numeric.Long;
-import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
 import ast.expression.nocond.trailer.*;
 import ast.expression.nocond.unary.Invert;
 import ast.expression.nocond.unary.Minus;
@@ -30,7 +32,6 @@ import ast.param.*;
 import ast.path.DottedPath;
 import ast.path.Path;
 import ast.path.SimplePath;
-import ast.statement.Statement;
 import ast.statement.compound.*;
 import ast.statement.flow.*;
 import ast.statement.simple.*;
@@ -326,28 +327,31 @@ public class AstBuilder {
 				operator = wrap.getItem();
 			}
 
-			//single assign
+			//single assign (augassign)
 			if (ctx.assignYield != null) {
 				Yield yield = (Yield) ctx.assignYield.accept(this);
 				return new AssignYield(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), yield);
 			}
 			if (ctx.assignTest != null) {
-				Statement source = (Statement) ctx.assignTest.accept(this);
-				return new AssignExpr(this.getLocInfo(ctx), operator, (ExprList) ctx.target.accept(this), source);
+				List<ExprList> targets = new ArrayList<>();
+				targets.add((ExprList) ctx.target.accept(this));
+				targets.add((ExprList) ctx.assignTest.accept(this));
+				return new AssignExpr(this.getLocInfo(ctx), operator, targets, Collections.emptyList());
 			}
 
-			//(possible) chained assign
+			//no assign
 			if (ctx.chainedAssign.size() == 1) {
 				return ctx.chainedAssign.get(0).accept(this);
 			}
 
-			List<ParserRuleContext> targetsCtx = ctx.chainedAssign.subList(0, ctx.chainedAssign.size() - 1);
-			List<ExprList> targets = targetsCtx.stream()
+			//chained assign
+			List<ExprList> elements = ctx.testlist_star_expr().stream()
 					.map(a -> (ExprList) a.accept(this))
 					.collect(Collectors.toList());
-
-			ParserRuleContext sourceCtx = ctx.chainedAssign.get(ctx.chainedAssign.size() - 1);
-			return new AssignExpr(this.getLocInfo(ctx), operator, targets, (Statement) sourceCtx.accept(this));
+			List<Yield> yieldElements = ctx.yield_expr().stream()
+					.map(a -> (Yield) a.accept(this))
+					.collect(Collectors.toList());
+			return new AssignExpr(this.getLocInfo(ctx), operator, elements, yieldElements);
 		}
 
 
@@ -1006,8 +1010,8 @@ public class AstBuilder {
 				return ctx.dictorsetmaker().accept(this);
 			}
 			if (ctx.testlist() != null) {
-				ExprList l = (ExprList) ctx.testlist().accept(this);
-				return new StrConversion(this.getLocInfo(ctx), l);
+				ExprList exprList = (ExprList) ctx.testlist().accept(this);
+				return new StrConversion(this.getLocInfo(ctx), exprList);
 			}
 			if (ctx.name() != null) {
 				return ctx.name().accept(this);

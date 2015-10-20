@@ -3,7 +3,7 @@ package process;
 import model.Class;
 import model.Method;
 import model.Project;
-import util.Helper;
+import util.LexicalHelper;
 
 /**
  * Created by Nik on 15-10-2015
@@ -55,11 +55,11 @@ public class Analyzer {
 	}
 
 	private Boolean hasControllerName(String name) {
-		return Helper.isControllerName(name);
+		return LexicalHelper.isControllerName(name);
 	}
 
 	private Boolean hasProceduralName(String name) {
-		return Helper.isProceduralName(name);
+		return LexicalHelper.isProceduralName(name);
 	}
 
 
@@ -87,7 +87,7 @@ public class Analyzer {
 
 	private boolean hasLongMethod(Class cls) {
 		for (Method m : cls.getMethods()) {
-			if (m.isLongMethod()) {
+			if (this.isLong(m)) {
 				return true;
 			}
 		}
@@ -108,7 +108,7 @@ public class Analyzer {
 
 	private Boolean hasControllerMethods(Class cls) {
 		for (Method m : cls.getMethods()) {
-			if (m.isController()) {
+			if (this.isController(m)) {
 				return true;
 			}
 		}
@@ -122,5 +122,17 @@ public class Analyzer {
 				.count();
 		return count.intValue();
 	}
+
+
+	//                   METHODS
+	public boolean isLong(Method m) {
+		return m.getLoc() > 100;
+	}
+
+	public boolean isController(Method m) {
+		return this.hasControllerName(m.getName());
+	}
+
+
 
 }

@@ -11,12 +11,9 @@ public class Class {
 
 	private final String name;
 	private final Module module;
-
 	private final Integer loc;
-
-	private final Map<String, Class> dependentOn;
-
 	private final List<String> parents;
+	private final Map<String, Class> dependentOn;
 	private final Map<String, Method> methods;
 	private final Set<String> variables;
 	private final Set<String> definedGlobals;
@@ -27,12 +24,9 @@ public class Class {
 	public Class(String name, Module module, Integer loc, List<String> parents) {
 		this.name = name;
 		this.module = module;
-
 		this.loc = loc;
-
-		this.dependentOn = new HashMap<>();
-
 		this.parents = parents;
+		this.dependentOn = new HashMap<>();
 		this.methods = new HashMap<>();
 		this.variables = new HashSet<>();
 		this.definedGlobals = new HashSet<>();
@@ -51,23 +45,12 @@ public class Class {
 		this.registerModuleDepGlobals(moduleVars);
 	}
 
-	public Integer getAccessorCount() {
-		Long c = this.methods.values().stream()
-				.filter(Method::isAccessor)
-				.count();
-		return c.intValue();
-	}
-
-	//TODO: check this again
 	private void registerClassDepGlobals() {
-//		for (String alias : this.dependentOn.keySet()) {
-//			Class c = this.dependentOn.get(alias);
-//		    this.addGlobalUsesFromClass(alias, c.getStaticVariables());
-//		}
 		for (String alias : this.dependentOn.keySet()) {
 			Class c = this.dependentOn.get(alias);
-			this.addGlobalUsesFromClass(alias, c.getStaticVariables());
-			this.addGlobalDefinitions(alias, c);
+			this.addGlobalUsesFromClass(alias, c.getDefinedGlobals());
+//			this.addGlobalUsesFromClass(alias, c.getStaticVariables());
+//			this.addGlobalDefinitions(alias, c);
 		}
 	}
 
@@ -78,24 +61,24 @@ public class Class {
 		this.usedGlobals.addAll(globals);
 	}
 
-	private void addGlobalDefinitions(String alias, Class c) {
-		this.definedGlobals.addAll(
-				this.getInstanceVariables().stream()
-						.filter(var -> c.referencesVar(alias + "." + var))
-						.map(var -> "self." + var)
-						.collect(Collectors.toSet())
-		);
-		this.definedGlobals.addAll(
-				this.getStaticVariables().stream()
-						.filter(var -> c.referencesVar(alias + "." + var))
-						.map(var -> this.getName() + "." + var)
-						.collect(Collectors.toSet())
-		);
-	}
-
-	private boolean referencesVar(String varName) {
-		return this.varReferences.contains(varName);
-	}
+//	private void addGlobalDefinitions(String clsAlias, Class c) {
+//		this.definedGlobals.addAll(
+//				this.getInstanceVariables().stream()
+//						.filter(var -> c.referencesVar(clsAlias + "." + var))
+//						.map(var -> "self." + var)
+//						.collect(Collectors.toSet())
+//		);
+//		this.definedGlobals.addAll(
+//				this.getStaticVariables().stream()
+//						.filter(var -> c.referencesVar(clsAlias + "." + var))
+//						.map(var -> this.getName() + "." + var)
+//						.collect(Collectors.toSet())
+//		);
+//	}
+//
+//	private Boolean referencesVar(String varName) {
+//		return this.varReferences.contains(varName);
+//	}
 
 	private void addGlobalUsesFromClass(String alias, Set<String> vars) {
 		List<String> globals = vars.stream()
@@ -111,22 +94,13 @@ public class Class {
 		}
 	}
 
-	private boolean isAliasReferenced(String alias) {
+	private Boolean isAliasReferenced(String alias) {
 		return this.variables.contains(alias) || this.parents.contains(alias)
 				|| this.varReferences.contains(alias) || this.methodReferences.contains(alias);
 	}
 
 	public void addMethod(Method method) {
-		this.methods.put(name, method);
-	}
-
-
-	public boolean hasNoMethods() {
-		return this.methods.size() == 0;
-	}
-
-	public Method getLastAddedMethod() {
-		return this.methods.get(this.methods.size() - 1);
+		this.methods.put(method.getName(), method);
 	}
 
 	public void addVariable(String varName) {
@@ -157,39 +131,20 @@ public class Class {
 		return this.calculateLcom();
 	}
 
-	public Integer parentsCount() {
-		return this.parents.size();
-	}
-
 	public List<String> getParents() {
 		return this.parents;
-	}
-
-	public Integer usedGlobalsCount() {
-		return this.usedGlobals.size();
-	}
-
-	public Integer definedGlobalsCount() {
-		return this.definedGlobals.size();
 	}
 
 	public Set<String> getInstanceVariables() {
 		return this.getVarsStartingWith("self.");
 	}
 
-	public Set<String> getStaticVariables() {
-		return this.getVarsStartingWith(this.name + ".");
+	public Set<String> getDefinedGlobals() {
+		return this.definedGlobals;
 	}
 
-	private Set<String> getVarsStartingWith(String prefix) {
-		Set<String> vars = new HashSet<>();
-		for (String s : this.variables) {
-			if (s.startsWith(prefix)) {
-				s = s.replaceFirst(prefix, "");
-				vars.add(s);
-			}
-		}
-		return vars;
+	public Set<String> getStaticVariables() {
+		return this.getVarsStartingWith(this.name + ".");
 	}
 
 	public Set<String> getVariables() {
@@ -204,6 +159,18 @@ public class Class {
 		return this.dependentOn.values().stream().collect(Collectors.toSet());
 	}
 
+	public Set<Method> getMethods() {
+		return this.methods.values().stream().collect(Collectors.toSet());
+	}
+
+	public Boolean hasNoMethods() {
+		return this.methods.size() == 0;
+	}
+
+	public Boolean usesGlobals() {
+		return this.usedGlobals.size() > 0;
+	}
+
 	public Integer methodCount() {
 		return this.methods.size();
 	}
@@ -215,17 +182,32 @@ public class Class {
 		return l.intValue();
 	}
 
+	public Integer parentsCount() {
+		return this.parents.size();
+	}
+
+	public Integer accessorsCount() {
+		Long c = this.methods.values().stream()
+				.filter(Method::isAccessor)
+				.count();
+		return c.intValue();
+	}
+
+	public Integer usedGlobalsCount() {
+		return this.usedGlobals.size();
+	}
+
+	public Integer definedGlobalsCount() {
+		return this.definedGlobals.size();
+	}
+
 	public Integer variablesCount() {
 		return this.variables.size();
 	}
 
-	public Set<Method> getMethods() {
-		return this.methods.values().stream().collect(Collectors.toSet());
-	}
-
 	public Integer methodsWithNoParamsCount() {
 		Long count = this.methods.values().stream()
-				.filter(m -> m.hasNoParams())
+				.filter(m -> m.paramCount() == 0)
 				.count();
 		return count.intValue();
 	}
@@ -240,7 +222,18 @@ public class Class {
 		return count.intValue();
 	}
 
-	private boolean privateFieldsWithOnePublicMethod() {
+	private Set<String> getVarsStartingWith(String prefix) {
+		Set<String> vars = new HashSet<>();
+		for (String s : this.variables) {
+			if (s.startsWith(prefix)) {
+				s = s.replaceFirst(prefix, "");
+				vars.add(s);
+			}
+		}
+		return vars;
+	}
+
+	private Boolean privateFieldsWithOnePublicMethod() {
 		return //this.privateVariablesCount() > 10 &&
 				this.publicMethodCount() == 1;
 	}
@@ -252,11 +245,7 @@ public class Class {
 		return count.intValue();
 	}
 
-	public Boolean usesGlobals() {
-		return this.usedGlobals.size() > 0;
-	}
-
-	private boolean isPrivateVariable(String varName) {
+	private Boolean isPrivateVariable(String varName) {
 		return varName.startsWith("_");
 	}
 

@@ -89,7 +89,7 @@ public class StatsCollector {
 				line.add(c.getName());
 				line.add(String.valueOf(c.privateVariablesCount()));
 				line.add(String.valueOf(c.publicVariablesCount()));
-				line.add(String.valueOf(c.getAccessorCount()));
+				line.add(String.valueOf(c.accessorsCount()));
 				line.add(String.valueOf(c.getLcom()));
 				line.add(String.valueOf(c.getLoc()));
 				line.add(String.valueOf(c.parentsCount()));

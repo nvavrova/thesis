@@ -11,6 +11,7 @@ public class Module {
 	private final String name;
 	private final String error;
 	private final Set<String> variables;
+	private final Set<String> definedGlobals;
 	private final Map<String, Class> classes;
 	private final Map<String, Class> classImports;
 	private final Map<String, Module> moduleImports;
@@ -20,6 +21,7 @@ public class Module {
 		this.name = name;
 		this.error = error;
 		this.variables = new HashSet<>();
+		this.definedGlobals = new HashSet<>();
 		this.classes = new LinkedHashMap<>();
 		this.classImports = new HashMap<>();
 		this.moduleImports = new HashMap<>();
@@ -35,11 +37,14 @@ public class Module {
 
 	public void resolveGlobalUse() {
 		Set<String> moduleVars = new HashSet<>();
+		Set<String> moduleGlobals = new HashSet<>();
 		for (String alias : this.moduleImports.keySet()) {
 			Module m = this.moduleImports.get(alias);
 			m.getVariables().forEach(var -> moduleVars.add(alias + "." + var));
+			m.getDefinedGlobals().forEach(var -> moduleGlobals.add(alias + "." + var));
 		}
 		this.classes.values().forEach(c -> c.registerGlobals(moduleVars));
+		this.classes.values().forEach(c -> c.registerGlobals(moduleGlobals));
 	}
 
 	private void resolveClassImports(Class c) {
@@ -71,8 +76,12 @@ public class Module {
 		this.classImports.put(name, c);
 	}
 
-	public void registerClass(Class c) {
+	public void addClass(Class c) {
 		this.classes.put(c.getName(), c);
+	}
+
+	public void addGlobal(String var) {
+		this.definedGlobals.add(var);
 	}
 
 	public boolean containsClass(String name) {
@@ -85,6 +94,10 @@ public class Module {
 
 	public Set<String> getVariables() {
 		return this.variables;
+	}
+
+	public Set<String> getDefinedGlobals() {
+		return this.definedGlobals;
 	}
 
 	public Class getClass(String name) {

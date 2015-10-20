@@ -36,7 +36,7 @@ public class ModelBuilder {
 				.filter(m -> oldTrees.containsKey(m.getFilePath()) && !this.project.hasModule(m.getFilePath()))
 				.map(m -> oldProject.getModule(m.getFilePath()))
 				.collect(Collectors.toSet());
-		oldModules.forEach(this.project::registerModule);
+		oldModules.forEach(this.project::addModule);
 
 		//link
 		LinkingVisitor linkingVisitor = new LinkingVisitor(this.project);
@@ -115,7 +115,7 @@ public class ModelBuilder {
 
 		public void build(Collection<ast.Module> trees) {
 			for (ast.Module m : trees) {
-				this.currentFilePath = m.getFilePath(); //TODO: fix null pointer here
+				this.currentFilePath = m.getFilePath();
 				m.accept(this);
 			}
 		}
@@ -124,7 +124,7 @@ public class ModelBuilder {
 		public void visitChildren(ast.Module n) {
 			String filePath = n.getFilePath();
 			model.Module module = new model.Module(filePath, n.getName(), StringHelper.implode(n.getErrors(), "\n"));
-			this.project.registerModule(module);
+			this.project.addModule(module);
 			super.visitChildren(n);
 		}
 
@@ -132,6 +132,9 @@ public class ModelBuilder {
 		public Void visit(Global n) {
 			if (this.inClass()) {
 				n.getIdentifiers().forEach(i -> this.getCurrentClass().addGlobal(i.getValue()));
+			}
+			else {
+				n.getIdentifiers().forEach(i -> this.getCurrentModule().addGlobal(i.getValue()));
 			}
 			return null;
 		}
@@ -164,7 +167,7 @@ public class ModelBuilder {
 
 			model.Module currentModule = this.getCurrentModule();
 			Class c = new Class(name, currentModule, locInfo, parents);
-			currentModule.registerClass(c);
+			currentModule.addClass(c);
 
 			this.classes.push(c);
 			this.visitChildren(n);
@@ -202,16 +205,13 @@ public class ModelBuilder {
 			if (n.hasReturnType()) {
 				n.getReturnType().accept(this);
 			}
-//			n.getName().accept(this);
+			//DON'T visit the name, otherwise it gets added as a variable
 			n.getParams().accept(this);
 			n.getDecorators().forEach(d -> d.accept(this));
 		}
 
 		@Override
 		public Void visit(Identifier n) {
-			if (n.getValue().equals("ModifiedCls")) {
-				System.out.print("");
-			}
 			this.addVar(n.getValue());
 			return null;
 		}

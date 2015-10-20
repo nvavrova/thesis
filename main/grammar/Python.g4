@@ -292,12 +292,9 @@ expr_stmt returns [List<ParserRuleContext> chainedAssign]
 @init {
     $chainedAssign = new ArrayList<>();
 }
- : target=testlist_star_expr { $chainedAssign.add($target.ctx); } ( augassign ( assignYield=yield_expr | assignTest=testlist)
-                                                                  | ( '=' ( ayi=yield_expr { $chainedAssign.add($ayi.ctx); }
-                                                                          | atsl=testlist_star_expr { $chainedAssign.add($atsl.ctx); }
-                                                                          )
-                                                                    )*
-                                                                  )
+ : target=testlist_star_expr ( augassign ( assignYield=yield_expr | assignTest=testlist)
+                             | ( '=' ( ayi=yield_expr | atsl=testlist_star_expr ) )*
+                             )
  ;
 
 /// testlist_star_expr: (test|star_expr) (',' (test|star_expr))* [',']

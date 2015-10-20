@@ -3,6 +3,7 @@ package tests;
 import ast.AstBuilder;
 import gen.PythonLexer;
 import gen.PythonParser;
+import process.File2AstConverter;
 import process.VersionSwitcher;
 import model.Class;
 import model.ModelBuilder;
@@ -74,9 +75,12 @@ public class TestHelper {
 
 
 	private static Project getProject(String parent, List<String> fileNames) {
-		List<ast.Module> trees = new ArrayList<>();
-		fileNames.stream().forEach(f -> trees.add(parseFile(f)));
-		ModelBuilder modelBuilder = new ModelBuilder(new File(parent), trees);
+//		List<ast.Module> trees = new ArrayList<>();
+//		fileNames.stream().forEach(f -> trees.add(parseFile(f)));
+//		ModelBuilder modelBuilder = new ModelBuilder(new File(parent), trees);
+//		return modelBuilder.getProject();
+		Map<String, ast.Module> trees = File2AstConverter.getTrees(fileNames);
+		ModelBuilder modelBuilder = new ModelBuilder(new File(parent), trees.values());
 		return modelBuilder.getProject();
 	}
 }

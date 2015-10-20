@@ -1,7 +1,6 @@
 package model;
 
-import util.Helper;
-
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,27 +45,15 @@ public class Method {
 		return this.usedClassVars;
 	}
 
-	public boolean isAccessor() {
+	public Boolean isAccessor() {
 		return this.isAccessor;
 	}
 
-	public boolean isController() {
-		return Helper.isControllerName(this.name);
+	public Boolean hasVariableIntersection(Method m) {
+		return !Collections.disjoint(this.usedClassVars, m.getUsedClassVars());
 	}
 
-	public boolean hasVariableIntersection(Method m) {
-		return !Helper.areSetsDisjoint(this.usedClassVars, m.getUsedClassVars());
-	}
-
-	public boolean isLongMethod() {
-		return this.loc > 100;
-	}
-
-	public boolean hasNoParams() {
-		return this.params.size() == 0;
-	}
-
-	public boolean isPrivate() {
+	public Boolean isPrivate() {
 		return this.name.startsWith("__") && !this.name.endsWith("__");
 	}
 }
