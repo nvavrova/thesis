@@ -13,3 +13,9 @@ class SrcCls():
 
     def met(self):
         return self.first.get(0)
+
+    def met2(self):
+        self.x = var
+
+    def met3(self):
+        self.y = non_cls_glob

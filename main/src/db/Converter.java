@@ -68,7 +68,8 @@ public class Converter {
 	public static Map<Method, MethodEntity> convertMethods(Map<Class, ClassEntity> classes, Set<Method> methods) {
 		Map<Method, MethodEntity> methodMap = new HashMap<>();
 		for (Method m : methods) {
-			methodMap.put(m, convert(m, classes.get(m.getCls())));
+			//TODO: fix this
+//			methodMap.put(m, convert(m, classes.get(m.getCls())));
 		}
 		return methodMap;
 	}

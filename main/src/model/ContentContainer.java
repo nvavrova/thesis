@@ -1,9 +1,6 @@
 package model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -18,14 +15,17 @@ public abstract class ContentContainer {
 	//variables
 	protected final Set<String> definedVariables;
 	protected final Set<String> referencedVariables;
-	protected final Map<String, Set<String>> assigns;
 
 	//methods
 	protected final Map<String, Method> definedMethods;
 	protected final Set<String> calledMethods;
 
-	//children
-	protected final Set<ContentContainer> children;
+	//classes
+	protected final Map<String, Class> definedClasses;
+	protected final Set<String> referencedClasses;
+
+	protected final Map<String, Set<String>> assignVars;
+	protected final Map<String, Set<String>> assignCalls;
 
 	public ContentContainer() {
 		this.definedGlobals = new HashSet<>();
@@ -33,35 +33,39 @@ public abstract class ContentContainer {
 
 		this.definedVariables = new HashSet<>();
 		this.referencedVariables = new HashSet<>();
-		this.assigns = new HashMap<>();
 
 		this.definedMethods = new HashMap<>();
 		this.calledMethods = new HashSet<>();
 
-		this.children = new HashSet<>();
+		this.definedClasses = new HashMap<>();
+		this.referencedClasses = new HashSet<>();
+
+		this.assignVars = new HashMap<>();
+		this.assignCalls = new HashMap<>();
 	}
 
-	public void addGlobalDefinition(String name) {
-		this.definedGlobals.add(name);
+	public void addGlobalDefinition(String globalName) {
+		this.definedGlobals.add(globalName);
 	}
 
-	public void addGlobalReference(String name) {
-		this.referencedGlobals.add(name);
+	public void addGlobalReference(String globalName) {
+		this.referencedGlobals.add(globalName);
 	}
 
-	public void addVariableDefinition(String name) {
-		this.definedVariables.add(name);
+	public void addVariableDefinition(String varName) {
+		this.definedVariables.add(varName);
 	}
 
-	public void addVariableReference(String name) {
-		this.referencedVariables.add(name);
+	public void addVariableReference(String varName) {
+		this.referencedVariables.add(varName);
 	}
 
 	public void addAssign(String target, String source) {
-		if (!this.assigns.containsKey(target)) {
-			this.assigns.put(target, new HashSet<>());
+		Map<String, Set<String>> assignMap = this.referencedVariables.contains(source) ? this.assignVars : this.assignCalls;
+		if (!assignMap.containsKey(target)) {
+			assignMap.put(target, new HashSet<>());
 		}
-		this.assigns.get(target).add(source);
+		assignMap.get(target).add(source);
 	}
 
 	public void addMethodDefinition(Method method) {
@@ -72,16 +76,22 @@ public abstract class ContentContainer {
 		this.calledMethods.add(methodName);
 	}
 
-	public void addChild(ContentContainer child) {
-		this.children.add(child);
+	public void addClassDefinition(Class cls) {
+		this.definedClasses.put(cls.getName(), cls);
 	}
+
+	public abstract String getName();
+	public abstract Module getModule();
 
 	public Set<String> getDefinedGlobals() {
 		return this.definedGlobals;
 	}
 
 	public Set<String> getReferencedGlobals() {
-		return this.referencedGlobals;
+		Set<String> r = new HashSet<>();
+		r.addAll(this.referencedGlobals);
+		this.getChildren().forEach(c -> r.addAll(c.getReferencedGlobals()));
+		return r;
 	}
 
 	public Set<String> getDefinedVariables() {
@@ -89,19 +99,77 @@ public abstract class ContentContainer {
 	}
 
 	public Set<String> getReferencedVariables() {
-		return this.referencedVariables;
+		Set<String> r = new HashSet<>();
+		r.addAll(this.referencedVariables);
+		this.getChildren().forEach(c -> r.addAll(c.getReferencedVariables()));
+		return r;
 	}
 
-	public Map<String, Set<String>> getAssigns() {
-		return this.assigns;
+	public Map<String, Set<String>> getAssignVars() {
+		return this.assignVars;
 	}
 
-	public Set<Method> getMethods() {
-		return this.definedMethods.values().stream().collect(Collectors.toSet());
+	public Map<String, Set<String>> getAssignCalls() {
+		return this.assignCalls;
 	}
 
-	public Map<String, Method> getMethodsByName() {
-		return this.definedMethods;
+	public Set<Method> getDefinedMethods() {
+		return this.getDefinedMethodsByName().values().stream().collect(Collectors.toSet());
+	}
+
+	public Map<String, Method> getDefinedMethodsByName() {
+		Map<String, Method> methods = new HashMap<>();
+		methods.putAll(this.definedMethods);
+		for (ContentContainer cc : this.getChildren()) {
+			Map<String, Method> childClasses = cc.getDefinedMethodsByName();
+			for (String key : childClasses.keySet()) {
+				methods.put(cc.getName() + '.' + key, childClasses.get(key));
+			}
+		}
+		return methods;
+	}
+
+	public Set<String> getCalledMethods() {
+		Set<String> r = new HashSet<>();
+		r.addAll(this.calledMethods);
+		this.getChildren().forEach(c -> r.addAll(c.getCalledMethods()));
+		return r;
+	}
+
+	public Set<Class> getDefinedClasses() {
+		return this.getDefinedClassesByName().values().stream().collect(Collectors.toSet());
+	}
+
+	public Map<String, Class> getDefinedClassesByName() {
+		Map<String, Class> classes = new HashMap<>();
+		classes.putAll(this.definedClasses);
+		for (ContentContainer cc : this.getChildren()) {
+			Map<String, Class> childClasses = cc.getDefinedClassesByName();
+			for (String key : childClasses.keySet()) {
+				classes.put(cc.getName() + '.' + key, childClasses.get(key));
+			}
+		}
+		return classes;
+	}
+
+	public Set<String> getReferencedClasses() {
+		return this.referencedClasses;
+	}
+
+	public Set<ContentContainer> getChildren() {
+		Set<ContentContainer> children = new HashSet<>();
+		children.addAll(this.definedClasses.values());
+		children.addAll(this.definedMethods.values());
+		return children;
+	}
+
+	public void resolveGlobalReferences(Set<String> globals) {
+		for (String global : globals) {
+			if (this.referencedVariables.contains(global)) {
+				this.referencedGlobals.add(global);
+			}
+		}
+		this.getChildren().forEach(c -> c.resolveGlobalReferences(globals));
 	}
 
 	public Integer publicVariablesCount() {
@@ -144,10 +212,6 @@ public abstract class ContentContainer {
 
 	public Integer definedVariablesCount() {
 		return this.definedVariables.size();
-	}
-
-	public Set<String> getCalledMethods() {
-		return this.calledMethods;
 	}
 
 	public Boolean hasNoMethods() {

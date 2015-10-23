@@ -2,7 +2,6 @@ package model;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,17 +58,4 @@ public class Project {
 	public Set<Module> getModules() {
 		return this.modules.values().stream().collect(Collectors.toSet());
 	}
-
-	public Set<Class> getClasses() {
-		Set<Class> classes = new HashSet<>();
-		this.modules.values().forEach(m -> classes.addAll(m.getClasses()));
-		return classes;
-	}
-
-	public Set<Method> getMethods() {
-		Set<Method> methods = new HashSet<>();
-		this.modules.values().forEach(m -> m.getClasses().forEach(c -> methods.addAll(c.getMethods())));
-		return methods;
-	}
-
 }

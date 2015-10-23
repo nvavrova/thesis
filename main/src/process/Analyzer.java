@@ -22,8 +22,7 @@ public class Analyzer {
 		System.out.println("Name: " + project.getName());
 		System.out.println("Location: " + project.getPath());
 
-		this.project.getClasses().forEach(this::analyze);
-		this.project.getMethods().forEach(this::analyze);
+		//TODO
 
 		System.out.println("-----------------------------------------------------------------");
 	}
@@ -86,7 +85,7 @@ public class Analyzer {
 	}
 
 	private boolean hasLongMethod(Class cls) {
-		for (Method m : cls.getMethods()) {
+		for (Method m : cls.getDefinedMethods()) {
 			if (this.isLong(m)) {
 				return true;
 			}
@@ -107,7 +106,7 @@ public class Analyzer {
 	}
 
 	private Boolean hasControllerMethods(Class cls) {
-		for (Method m : cls.getMethods()) {
+		for (Method m : cls.getDefinedMethods()) {
 			if (this.isController(m)) {
 				return true;
 			}

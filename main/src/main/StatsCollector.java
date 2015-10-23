@@ -82,28 +82,32 @@ public class StatsCollector {
 			ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
 			Project project = mb.getProject();
 
-			for (model.Class c : project.getClasses()) {
-				List<String> line = new ArrayList<>();
-				line.add(project.getPath());
-				line.add(c.getModule().getFilePath());
-				line.add(c.getName());
-				line.add(String.valueOf(c.privateVariablesCount()));
-				line.add(String.valueOf(c.publicVariablesCount()));
-				line.add(String.valueOf(c.accessorsCount()));
-				line.add(String.valueOf(c.getLcom()));
-				line.add(String.valueOf(c.getLoc()));
-				line.add(String.valueOf(c.parentsCount()));
-				line.add(String.valueOf(c.methodsWithNoParamsCount()));
-				line.add(String.valueOf(c.referencedGlobalsCount()));
-				line.add(String.valueOf(c.definedGlobalsCount()));
-
-				csv.println(StringHelper.implode(line, CSV_DELIMITER));
-			}
+			//TODO
+//			for (model.Class c : project.getClasses()) {
+//				csv.println(StringHelper.implode(createClassLine(c, project), CSV_DELIMITER));
+//			}
 		}
 		catch (Exception ex) {
 			StatsCollector.handleException(ex);
 		}
 		System.out.println("-----------------------------------------------------------------------------------------------------------");
+	}
+
+	private static List<String> createClassLine(model.Class c, Project project) {
+		List<String> line = new ArrayList<>();
+		line.add(project.getPath());
+		line.add(c.getModule().getFilePath());
+		line.add(c.getName());
+		line.add(String.valueOf(c.privateVariablesCount()));
+		line.add(String.valueOf(c.publicVariablesCount()));
+		line.add(String.valueOf(c.accessorsCount()));
+		line.add(String.valueOf(c.getLcom()));
+		line.add(String.valueOf(c.getLoc()));
+		line.add(String.valueOf(c.parentsCount()));
+		line.add(String.valueOf(c.methodsWithNoParamsCount()));
+		line.add(String.valueOf(c.referencedGlobalsCount()));
+		line.add(String.valueOf(c.definedGlobalsCount()));
+		return line;
 	}
 
 	private static void handleException(Exception ex) {

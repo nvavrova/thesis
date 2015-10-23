@@ -63,22 +63,23 @@ public class DataHandler {
 	}
 
 	private void save(Project project, Session session) {
-		RunInfoEntity runInfoEntity = Converter.createRunInfo(this.projectEntity);
-		session.save(runInfoEntity);
-
-		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, project.getVersion());
-		session.save(versionEntity);
-
-		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, project.getModules());
-		moduleMap.values().forEach(session::save);
-
-		Map<model.Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, project.getClasses());
-		classMap.values().forEach(session::save);
-
-		List<DependenciesEntity> dependencies = Converter.createDependencies(classMap);
-		dependencies.forEach(session::save);
-
-		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, project.getMethods());
-		methodMap.values().forEach(session::save);
+		//TODO
+//		RunInfoEntity runInfoEntity = Converter.createRunInfo(this.projectEntity);
+//		session.save(runInfoEntity);
+//
+//		VersionEntity versionEntity = Converter.createVersion(runInfoEntity, project.getVersion());
+//		session.save(versionEntity);
+//
+//		Map<Module, ModuleEntity> moduleMap = Converter.convertModules(versionEntity, project.getModules());
+//		moduleMap.values().forEach(session::save);
+//
+//		Map<model.Class, ClassEntity> classMap = Converter.convertClasses(moduleMap, project.getClasses());
+//		classMap.values().forEach(session::save);
+//
+//		List<DependenciesEntity> dependencies = Converter.createDependencies(classMap);
+//		dependencies.forEach(session::save);
+//
+//		Map<Method, MethodEntity> methodMap = Converter.convertMethods(classMap, project.getMethods());
+//		methodMap.values().forEach(session::save);
 	}
 }

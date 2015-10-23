@@ -1,6 +1,7 @@
 package tests;
 
 import model.Class;
+import model.Method;
 import org.junit.Test;
 
 import java.util.Map;
@@ -33,13 +34,13 @@ public class ModelBuilderTest {
 		Map<String, Class> classes = TestHelper.getClasses("collect_variables/collect_variables.py");
 
 		Class one = classes.get("ClsOne");
-		Set<String> oneVars = one.getVariables();
+		Set<String> oneVars = one.getDefinedVariables();
 		assert (oneVars.size() == 2);
 		assert (oneVars.contains("self.var"));
 		assert (oneVars.contains("ClsOne.var"));
 
 		Class two = classes.get("ClsTwo");
-		Set<String> twoVars = two.getVariables();
+		Set<String> twoVars = two.getDefinedVariables();
 		assert (twoVars.size() == 3);
 		assert (twoVars.contains("self.varr"));
 		assert (twoVars.contains("self.co"));
@@ -64,13 +65,21 @@ public class ModelBuilderTest {
 	public void collectGlobals() {
 		Map<String, Class> classes = TestHelper.getClasses("globals");
 
-		Set<String> usrCls = classes.get("UsrCls").getUsedGlobals();
-		Set<String> firstTestCls = classes.get("FirstTestCls").getUsedGlobals();
-		Set<String> secondTestCls = classes.get("SecondTestCls").getUsedGlobals();
+		Set<String> srcCls = classes.get("SrcCls").getReferencedGlobals();
+		Set<String> usrCls = classes.get("UsrCls").getReferencedGlobals();
+		Set<String> firstTestCls = classes.get("FirstTestCls").getReferencedGlobals();
+		Set<String> secondTestCls = classes.get("SecondTestCls").getReferencedGlobals();
 
-		assert (usrCls.size() == 2);
+		assert (srcCls.size() == 1);
+		assert (srcCls.contains("non_cls_glob"));
+		assert (!srcCls.contains("var"));
+
+		assert (usrCls.size() == 3);
 		assert (usrCls.contains("s.var"));
 		assert (usrCls.contains("s.non_cls_glob"));
+		assert (usrCls.contains("Multiplier.multip2"));
+		assert (!usrCls.contains("Multiplier.multiplier"));
+		assert (!usrCls.contains("UsrCls.multiplier"));
 
 		assert (firstTestCls.size() == 0);
 		assert (!firstTestCls.contains("sc.first"));
@@ -80,6 +89,42 @@ public class ModelBuilderTest {
 		assert (!secondTestCls.contains("sc.first"));
 		assert (!secondTestCls.contains("sc.third"));
 		assert (!secondTestCls.contains("sc.met"));
+	}
+
+	@Test
+	public void checkMethodNonClassVarUsage() {
+		Map<String, Class> classes = TestHelper.getClasses("method_variables");
+
+		//TODO: add check for a method using inherited var!
+		Map<String, Method> userCls = classes.get("UserCls").getDefinedMethodsByName();
+		Map<String, Method> userCls2 = classes.get("UserCls2").getDefinedMethodsByName();
+
+		assert (userCls.get("method_one").getUsedNonInstanceVars().size() == 1);
+		assert (userCls.get("method_one").getUsedNonInstanceVars().contains("sc.parent_var"));
+
+		assert (userCls.get("method_two").getUsedNonInstanceVars().size() == 2);
+		assert (userCls.get("method_two").getUsedNonInstanceVars().contains("sec.parent_var"));
+		assert (userCls.get("method_two").getUsedNonInstanceVars().contains("sec.child_var"));
+
+//		assert (userCls2.get("method_three").getUsedNonInstanceVars().size() == 1);
+//		assert (userCls2.get("method_three").getUsedNonInstanceVars().contains("s.out_of_cls_var"));
+
+		assert (userCls2.get("method_one").getUsedNonInstanceVars().size() == 1);
+		assert (userCls2.get("method_one").getUsedNonInstanceVars().contains("sc.parent_var"));
+
+		assert (userCls2.get("method_two").getUsedNonInstanceVars().size() == 3);
+		assert (userCls2.get("method_two").getUsedNonInstanceVars().contains("s.SrcClass.parent_var"));
+		assert (userCls2.get("method_two").getUsedNonInstanceVars().contains("s.SrcExtendedClass.parent_var"));
+		assert (userCls2.get("method_two").getUsedNonInstanceVars().contains("s.SrcExtendedClass.child_var"));
+	}
+
+	@Test
+	public void checkMethodClassVarUsage() {
+		Map<String, Class> classes = TestHelper.getClasses("method_variables");
+		Map<String, Method> userCls = classes.get("UserCls").getDefinedMethodsByName();
+
+		assert (userCls.get("method_three").getReferencedInstanceVariables().size() == 1);
+		assert (userCls.get("method_three").getReferencedInstanceVariables().contains("self.child_var"));
 	}
 
 	@Test

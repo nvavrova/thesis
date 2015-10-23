@@ -22,52 +22,39 @@ public class Class extends ContentContainer {
 		this.dependentOn = new HashMap<>();
 	}
 
-	public void registerGlobals(Set<String> moduleVars) {
-		this.registerClassDepGlobals();
-		this.registerModuleDepGlobals(moduleVars);
-	}
-
-	private void registerClassDepGlobals() {
-		for (String alias : this.dependentOn.keySet()) {
-			Class c = this.dependentOn.get(alias);
-			this.addGlobalUsesFromClass(alias, c.getDefinedGlobals());
-//			this.addGlobalUsesFromClass(alias, c.getStaticVariables());
-//			this.addGlobalDefinitions(alias, c);
+	@Override
+	public void addVariableDefinition(String varName) {
+		if (this.wasVarDefinedInsideMethod(varName)) {
+			this.definedVariables.add(varName);
+		}
+		else {
+			//variable defined outside a method, meaning both class and instance variables are created
+			this.definedVariables.add("self." + varName);
+			this.definedVariables.add(this.name + "." + varName);
 		}
 	}
 
-	private void registerModuleDepGlobals(Set<String> moduleVars) {
-		Set<String> globals = moduleVars.stream()
-				.filter(this.referencedVariables::contains)
-				.collect(Collectors.toSet());
-		this.referencedGlobals.addAll(globals);
+	private boolean wasVarDefinedInsideMethod(String varName) {
+		return varName.startsWith("self.") || varName.startsWith(this.name + ".");
 	}
 
-//	private void addGlobalDefinitions(String clsAlias, Class c) {
-//		this.definedGlobals.addAll(
-//				this.getInstanceVariables().stream()
-//						.filter(var -> c.referencesVar(clsAlias + "." + var))
-//						.map(var -> "self." + var)
-//						.collect(Collectors.toSet())
-//		);
-//		this.definedGlobals.addAll(
-//				this.getStaticVariables().stream()
-//						.filter(var -> c.referencesVar(clsAlias + "." + var))
-//						.map(var -> this.getName() + "." + var)
-//						.collect(Collectors.toSet())
-//		);
-//	}
-//
-//	private Boolean referencesVar(String varName) {
-//		return this.referencedVariables.contains(varName);
-//	}
+	@Override
+	public Set<String> getDefinedVariables() {
+		Set<String> vars = super.getDefinedVariables();
+		for (Method method : this.getDefinedMethods()) {
+			Set<String> methodVars = method.getDefinedVariables();
+			for (String methodVar : methodVars) {
+				if (methodVar.startsWith("self.") || methodVar.startsWith(name + ".")) {
+					vars.add(methodVar);
+				}
+			}
+		}
+		return vars;
+	}
 
-	private void addGlobalUsesFromClass(String alias, Set<String> vars) {
-		List<String> globals = vars.stream()
-				.map(var -> alias + "." + var)
-				.filter(this.referencedVariables::contains)
-				.collect(Collectors.toList());
-		this.referencedGlobals.addAll(globals);
+
+	private Boolean referencesVar(String varName) {
+		return this.referencedVariables.contains(varName);
 	}
 
 	public void linkVarToClass(String alias, Class c) {
@@ -78,13 +65,26 @@ public class Class extends ContentContainer {
 
 	private Boolean isAliasReferenced(String alias) {
 		return this.definedVariables.contains(alias) || this.parents.contains(alias)
-				|| this.referencedVariables.contains(alias) || this.calledMethods.contains(alias);
+				|| this.referencedVariables.contains(alias) || this.getCalledMethods().contains(alias);
 	}
 
+	public void markVarsAsClassVars(Set<String> upperClassVars) {
+		Set<String> vars = new HashSet<>();
+		vars.addAll(upperClassVars);
+		vars.addAll(this.definedVariables);
+
+		this.getDefinedMethods().forEach(m -> m.markVarsAsClassVars(vars));
+		for (Class c : this.definedClasses.values()) {
+			c.markVarsAsClassVars(vars);
+		}
+	}
+
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public Module getModule() {
 		return this.module;
 	}

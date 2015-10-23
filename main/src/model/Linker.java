@@ -25,11 +25,12 @@ public class Linker {
 	public void link() {
 		this.project.getModules().forEach(model.Module::resolveImportsAndDependencies);
 		this.project.getModules().forEach(model.Module::resolveGlobalUse);
-		this.project.getMethods().forEach(Method::resolveClassInstances);
-		this.project.getMethods().forEach(Method::resolveNonClassVarUsage);
+		this.project.getModules().forEach(model.Module::resolveInstanceVarUse);
+//		this.project.getMethods().forEach(Method::resolveClassInstances);
+//		this.project.getMethods().forEach(Method::resolveNonClassVarUsage);
 	}
 
-	public void addImport(String source, String target, String alias) {
+	public void addModuleImport(String source, String target, String alias) {
 		assert (this.project.hasModule(source));
 
 		Module sourceModule = this.project.getModule(source);
@@ -43,7 +44,7 @@ public class Linker {
 		}
 	}
 
-	public void addImport(String source, String importPath, String target, String alias) {
+	public void addImportFrom(String source, String importPath, String target, String alias) {
 		assert (this.project.hasModule(source));
 
 		if (target.equals("*")) {
@@ -66,10 +67,12 @@ public class Linker {
 		for (String path : sourcePaths) {
 			String fullModulePath = path + FILE_DELIMITER + modulePathEnd;
 			String fullClassPath = path + FILE_DELIMITER + classPathEnd;
+
 			Boolean added = this.addModuleImport(sourceModule, fullModulePath, alias);
-			if (!added) {
-				added = this.addClassImport(sourceModule, fullClassPath, className, alias);
+			if (added) {
+				break;
 			}
+			added = this.addClassImport(sourceModule, fullClassPath, className, alias);
 			if (added) {
 				break;
 			}
@@ -83,7 +86,7 @@ public class Linker {
 
 		if (this.project.hasModule(path)) {
 			Module importedModule = this.project.getModule(path);
-			for (model.Class c : importedModule.getClasses()) {
+			for (model.Class c : importedModule.getDefinedClasses()) {
 				sourceModule.addImport(c, c.getName());
 			}
 		}
