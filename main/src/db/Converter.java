@@ -4,7 +4,7 @@ import db.pojo.*;
 import mining.Bug;
 import mining.Bugs;
 import model.Class;
-import model.Method;
+import model.Subroutine;
 import model.Module;
 
 import java.sql.Timestamp;
@@ -60,14 +60,15 @@ public class Converter {
 	public static Map<Class, ClassEntity> convertClasses(Map<Module, ModuleEntity> modules, Set<Class> classes) {
 		Map<Class, ClassEntity> classMap = new HashMap<>();
 		for (Class c : classes) {
-			classMap.put(c, convert(c, modules.get(c.getModule())));
+			//TODO: fix this
+//			classMap.put(c, convert(c, modules.get(c.getModule())));
 		}
 		return classMap;
 	}
 
-	public static Map<Method, MethodEntity> convertMethods(Map<Class, ClassEntity> classes, Set<Method> methods) {
-		Map<Method, MethodEntity> methodMap = new HashMap<>();
-		for (Method m : methods) {
+	public static Map<Subroutine, MethodEntity> convertMethods(Map<Class, ClassEntity> classes, Set<Subroutine> subroutines) {
+		Map<Subroutine, MethodEntity> methodMap = new HashMap<>();
+		for (Subroutine m : subroutines) {
 			//TODO: fix this
 //			methodMap.put(m, convert(m, classes.get(m.getCls())));
 		}
@@ -78,7 +79,7 @@ public class Converter {
 		List<DependenciesEntity> dependencies = new ArrayList<>();
 		for (Class dependentCls : classMap.keySet()) {
 			ClassEntity dependent = classMap.get(dependentCls);
-			dependentCls.getDependencies().stream()
+			dependentCls.getReferencedClasses().stream()
 					.filter(classMap::containsKey)
 					.forEach(c -> dependencies.add(createDependency(dependent, classMap.get(c))));
 		}
@@ -92,13 +93,13 @@ public class Converter {
 		return depEnt;
 	}
 
-	private static MethodEntity convert(Method method, ClassEntity classEntity) {
+	private static MethodEntity convert(Subroutine subroutine, ClassEntity classEntity) {
 		MethodEntity mthdEnt = new MethodEntity();
-		mthdEnt.setName(method.getName());
+		mthdEnt.setName(subroutine.getName());
 		mthdEnt.setClassEntity(classEntity);
-		mthdEnt.setLoc(method.getLoc());
-		mthdEnt.setIsAccessor(method.isAccessor());
-		mthdEnt.setNrParams(method.paramCount().shortValue());
+		mthdEnt.setLoc(subroutine.getLoc());
+		mthdEnt.setIsAccessor(subroutine.isAccessor());
+		mthdEnt.setNrParams(subroutine.paramCount().shortValue());
 		return mthdEnt;
 	}
 

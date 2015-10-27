@@ -23,9 +23,9 @@ public class Linker {
 	}
 
 	public void link() {
-		this.project.getModules().forEach(model.Module::resolveImportsAndDependencies);
-		this.project.getModules().forEach(model.Module::resolveGlobalUse);
-		this.project.getModules().forEach(model.Module::resolveInstanceVarUse);
+		this.project.getModules().forEach(model.Module::resolveDependencies);
+//		this.project.getModules().forEach(model.Module::resolveGlobalUse);
+//		this.project.getModules().forEach(model.Module::resolveInstanceVarUse);
 //		this.project.getMethods().forEach(Method::resolveClassInstances);
 //		this.project.getMethods().forEach(Method::resolveNonClassVarUsage);
 	}

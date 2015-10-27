@@ -110,7 +110,7 @@ public class ModelBuilder {
 		private final Stack<ContentContainer> contentContainers;
 
 		private final Stack<model.Class> classes;
-		//		private final Stack<Method> methods;
+		private final Stack<Subroutine> subroutines;
 		private boolean inAssign;
 
 		private boolean inAssignLeft;
@@ -124,7 +124,7 @@ public class ModelBuilder {
 			this.contentContainers = new Stack<>();
 
 			this.classes = new Stack<>();
-//			this.methods = new Stack<>();
+			this.subroutines = new Stack<>();
 			this.inAssign = false;
 			this.inAssignLeft = false;
 			this.inAssignRight = false;
@@ -140,7 +140,7 @@ public class ModelBuilder {
 		@Override
 		public void visitChildren(ast.Module n) {
 			String filePath = n.getFilePath();
-			model.Module module = new model.Module(filePath, n.getName(), StringHelper.implode(n.getErrors(), "\n"));
+			model.Module module = new model.Module(n.getName(), filePath, StringHelper.implode(n.getErrors(), "\n"));
 
 			this.project.addModule(module);
 
@@ -151,7 +151,9 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(Global n) {
-			n.getIdentifiers().forEach(i -> this.getCurrentContainer().addGlobalDefinition(i.getValue()));
+			for (Identifier i : n.getIdentifiers()) {
+				this.addVarDef(i.getValue(), VarType.GLOBAL);
+			}
 			return null;
 		}
 
@@ -171,7 +173,7 @@ public class ModelBuilder {
 				this.inAssignRight = false;
 
 				if (this.leftAssign != null && this.rightAssign != null) {
-					this.getCurrentContainer().addAssign(this.leftAssign, this.rightAssign);
+//					this.getCurrentContainer().addAssign(this.leftAssign, this.rightAssign);
 				}
 
 				this.leftAssign = null;
@@ -191,7 +193,7 @@ public class ModelBuilder {
 					.map(p -> p.getValue().toString())
 					.collect(Collectors.toList());
 
-			Class c = new Class(n.getName().getValue(), this.getCurrentModule(), locInfo, parents);
+			Class c = new Class(n.getName().getValue(), locInfo, parents);
 			this.getCurrentContainer().addClassDefinition(c);
 
 			this.classes.push(c);
@@ -216,15 +218,16 @@ public class ModelBuilder {
 			List<String> paramNames = n.getParams().getParamNames().stream()
 					.filter(p -> !p.equals(SELF_KEYWORD))
 					.collect(Collectors.toList());
+			SubroutineType type = !this.inClass() ? SubroutineType.FUNCTION :
+					(n.isStatic() ? SubroutineType.STATIC_METHOD : SubroutineType.INSTANCE_METHOD);
+			Subroutine subroutine = new Subroutine(n.getNameString(), n.getLocInfo(), type, paramNames, n.isAccessor());
+			this.getCurrentContainer().addSubroutineDefinition(subroutine);
 
-			Method method = new Method(n.getNameString(), this.getCurrentModule(), n.getLocInfo(), paramNames, n.isAccessor());
-			this.getCurrentContainer().addMethodDefinition(method);
-
-//			this.methods.push(method);
-			this.contentContainers.push(method);
+			this.subroutines.push(subroutine);
+			this.contentContainers.push(subroutine);
 			this.visitChildren(n);
 			this.contentContainers.pop();
-//			this.methods.pop();
+			this.subroutines.pop();
 
 			return null;
 //			}
@@ -241,12 +244,11 @@ public class ModelBuilder {
 
 		@Override
 		public void visitChildren(Function n) {
-			//prevents registering function names as variables
+			//prevents registering function names and param names as variables
 			n.getBody().accept(this);
 			if (n.hasReturnType()) {
 				n.getReturnType().accept(this);
 			}
-			n.getParams().accept(this);
 			n.getDecorators().forEach(d -> d.accept(this));
 		}
 
@@ -263,36 +265,56 @@ public class ModelBuilder {
 			this.addVarDef(n.toString());
 			this.addVarRef(n.toString());
 			this.setAssignVar(n.toString());
-			this.visitChildren(n);
+//			this.visitChildren(n);
 			return null;
 		}
-
 
 		private void addVarRef(String fullName) {
 			this.getCurrentContainer().addVariableReference(fullName);
 		}
 
+		private boolean hasClassVarName(String varName) {
+			return varName.startsWith(this.getCurrentClass().getName() + ".");
+		}
+
+		private boolean hasInstanceVarName(String varName) {
+			return varName.startsWith(SELF_KEYWORD + ".");
+		}
+
 		private void addVarDef(String fullName) {
-			List<String> varParts = StringHelper.explode(fullName, ".");
-			if (varParts.size() == 1) {
-				//simple identifier
-				this.getCurrentContainer().addVariableDefinition(fullName);
-			}
-			else if (varParts.size() > 1) {
-				//attribute reference - add if it references a class or instance variable of the current class
-				if (this.isClassOrInstanceVariable(varParts.get(0))) {
-					this.getCurrentClass().addVariableDefinition(varParts.get(0) + "." + varParts.get(1));
+			List<String> nameParts = StringHelper.explode(fullName, ".");
+			if (this.inClass()) {
+				if (this.hasClassVarName(fullName)) {
+					this.addVarDef(nameParts.get(1), VarType.CLASS);
 				}
+				else if (this.hasInstanceVarName(fullName)) {
+					this.addVarDef(nameParts.get(1), VarType.INSTANCE);
+				}
+				//if its name has more than 1 part, then it was just an attribute reference
+				else if (!this.inSubroutine() && nameParts.size() == 1) {
+					//variable defined inside of a class but outside of a method -> both class and instance variable
+					this.addVarDef(nameParts.get(0), VarType.CLASS);
+					this.addVarDef(nameParts.get(0), VarType.INSTANCE);
+				}
+			}
+			else {
+				this.addVarDef(nameParts.get(0), VarType.LOCAL);
 			}
 		}
 
-		private boolean isClassOrInstanceVariable(String prefix) {
-			return prefix.equals("self") || (this.inClass() && prefix.equals(this.getCurrentClass().getName()));
+		private void addVarDef(String name, VarType varType) {
+			Variable var = new Variable(name, varType);
+			if (varType == VarType.CLASS || varType == VarType.INSTANCE) {
+				this.getCurrentClass().addVariableDefinition(var);
+			}
+			else {
+				this.getCurrentContainer().addVariableDefinition(var);
+			}
 		}
 
 		@Override
 		public Void visit(Call n) {
-			this.addMethodRef(n.getBase().toString());
+			this.addSubroutineRef(n.getBase().toString());
 			this.setAssignVar(n.getBase().toString()); //TODO: fix this
 			this.visitChildren(n);
 			return null;
@@ -300,7 +322,7 @@ public class ModelBuilder {
 
 		@Override
 		public Void visit(DirectCall n) {
-			this.addMethodRef(n.getBase().toString() + "." + n.getCall().getName());
+			this.addSubroutineRef(n.getBase().toString() + "." + n.getCall().getName());
 			this.setAssignVar(n.getBase().toString() + "." + n.getCall().getName()); //TODO: fix this
 			this.visitChildren(n);
 			return null;
@@ -336,8 +358,8 @@ public class ModelBuilder {
 			n.getCall().accept(this);
 		}
 
-		private void addMethodRef(String name) {
-			this.getCurrentContainer().addMethodCall(name);
+		private void addSubroutineRef(String name) {
+			this.getCurrentContainer().addSubroutineCall(name);
 		}
 
 		private model.Module getCurrentModule() {
@@ -353,15 +375,19 @@ public class ModelBuilder {
 
 		//
 //		private Method getCurrentMethod() {
-//			return this.methods.peek();
+//			return this.subroutines.peek();
 //		}
 //
 		private boolean inClass() {
 			return !this.classes.isEmpty();
 		}
+
+		private boolean inSubroutine() {
+			return !this.subroutines.isEmpty();
+		}
 //
 //		private boolean inClassMethod() {
-//			return this.inClass() && !this.methods.isEmpty();
+//			return this.inClass() && !this.subroutines.isEmpty();
 //		}
 
 		private ContentContainer getCurrentContainer() {

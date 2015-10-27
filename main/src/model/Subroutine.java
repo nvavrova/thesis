@@ -9,33 +9,22 @@ import java.util.stream.Collectors;
 /**
  * Created by Nik on 11-07-2015
  */
-public class Method extends ContentContainer {
-	private final String name;
-	private final Module module;
+public class Subroutine extends ContentContainer {
 	private final Integer loc;
+	private final SubroutineType subroutineType;
 	private final Boolean isAccessor;
 	private final List<String> params;
 
 	private final Set<String> referencedInstanceVariables;
 
-	public Method(String name, Module module, Integer loc, List<String> params, Boolean isAccessor) {
-		this.name = name;
-		this.module = module;
+	public Subroutine(String name, Integer loc, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
+		super(name);
 		this.loc = loc;
+		this.subroutineType = subroutineType;
 		this.params = params;
 		this.isAccessor = isAccessor;
 
 		this.referencedInstanceVariables = new HashSet<>();
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
-
-	@Override
-	public Module getModule() {
-		return this.module;
 	}
 
 	public Integer getLoc() {
@@ -45,7 +34,7 @@ public class Method extends ContentContainer {
 	public Integer getAid() {
 		//Access of Import Data: Number of data members accessed in a method directly or via accessor-methods, from which the definition-class of the method is not derived.
 		//TODO: add used accessors
-		return this.referencedVariables.size() - this.getReferencedInstanceVariables().size();
+		return this.referencedVarNames.size() - this.getReferencedInstanceVariables().size();
 	}
 
 	public Integer getAld() {
@@ -62,7 +51,7 @@ public class Method extends ContentContainer {
 	}
 
 	public Set<String> getUsedNonInstanceVars() {
-		Set<String> copyReferencedVars = this.referencedVariables.stream().collect(Collectors.toSet());
+		Set<String> copyReferencedVars = this.referencedVarNames.stream().collect(Collectors.toSet());
 		copyReferencedVars.removeAll(this.referencedInstanceVariables);
 		return copyReferencedVars;
 	}
@@ -71,26 +60,15 @@ public class Method extends ContentContainer {
 		return this.isAccessor;
 	}
 
-	public Boolean hasVariableIntersection(Method m) {
+	public SubroutineType getSubroutineType() {
+		return this.subroutineType;
+	}
+
+	public Boolean hasVariableIntersection(Subroutine m) {
 		return !Collections.disjoint(this.referencedInstanceVariables, m.getReferencedInstanceVariables());
 	}
 
 	public Boolean isPrivate() {
 		return this.name.startsWith("__") && !this.name.endsWith("__");
-	}
-
-	public void markVarsAsClassVars(Set<String> classVars) {
-		for (String var : classVars) {
-			if (this.referencedVariables.contains(var)) {
-				this.referencedInstanceVariables.add(var);
-			}
-		}
-	}
-
-	public void addAssign(String target, String source) {
-		if (!this.assignVars.containsKey(target)) {
-			this.assignVars.put(target, new HashSet<>());
-		}
-		this.assignVars.get(target).add(source);
 	}
 }

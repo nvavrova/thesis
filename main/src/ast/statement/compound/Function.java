@@ -74,6 +74,15 @@ public class Function extends Statement {
 		return this.async;
 	}
 
+	public Boolean isStatic() {
+		for (Decorator d : this.decorators) {
+			if (d.getName().getPath().equals("staticmethod")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public Boolean isAccessor() {
 		//TODO: fix this
 		if (this.params.isEmptyExceptForSelf() && this.name.startsWith("get")) {

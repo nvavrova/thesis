@@ -1,7 +1,7 @@
 package process;
 
 import model.Class;
-import model.Method;
+import model.Subroutine;
 import model.Project;
 import util.LexicalHelper;
 
@@ -31,7 +31,7 @@ public class Analyzer {
 
 	public void analyze(Class cls) {}
 
-	public void analyze(Method method) {}
+	public void analyze(Subroutine subroutine) {}
 
 	public boolean isBlob(Class cls) {
 		return (this.isLargeClass(cls) || this.hasLowCohesion(cls)) &&
@@ -85,7 +85,7 @@ public class Analyzer {
 	}
 
 	private boolean hasLongMethod(Class cls) {
-		for (Method m : cls.getDefinedMethods()) {
+		for (Subroutine m : cls.getDefinedSubroutines()) {
 			if (this.isLong(m)) {
 				return true;
 			}
@@ -95,18 +95,18 @@ public class Analyzer {
 
 	private Integer relatedDataClassesCount(Class cls) {
 		//TODO
-		Long count = cls.getDependencies().stream()
+		Long count = cls.getReferencedClasses().stream()
 //				.filter(c -> c.isDataClass())
 				.count();
 		return count.intValue();
 	}
 
 	private boolean hasTooManyMethodsWithNoParams(Class cls) {
-		return cls.methodsWithNoParamsCount() > 7;
+		return cls.subroutinesWithNoParamsCount() > 7;
 	}
 
 	private Boolean hasControllerMethods(Class cls) {
-		for (Method m : cls.getDefinedMethods()) {
+		for (Subroutine m : cls.getDefinedSubroutines()) {
 			if (this.isController(m)) {
 				return true;
 			}
@@ -116,7 +116,7 @@ public class Analyzer {
 
 	private Integer relatedPrivateFieldsWithOneMethodCount(Class cls) {
 		//TODO
-		Long count = cls.getDependencies().stream()
+		Long count = cls.getReferencedClasses().stream()
 //				.filter(Class::privateFieldsWithOnePublicMethod)
 				.count();
 		return count.intValue();
@@ -124,11 +124,11 @@ public class Analyzer {
 
 
 	//                   METHODS
-	public boolean isLong(Method m) {
+	public boolean isLong(Subroutine m) {
 		return m.getLoc() > 100;
 	}
 
-	public boolean isController(Method m) {
+	public boolean isController(Subroutine m) {
 		return this.hasControllerName(m.getName());
 	}
 

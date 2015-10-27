@@ -100,7 +100,7 @@ public class VersionSwitcherTest {
 		Map<String, Class> modifiedClasses = this.getClasses(modified);
 		Class modCls = modifiedClasses.get("ModifiedCls");
 
-		assert (addedCls.getDependencies().contains(modCls));
+		assert (addedCls.getReferencedClasses().contains(modCls));
 
 		project = this.versionSwitcher.getNextProjectVersion();
 		moduleMap = project.getModules().stream()
@@ -114,7 +114,7 @@ public class VersionSwitcherTest {
 		modifiedClasses = this.getClasses(modified);
 		modCls = modifiedClasses.get("ModifiedCls2");
 
-		assert (addedCls.getDependencies().contains(modCls));
+		assert (addedCls.getReferencedClasses().contains(modCls));
 	}
 
 	private String getFullFilePath(String fileName) {

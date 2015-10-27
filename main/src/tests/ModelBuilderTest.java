@@ -1,11 +1,13 @@
 package tests;
 
 import model.Class;
-import model.Method;
+import model.Subroutine;
+import model.Variable;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 08-07-2015
@@ -34,18 +36,18 @@ public class ModelBuilderTest {
 		Map<String, Class> classes = TestHelper.getClasses("collect_variables/collect_variables.py");
 
 		Class one = classes.get("ClsOne");
-		Set<String> oneVars = one.getDefinedVariables();
+		Set<Variable> oneVars = one.getDefinedVariables();
 		assert (oneVars.size() == 2);
-		assert (oneVars.contains("self.var"));
-		assert (oneVars.contains("ClsOne.var"));
+//		assert (oneVars.contains("self.var"));
+//		assert (oneVars.contains("ClsOne.var"));
 
 		Class two = classes.get("ClsTwo");
-		Set<String> twoVars = two.getDefinedVariables();
+		Set<String> twoVars = two.getDefinedVariables().stream().map(v -> v.getName()).collect(Collectors.toSet());
 		assert (twoVars.size() == 3);
-		assert (twoVars.contains("self.varr"));
-		assert (twoVars.contains("self.co"));
-		assert (twoVars.contains("self.co2"));
-		assert (!twoVars.contains("self.co.var"));
+//		assert (twoVars.contains("self.varr"));
+//		assert (twoVars.contains("self.co"));
+//		assert (twoVars.contains("self.co2"));
+//		assert (!twoVars.contains("self.co.var"));
 	}
 
 	@Test
@@ -54,21 +56,21 @@ public class ModelBuilderTest {
 		assert (classes.size() == 2);
 
 		Class one = classes.get("ClsOne");
-		assert (one.methodCount() == 2);
-		assert (one.methodsWithNoParamsCount() == 1);
+		assert (one.subroutineCount() == 2);
+		assert (one.subroutinesWithNoParamsCount() == 1);
 
 		Class two = classes.get("ClsTwo");
-		assert (two.methodCount() == 1);
+		assert (two.subroutineCount() == 1);
 	}
 
 	@Test
 	public void collectGlobals() {
 		Map<String, Class> classes = TestHelper.getClasses("globals");
 
-		Set<String> srcCls = classes.get("SrcCls").getReferencedGlobals();
-		Set<String> usrCls = classes.get("UsrCls").getReferencedGlobals();
-		Set<String> firstTestCls = classes.get("FirstTestCls").getReferencedGlobals();
-		Set<String> secondTestCls = classes.get("SecondTestCls").getReferencedGlobals();
+		Set<String> srcCls = classes.get("SrcCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
+		Set<String> usrCls = classes.get("UsrCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
+		Set<String> firstTestCls = classes.get("FirstTestCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
+		Set<String> secondTestCls = classes.get("SecondTestCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
 
 		assert (srcCls.size() == 1);
 		assert (srcCls.contains("non_cls_glob"));
@@ -96,8 +98,8 @@ public class ModelBuilderTest {
 		Map<String, Class> classes = TestHelper.getClasses("method_variables");
 
 		//TODO: add check for a method using inherited var!
-		Map<String, Method> userCls = classes.get("UserCls").getDefinedMethodsByName();
-		Map<String, Method> userCls2 = classes.get("UserCls2").getDefinedMethodsByName();
+		Map<String, Subroutine> userCls = classes.get("UserCls").getDefinedSubroutinesByName();
+		Map<String, Subroutine> userCls2 = classes.get("UserCls2").getDefinedSubroutinesByName();
 
 		assert (userCls.get("method_one").getUsedNonInstanceVars().size() == 1);
 		assert (userCls.get("method_one").getUsedNonInstanceVars().contains("sc.parent_var"));
@@ -121,7 +123,7 @@ public class ModelBuilderTest {
 	@Test
 	public void checkMethodClassVarUsage() {
 		Map<String, Class> classes = TestHelper.getClasses("method_variables");
-		Map<String, Method> userCls = classes.get("UserCls").getDefinedMethodsByName();
+		Map<String, Subroutine> userCls = classes.get("UserCls").getDefinedSubroutinesByName();
 
 		assert (userCls.get("method_three").getReferencedInstanceVariables().size() == 1);
 		assert (userCls.get("method_three").getReferencedInstanceVariables().contains("self.child_var"));
@@ -136,10 +138,10 @@ public class ModelBuilderTest {
 		Class libCls = classes.get("LibCls");
 		Class derived = classes.get("Derived");
 
-		assert (baseCls.getDependencies().size() == 0);
-		assert (subBaseCls.getDependencies().size() == 1);
-		assert (libCls.getDependencies().size() == 1);
-		assert (derived.getDependencies().size() == 2);
+		assert (baseCls.getReferencedClasses().size() == 0);
+		assert (subBaseCls.getReferencedClasses().size() == 1);
+		assert (libCls.getReferencedClasses().size() == 1);
+		assert (derived.getReferencedClasses().size() == 2);
 	}
 
 	@Test
@@ -147,7 +149,7 @@ public class ModelBuilderTest {
 		Map<String, Class> classes = TestHelper.getClasses("dependencies");
 
 		Class main = classes.get("Main");
-		Set<Class> dependencies = main.getDependencies();
+		Set<Class> dependencies = main.getReferencedClasses();
 
 		assert (dependencies.size() == 3);
 		assert (dependencies.contains(classes.get("Base1")));
@@ -156,7 +158,7 @@ public class ModelBuilderTest {
 
 
 		Class main2 = classes.get("Main2");
-		Set<Class> dependencies2 = main2.getDependencies();
+		Set<Class> dependencies2 = main2.getReferencedClasses();
 		assert (dependencies2.size() == 1);
 		assert (dependencies2.contains(classes.get("Base1")));
 	}

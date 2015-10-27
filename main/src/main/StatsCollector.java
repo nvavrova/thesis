@@ -96,7 +96,8 @@ public class StatsCollector {
 	private static List<String> createClassLine(model.Class c, Project project) {
 		List<String> line = new ArrayList<>();
 		line.add(project.getPath());
-		line.add(c.getModule().getFilePath());
+		//TODO: get the module
+//		line.add(c.getModule().getFilePath());
 		line.add(c.getName());
 		line.add(String.valueOf(c.privateVariablesCount()));
 		line.add(String.valueOf(c.publicVariablesCount()));
@@ -104,7 +105,7 @@ public class StatsCollector {
 		line.add(String.valueOf(c.getLcom()));
 		line.add(String.valueOf(c.getLoc()));
 		line.add(String.valueOf(c.parentsCount()));
-		line.add(String.valueOf(c.methodsWithNoParamsCount()));
+		line.add(String.valueOf(c.subroutinesWithNoParamsCount()));
 		line.add(String.valueOf(c.referencedGlobalsCount()));
 		line.add(String.valueOf(c.definedGlobalsCount()));
 		return line;

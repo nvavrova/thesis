@@ -8,131 +8,106 @@ import java.util.stream.Collectors;
  */
 public abstract class ContentContainer {
 
-	//globals
-	protected final Set<String> definedGlobals;
-	protected final Set<String> referencedGlobals;
+	protected final String name;
 
 	//variables
-	protected final Set<String> definedVariables;
-	protected final Set<String> referencedVariables;
+	//this is a set because of the special situation of defining a class and instance variable at the same time, with the same name
+	protected final Map<String, Set<Variable>> definedVars;
+	protected final Map<String, Set<Variable>> referencedVars;
 
-	//methods
-	protected final Map<String, Method> definedMethods;
-	protected final Set<String> calledMethods;
+	protected final Set<String> referencedVarNames;
+	//subroutines
+	protected final Map<String, Subroutine> definedSubroutines;
+	protected final Map<String, Subroutine> calledSubroutines;
 
+	protected final Set<String> calledSubroutineNames;
 	//classes
 	protected final Map<String, Class> definedClasses;
-	protected final Set<String> referencedClasses;
+	protected final Map<String, Class> referencedClasses;
 
-	protected final Map<String, Set<String>> assignVars;
-	protected final Map<String, Set<String>> assignCalls;
+	public ContentContainer(String name) {
+		this.name = name;
 
-	public ContentContainer() {
-		this.definedGlobals = new HashSet<>();
-		this.referencedGlobals = new HashSet<>();
+		this.definedVars = new HashMap<>();
+		this.referencedVars = new HashMap<>();
+		this.referencedVarNames = new HashSet<>();
 
-		this.definedVariables = new HashSet<>();
-		this.referencedVariables = new HashSet<>();
-
-		this.definedMethods = new HashMap<>();
-		this.calledMethods = new HashSet<>();
+		this.definedSubroutines = new HashMap<>();
+		this.calledSubroutines = new HashMap<>();
+		this.calledSubroutineNames = new HashSet<>();
 
 		this.definedClasses = new HashMap<>();
-		this.referencedClasses = new HashSet<>();
-
-		this.assignVars = new HashMap<>();
-		this.assignCalls = new HashMap<>();
+		this.referencedClasses = new HashMap<>();
 	}
 
-	public void addGlobalDefinition(String globalName) {
-		this.definedGlobals.add(globalName);
-	}
-
-	public void addGlobalReference(String globalName) {
-		this.referencedGlobals.add(globalName);
-	}
-
-	public void addVariableDefinition(String varName) {
-		this.definedVariables.add(varName);
+	public void addVariableDefinition(Variable var) {
+		this.addVariableDefinition(var.getName(), var);
 	}
 
 	public void addVariableReference(String varName) {
-		this.referencedVariables.add(varName);
+		this.referencedVarNames.add(varName);
 	}
 
-	public void addAssign(String target, String source) {
-		Map<String, Set<String>> assignMap = this.referencedVariables.contains(source) ? this.assignVars : this.assignCalls;
-		if (!assignMap.containsKey(target)) {
-			assignMap.put(target, new HashSet<>());
-		}
-		assignMap.get(target).add(source);
+	public void addSubroutineDefinition(Subroutine subroutine) {
+		this.definedSubroutines.put(subroutine.getName(), subroutine);
 	}
 
-	public void addMethodDefinition(Method method) {
-		this.definedMethods.put(method.getName(), method);
-	}
-
-	public void addMethodCall(String methodName) {
-		this.calledMethods.add(methodName);
+	public void addSubroutineCall(String subroutineName) {
+		this.calledSubroutineNames.add(subroutineName);
 	}
 
 	public void addClassDefinition(Class cls) {
 		this.definedClasses.put(cls.getName(), cls);
 	}
 
-	public abstract String getName();
-	public abstract Module getModule();
-
-	public Set<String> getDefinedGlobals() {
-		return this.definedGlobals;
+	public String getName() {
+		return this.name;
 	}
 
-	public Set<String> getReferencedGlobals() {
-		Set<String> r = new HashSet<>();
-		r.addAll(this.referencedGlobals);
+	public Set<Variable> getReferencedGlobals() {
+		Set<Variable> r = this.getReferencedVariables().stream()
+				.filter(v -> v.getVarType() == VarType.GLOBAL)
+				.collect(Collectors.toSet());
 		this.getChildren().forEach(c -> r.addAll(c.getReferencedGlobals()));
 		return r;
 	}
 
-	public Set<String> getDefinedVariables() {
-		return this.definedVariables;
+	public Set<Variable> getDefinedVariables() {
+		Set<Variable> defVars = new HashSet<>();
+		for (Set<Variable> vars : this.definedVars.values()) {
+			defVars.addAll(vars);
+		}
+		return defVars;
 	}
 
-	public Set<String> getReferencedVariables() {
-		Set<String> r = new HashSet<>();
-		r.addAll(this.referencedVariables);
-		this.getChildren().forEach(c -> r.addAll(c.getReferencedVariables()));
-		return r;
+	public Set<Variable> getReferencedVariables() {
+		Set<Variable> refVars = new HashSet<>();
+		for (Set<Variable> vars : this.referencedVars.values()) {
+			refVars.addAll(vars);
+		}
+		return refVars;
 	}
 
-	public Map<String, Set<String>> getAssignVars() {
-		return this.assignVars;
+	public Set<Subroutine> getDefinedSubroutines() {
+		return this.getDefinedSubroutinesByName().values().stream().collect(Collectors.toSet());
 	}
 
-	public Map<String, Set<String>> getAssignCalls() {
-		return this.assignCalls;
-	}
-
-	public Set<Method> getDefinedMethods() {
-		return this.getDefinedMethodsByName().values().stream().collect(Collectors.toSet());
-	}
-
-	public Map<String, Method> getDefinedMethodsByName() {
-		Map<String, Method> methods = new HashMap<>();
-		methods.putAll(this.definedMethods);
+	public Map<String, Subroutine> getDefinedSubroutinesByName() {
+		Map<String, Subroutine> subroutines = new HashMap<>();
+		subroutines.putAll(this.definedSubroutines);
 		for (ContentContainer cc : this.getChildren()) {
-			Map<String, Method> childClasses = cc.getDefinedMethodsByName();
+			Map<String, Subroutine> childClasses = cc.getDefinedSubroutinesByName();
 			for (String key : childClasses.keySet()) {
-				methods.put(cc.getName() + '.' + key, childClasses.get(key));
+				subroutines.put(cc.getName() + '.' + key, childClasses.get(key));
 			}
 		}
-		return methods;
+		return subroutines;
 	}
 
-	public Set<String> getCalledMethods() {
+	public Set<String> getCalledSubroutineNames() {
 		Set<String> r = new HashSet<>();
-		r.addAll(this.calledMethods);
-		this.getChildren().forEach(c -> r.addAll(c.getCalledMethods()));
+		r.addAll(this.calledSubroutineNames);
+		this.getChildren().forEach(c -> r.addAll(c.getCalledSubroutineNames()));
 		return r;
 	}
 
@@ -152,85 +127,128 @@ public abstract class ContentContainer {
 		return classes;
 	}
 
-	public Set<String> getReferencedClasses() {
-		return this.referencedClasses;
-	}
-
 	public Set<ContentContainer> getChildren() {
 		Set<ContentContainer> children = new HashSet<>();
 		children.addAll(this.definedClasses.values());
-		children.addAll(this.definedMethods.values());
+		children.addAll(this.definedSubroutines.values());
 		return children;
 	}
 
-	public void resolveGlobalReferences(Set<String> globals) {
-		for (String global : globals) {
-			if (this.referencedVariables.contains(global)) {
-				this.referencedGlobals.add(global);
-			}
-		}
-		this.getChildren().forEach(c -> c.resolveGlobalReferences(globals));
+	public void resolveGlobalReferences(Set<Variable> globals) {
+		//TODO: fix
 	}
 
 	public Integer publicVariablesCount() {
-		Long count = this.definedVariables.stream()
-				.filter(v -> !this.isPrivateVariable(v)).count();
+		Long count = this.getDefinedVariables().stream()
+				.filter(v -> v.isPublic()).count();
 		return count.intValue();
 	}
 
 	public Integer privateVariablesCount() {
-		Long count = this.definedVariables.stream()
-				.filter(v -> this.isPrivateVariable(v)).count();
+		Long count = this.getDefinedVariables().stream()
+				.filter(v -> v.isPrivate()).count();
 		return count.intValue();
 	}
 
-	private Boolean isPrivateVariable(String varName) {
-		return varName.startsWith("_");
+	public Integer subroutineCount() {
+		return this.definedSubroutines.size();
 	}
 
-	public Integer methodCount() {
-		return this.definedMethods.size();
-	}
-
-	public Integer publicMethodCount() {
-		Long l = this.definedMethods.values().stream()
-				.filter(Method::isPrivate)
+	public Integer publicSubroutineCount() {
+		Long l = this.definedSubroutines.values().stream()
+				.filter(Subroutine::isPrivate)
 				.count();
 		return l.intValue();
 	}
 
 	public Integer accessorsCount() {
-		Long c = this.definedMethods.values().stream()
-				.filter(Method::isAccessor)
+		Long c = this.definedSubroutines.values().stream()
+				.filter(Subroutine::isAccessor)
 				.count();
 		return c.intValue();
 	}
 
 	public Integer definedGlobalsCount() {
-		return this.definedGlobals.size();
+		Long l = this.getDefinedVariables().stream()
+				.filter(var -> var.getVarType() == VarType.GLOBAL)
+				.count();
+		return l.intValue();
 	}
-
-	public Integer definedVariablesCount() {
-		return this.definedVariables.size();
-	}
-
-	public Boolean hasNoMethods() {
-		return this.definedMethods.size() == 0;
-	}
-
 
 	public Boolean usesGlobals() {
-		return this.referencedGlobals.size() > 0;
+		return this.referencedGlobalsCount() > 0;
 	}
 
 	public Integer referencedGlobalsCount() {
-		return this.referencedGlobals.size();
+		Long c = this.getReferencedVariables().stream()
+				.filter(v -> v.getVarType() == VarType.GLOBAL)
+				.count();
+		return c.intValue();
 	}
 
-	public Integer methodsWithNoParamsCount() {
-		Long count = this.definedMethods.values().stream()
+	public Integer subroutinesWithNoParamsCount() {
+		Long count = this.definedSubroutines.values().stream()
 				.filter(m -> m.paramCount() == 0)
 				.count();
 		return count.intValue();
+	}
+
+	public Set<Class> getReferencedClasses() {
+		return this.referencedClasses.values().stream().collect(Collectors.toSet());
+	}
+
+	public void resolveDependencies(Scope scope) {
+		for (String clsAlias : scope.definedClasses.keySet()) {
+			if (this.getCalledSubroutineNames().contains(clsAlias)) {
+				this.referencedClasses.put(clsAlias, scope.definedClasses.get(clsAlias));
+			}
+		}
+		for (String methodAlias : scope.definedSubroutines.keySet()) {
+			if (this.getCalledSubroutineNames().contains(methodAlias)) {
+				this.calledSubroutines.put(methodAlias, scope.definedSubroutines.get(methodAlias));
+			}
+		}
+		for (String varAlias : scope.definedVars.keySet()) {
+			if (this.referencedVarNames.contains(varAlias)) {
+				if (!this.referencedVars.containsKey(varAlias)) {
+					this.referencedVars.put(varAlias, new HashSet<>());
+				}
+				for (Variable var : scope.definedVars.get(varAlias)) {
+					this.addVariableDefinition(varAlias, var);
+				}
+			}
+		}
+
+		Scope classScope = scope.copy();
+		classScope.addToScope(this.name, this, false);
+		for (Class cls : this.definedClasses.values()) {
+			cls.resolveDependencies(classScope);
+		}
+
+		Scope methodScope = scope.copy();
+		methodScope.addToScope("", this, true);
+		for (Subroutine m : this.definedSubroutines.values()) {
+			m.resolveDependencies(methodScope);
+		}
+	}
+
+	protected void addVariableDefinition(String name, Variable var) {
+		if (!this.definedVars.containsKey(name)) {
+			this.definedVars.put(name, new HashSet<>());
+		}
+		if (!this.definedVarOfTypeExists(name, var.getVarType())) {
+			this.definedVars.get(name).add(var);
+		}
+
+	}
+
+	private boolean definedVarOfTypeExists(String name, VarType varType) {
+		Set<Variable> sameNameVars = this.definedVars.get(name);
+		for (Variable sameNameVar : sameNameVars) {
+			if (sameNameVar.getVarType() == varType) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

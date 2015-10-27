@@ -181,7 +181,7 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitParameters(@NotNull PythonParser.ParametersContext ctx) {
-			//      '(' typedargslist? ')'
+			//      '(' typedargslist ')' | '(' varargslist? ')'
 			if (ctx.typedargslist() != null) {
 				return ctx.typedargslist().accept(this);
 			}
