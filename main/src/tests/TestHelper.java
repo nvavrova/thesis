@@ -24,7 +24,7 @@ public class TestHelper {
 
 	public static Map<String, Class> getClasses(Project project) {
 		Map<String, Class> classMap = new HashMap<>();
-		project.getModules().forEach(m -> classMap.putAll(m.getDefinedClassesByName()));
+		project.getModules().forEach(m -> classMap.putAll(m.getDefinedClassesInclSubclassesByName()));
 		return classMap;
 	}
 

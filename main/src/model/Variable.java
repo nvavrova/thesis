@@ -22,7 +22,7 @@ public class Variable {
 	}
 
 	public boolean isProtected() {
-		return this.name.startsWith("_");
+		return this.name.startsWith("_") && !this.isPrivate();
 	}
 
 	public boolean isPrivate() {

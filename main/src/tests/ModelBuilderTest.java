@@ -5,6 +5,7 @@ import model.Subroutine;
 import model.Variable;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,11 +57,11 @@ public class ModelBuilderTest {
 		assert (classes.size() == 2);
 
 		Class one = classes.get("ClsOne");
-		assert (one.subroutineCount() == 2);
+		assert (one.getDefinedSubroutines().size() == 2);
 		assert (one.subroutinesWithNoParamsCount() == 1);
 
 		Class two = classes.get("ClsTwo");
-		assert (two.subroutineCount() == 1);
+		assert (two.getDefinedSubroutines().size() == 1);
 	}
 
 	@Test
@@ -98,8 +99,8 @@ public class ModelBuilderTest {
 		Map<String, Class> classes = TestHelper.getClasses("method_variables");
 
 		//TODO: add check for a method using inherited var!
-		Map<String, Subroutine> userCls = classes.get("UserCls").getDefinedSubroutinesByName();
-		Map<String, Subroutine> userCls2 = classes.get("UserCls2").getDefinedSubroutinesByName();
+		Map<String, Subroutine> userCls = this.sortSubroutinesByName(classes.get("UserCls").getDefinedSubroutines());
+		Map<String, Subroutine> userCls2 = this.sortSubroutinesByName(classes.get("UserCls2").getDefinedSubroutines());
 
 		assert (userCls.get("method_one").getUsedNonInstanceVars().size() == 1);
 		assert (userCls.get("method_one").getUsedNonInstanceVars().contains("sc.parent_var"));
@@ -123,10 +124,18 @@ public class ModelBuilderTest {
 	@Test
 	public void checkMethodClassVarUsage() {
 		Map<String, Class> classes = TestHelper.getClasses("method_variables");
-		Map<String, Subroutine> userCls = classes.get("UserCls").getDefinedSubroutinesByName();
+		Map<String, Subroutine> userCls = this.sortSubroutinesByName(classes.get("UserCls").getDefinedSubroutines());
 
 		assert (userCls.get("method_three").getReferencedInstanceVariables().size() == 1);
 		assert (userCls.get("method_three").getReferencedInstanceVariables().contains("self.child_var"));
+	}
+
+	private Map<String, Subroutine> sortSubroutinesByName(Set<Subroutine> containers) {
+		Map<String, Subroutine> sorted = new HashMap<>();
+		for (Subroutine container : containers) {
+			sorted.put(container.getName(), container);
+		}
+		return sorted;
 	}
 
 	@Test

@@ -5,6 +5,7 @@ import db.DataHandler;
 import db.pojo.ProjectEntity;
 import model.ModelBuilder;
 import model.Project;
+import model.VarType;
 import process.File2Tree;
 import util.FileHelper;
 import util.StringHelper;
@@ -60,6 +61,7 @@ public class StatsCollector {
 		header.add("module");
 		header.add("class name");
 		header.add("# of private variables");
+		header.add("# of protected variables");
 		header.add("# of public variables");
 		header.add("# of accessors");
 		header.add("LCOM");
@@ -99,15 +101,16 @@ public class StatsCollector {
 		//TODO: get the module
 //		line.add(c.getModule().getFilePath());
 		line.add(c.getName());
-		line.add(String.valueOf(c.privateVariablesCount()));
-		line.add(String.valueOf(c.publicVariablesCount()));
-		line.add(String.valueOf(c.accessorsCount()));
+		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isPrivate()).count()));
+		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isProtected()).count()));
+		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isPublic()).count()));
+		line.add(String.valueOf(c.getDefinedSubroutines().stream().filter(s -> s.isAccessor()).count()));
 		line.add(String.valueOf(c.getLcom()));
 		line.add(String.valueOf(c.getLoc()));
 		line.add(String.valueOf(c.parentsCount()));
 		line.add(String.valueOf(c.subroutinesWithNoParamsCount()));
-		line.add(String.valueOf(c.referencedGlobalsCount()));
-		line.add(String.valueOf(c.definedGlobalsCount()));
+		line.add(String.valueOf(c.getReferencedGlobals().size()));
+		line.add(String.valueOf(c.getDefinedVariablesOfType(VarType.GLOBAL).size()));
 		return line;
 	}
 

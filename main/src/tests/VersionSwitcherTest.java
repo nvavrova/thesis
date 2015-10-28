@@ -122,7 +122,7 @@ public class VersionSwitcherTest {
 	}
 
 	private Map<String, Class> getClasses(Module module) {
-		return module.getDefinedClasses().stream().collect(Collectors.toMap(k -> k.getName(), v -> v));
+		return module.getDefinedClassesInclSubclassesByName();
 	}
 
 }

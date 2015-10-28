@@ -47,13 +47,13 @@ public class Module extends ContentContainer implements Cloneable {
 	}
 
 	public boolean containsClass(String name) {
-		return this.getDefinedClassesByName().containsKey(name);
+		return this.getDefinedClassesInclSubclassesByName().containsKey(name);
 	}
 
 	public Class getClass(String name) {
-		assert (this.getDefinedClassesByName().containsKey(name));
+		assert (this.getDefinedClassesInclSubclassesByName().containsKey(name));
 
-		return this.getDefinedClassesByName().get(name);
+		return this.getDefinedClassesInclSubclassesByName().get(name);
 	}
 
 	public String getFilePath() {

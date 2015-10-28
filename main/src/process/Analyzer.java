@@ -50,7 +50,11 @@ public class Analyzer {
 
 	public boolean isSpaghettiCode(Class cls) {
 		return this.noInheritance(cls) && this.hasProceduralName(cls.getName()) && this.hasLongMethod(cls)
-				&& this.hasTooManyMethodsWithNoParams(cls) && cls.usesGlobals();
+				&& this.hasTooManyMethodsWithNoParams(cls) && this.usesGlobals(cls);
+	}
+
+	public boolean usesGlobals(Class cls) {
+		return cls.getReferencedGlobals().size() > 1;
 	}
 
 	private Boolean hasControllerName(String name) {
@@ -63,7 +67,8 @@ public class Analyzer {
 
 
 	private boolean isDataClass(Class cls) {
-		return cls.publicVariablesCount() > 11;
+		Long publicVarCount = cls.getDefinedVariables().stream().filter(v -> v.isPrivate()).count();
+		return publicVarCount > 11;
 //		return cls.getNumberOfAccessors() > 5;
 	}
 

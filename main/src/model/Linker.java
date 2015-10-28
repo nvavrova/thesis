@@ -86,7 +86,7 @@ public class Linker {
 
 		if (this.project.hasModule(path)) {
 			Module importedModule = this.project.getModule(path);
-			for (model.Class c : importedModule.getDefinedClasses()) {
+			for (model.Class c : importedModule.getDefinedClassesInclSubclasses()) {
 				sourceModule.addImport(c, c.getName());
 			}
 		}

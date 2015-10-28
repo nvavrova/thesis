@@ -105,14 +105,14 @@ public class Converter {
 
 	private static ClassEntity convert(Class c, ModuleEntity moduleEntity) {
 		ClassEntity clsEnt = new ClassEntity();
-		clsEnt.setModuleEntity(moduleEntity);
-		clsEnt.setLcom(c.getLcom());
-		clsEnt.setLoc(c.getLoc());
-		clsEnt.setName(c.getName());
-		clsEnt.setNrParents(c.parentsCount().shortValue());
-		clsEnt.setNrPrivateVars(c.privateVariablesCount().shortValue());
-		clsEnt.setNrPublicVars(c.publicVariablesCount().shortValue());
-		clsEnt.setNrUsedGlobals(c.referencedGlobalsCount().shortValue());
+//		clsEnt.setModuleEntity(moduleEntity);
+//		clsEnt.setLcom(c.getLcom());
+//		clsEnt.setLoc(c.getLoc());
+//		clsEnt.setName(c.getName());
+//		clsEnt.setNrParents(c.parentsCount().shortValue());
+//		clsEnt.setNrPrivateVars(c.privateVariablesCount().shortValue());
+//		clsEnt.setNrPublicVars(c.publicVariablesCount().shortValue());
+//		clsEnt.setNrUsedGlobals(((Integer) c.getReferencedGlobals().size()).shortValue());
 		return clsEnt;
 	}
 
