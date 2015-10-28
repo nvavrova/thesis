@@ -98,8 +98,15 @@ public abstract class ContentContainer {
 
 	public Set<Variable> getReferencedGlobals() {
 		return this.getReferencedVariables().stream()
-				.filter(v -> v.getVarType() == VarType.GLOBAL)
+				.filter(v -> v.getVarType() == VarType.GLOBAL || test(v))// || (v.getVarType() == VarType.LOCAL && !v.isInAncestorLine(this)))
 				.collect(Collectors.toSet());
+	}
+
+	private boolean test(Variable v) {
+		if (v.getVarType() == VarType.LOCAL) {
+			return !v.isInAncestorLine(this);
+		}
+		return false;
 	}
 
 	public Set<Class> getReferencedClasses() {
@@ -220,4 +227,6 @@ public abstract class ContentContainer {
 	private String prefix(String str, String prefix) {
 		return prefix.equals("") ? str : prefix + "." + str;
 	}
+
+	public abstract boolean isInAncestorLine(ContentContainer container);
 }

@@ -11,15 +11,17 @@ import java.util.stream.Collectors;
  */
 public class Subroutine extends ContentContainer {
 	private final Integer loc;
+	private final ContentContainer parent;
 	private final SubroutineType subroutineType;
 	private final Boolean isAccessor;
 	private final List<String> params;
 
 	private final Set<String> referencedInstanceVariables;
 
-	public Subroutine(String name, Integer loc, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
+	public Subroutine(String name, ContentContainer parent, Integer loc, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
 		super(name);
 		this.loc = loc;
+		this.parent = parent;
 		this.subroutineType = subroutineType;
 		this.params = params;
 		this.isAccessor = isAccessor;
@@ -70,5 +72,13 @@ public class Subroutine extends ContentContainer {
 
 	public Boolean isPrivate() {
 		return this.name.startsWith("__") && !this.name.endsWith("__");
+	}
+
+	@Override
+	public boolean isInAncestorLine(ContentContainer container) {
+		if (this.equals(container)) {
+			return true;
+		}
+		return this.parent.isInAncestorLine(container);
 	}
 }

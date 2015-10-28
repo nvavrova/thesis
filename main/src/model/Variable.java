@@ -6,10 +6,12 @@ package model;
 public class Variable {
 
 	private final String name;
+	private final ContentContainer parent;
 	private final VarType varType;
 
-	public Variable(String name, VarType varType) {
+	public Variable(String name, ContentContainer parent, VarType varType) {
 		this.name = name;
+		this.parent = parent;
 		this.varType = varType;
 	}
 
@@ -31,5 +33,9 @@ public class Variable {
 
 	public boolean isPublic() {
 		return !this.isPrivate() && !this.isProtected();
+	}
+
+	public boolean isInAncestorLine(ContentContainer container) {
+		return container.isInAncestorLine(this.parent);
 	}
 }

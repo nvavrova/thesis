@@ -1,13 +1,12 @@
 package model;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by Nik on 26-10-2015
  */
-public class Scope extends ContentContainer implements Cloneable {
+public class Scope extends ContentContainer {
 
 	public Scope() {
 		super("");
@@ -15,6 +14,11 @@ public class Scope extends ContentContainer implements Cloneable {
 
 	@Override
 	public void resolveDependencies(Scope scope) {
+	}
+
+	@Override
+	public boolean isInAncestorLine(ContentContainer container) {
+		throw new IllegalAccessError();
 	}
 
 	public void addToScope(String prefix, ContentContainer container, Boolean passInstanceObjects) {
@@ -74,9 +78,6 @@ public class Scope extends ContentContainer implements Cloneable {
 			for (Variable var : vars) {
 				String name = this.getAddedVariableName(var.getVarType(), defVarName, prefix, instancePrefix);
 				if (passInstanceObjects || var.getVarType() != VarType.INSTANCE) {
-					if (!this.definedVars.containsKey(name)) {
-						this.definedVars.put(name, new HashSet<>());
-					}
 					this.addVariableDefinition(name, var);
 				}
 			}
@@ -87,11 +88,8 @@ public class Scope extends ContentContainer implements Cloneable {
 		if (varType == VarType.INSTANCE) {
 			return this.addPrefix(defVarName, instancePrefix); //, true
 		}
-		if (varType == VarType.CLASS) {
+		if (varType == VarType.CLASS || varType == VarType.LOCAL || varType == VarType.GLOBAL) {
 			return this.addPrefix(defVarName, prefix);
-		}
-		if (varType == VarType.LOCAL || varType == VarType.GLOBAL) {
-			return defVarName;
 		}
 		throw new IllegalArgumentException("Unknown variable type");
 	}

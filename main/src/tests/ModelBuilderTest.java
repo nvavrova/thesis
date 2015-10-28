@@ -68,30 +68,24 @@ public class ModelBuilderTest {
 	public void collectGlobals() {
 		Map<String, Class> classes = TestHelper.getClasses("globals");
 
-		Set<String> srcCls = classes.get("SrcCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
-		Set<String> usrCls = classes.get("UsrCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
-		Set<String> firstTestCls = classes.get("FirstTestCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
-		Set<String> secondTestCls = classes.get("SecondTestCls").getReferencedGlobals().stream().map(v -> v.getName()).collect(Collectors.toSet());
+		Map<String, Variable> srcCls = this.sortVarsByName(classes.get("SrcCls").getReferencedGlobals());
+		Map<String, Variable> usrCls = this.sortVarsByName(classes.get("UsrCls").getReferencedGlobals());
+		Map<String, Variable> firstTestCls = this.sortVarsByName(classes.get("FirstTestCls").getReferencedGlobals());
+		Map<String, Variable> secondTestCls = this.sortVarsByName(classes.get("SecondTestCls").getReferencedGlobals());
 
 		assert (srcCls.size() == 1);
-		assert (srcCls.contains("non_cls_glob"));
-		assert (!srcCls.contains("var"));
+		assert (srcCls.keySet().contains("non_cls_glob"));
+		assert (!srcCls.keySet().contains("var"));
 
 		assert (usrCls.size() == 3);
-		assert (usrCls.contains("s.var"));
-		assert (usrCls.contains("s.non_cls_glob"));
-		assert (usrCls.contains("Multiplier.multip2"));
-		assert (!usrCls.contains("Multiplier.multiplier"));
-		assert (!usrCls.contains("UsrCls.multiplier"));
+		assert (usrCls.keySet().contains("var"));
+		assert (usrCls.keySet().contains("non_cls_glob"));
+		assert (usrCls.keySet().contains("multip2"));
 
 		assert (firstTestCls.size() == 0);
-		assert (!firstTestCls.contains("sc.first"));
 
 		assert (secondTestCls.size() == 1);
-		assert (secondTestCls.contains("sc.cls_glob"));
-		assert (!secondTestCls.contains("sc.first"));
-		assert (!secondTestCls.contains("sc.third"));
-		assert (!secondTestCls.contains("sc.met"));
+		assert (secondTestCls.keySet().contains("cls_glob"));
 	}
 
 	@Test
@@ -130,14 +124,6 @@ public class ModelBuilderTest {
 		assert (userCls.get("method_three").getReferencedInstanceVariables().contains("self.child_var"));
 	}
 
-	private Map<String, Subroutine> sortSubroutinesByName(Set<Subroutine> containers) {
-		Map<String, Subroutine> sorted = new HashMap<>();
-		for (Subroutine container : containers) {
-			sorted.put(container.getName(), container);
-		}
-		return sorted;
-	}
-
 	@Test
 	public void checkParentDependencies() {
 		Map<String, Class> classes = TestHelper.getClasses("parents");
@@ -170,5 +156,21 @@ public class ModelBuilderTest {
 		Set<Class> dependencies2 = main2.getReferencedClasses();
 		assert (dependencies2.size() == 1);
 		assert (dependencies2.contains(classes.get("Base1")));
+	}
+
+	private Map<String, Subroutine> sortSubroutinesByName(Set<Subroutine> subroutines) {
+		Map<String, Subroutine> sorted = new HashMap<>();
+		for (Subroutine subroutine : subroutines) {
+			sorted.put(subroutine.getName(), subroutine);
+		}
+		return sorted;
+	}
+	
+	private Map<String, Variable> sortVarsByName(Set<Variable> vars) {
+		Map<String, Variable> sorted = new HashMap<>();
+		for (Variable var : vars) {
+			sorted.put(var.getName(), var);
+		}
+		return sorted;
 	}
 }

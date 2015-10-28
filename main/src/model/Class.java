@@ -9,12 +9,14 @@ import java.util.stream.Collectors;
 public class Class extends ContentContainer {
 
 	private final Integer loc;
+	private final ContentContainer parent;
 	private final List<String> parents;
 	private final Map<String, Class> dependentOn;
 
-	public Class(String name, Integer loc, List<String> parents) {
+	public Class(String name, ContentContainer parent, Integer loc, List<String> parents) {
 		super(name);
 		this.loc = loc;
+		this.parent = parent;
 		this.parents = parents;
 		this.dependentOn = new HashMap<>();
 	}
@@ -68,5 +70,13 @@ public class Class extends ContentContainer {
 				this.referencedClasses.put(clsName, scope.definedClasses.get(clsName));
 			}
 		}
+	}
+
+	@Override
+	public boolean isInAncestorLine(ContentContainer container) {
+		if (this.equals(container)) {
+			return true;
+		}
+		return this.parent.isInAncestorLine(container);
 	}
 }

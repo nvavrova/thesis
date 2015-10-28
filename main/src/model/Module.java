@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by Nik on 21-07-2015
  */
-public class Module extends ContentContainer implements Cloneable {
+public class Module extends ContentContainer {
 
 	private final String filePath;
 	private final String error;
@@ -66,5 +66,10 @@ public class Module extends ContentContainer implements Cloneable {
 
 	@Override
 	public void resolveDependencies(Scope scope) {
+	}
+
+	@Override
+	public boolean isInAncestorLine(ContentContainer container) {
+		return this.equals(container);
 	}
 }

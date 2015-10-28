@@ -193,7 +193,7 @@ public class ModelBuilder {
 					.map(p -> p.getValue().toString())
 					.collect(Collectors.toList());
 
-			Class c = new Class(n.getName().getValue(), locInfo, parents);
+			Class c = new Class(n.getName().getValue(), this.getCurrentContainer(), locInfo, parents);
 			this.getCurrentContainer().addClassDefinition(c);
 
 			this.classes.push(c);
@@ -220,7 +220,7 @@ public class ModelBuilder {
 					.collect(Collectors.toList());
 			SubroutineType type = !this.inClass() ? SubroutineType.FUNCTION :
 					(n.isStatic() ? SubroutineType.STATIC_METHOD : SubroutineType.INSTANCE_METHOD);
-			Subroutine subroutine = new Subroutine(n.getNameString(), n.getLocInfo(), type, paramNames, n.isAccessor());
+			Subroutine subroutine = new Subroutine(n.getNameString(), this.getCurrentContainer(), n.getLocInfo(), type, paramNames, n.isAccessor());
 			this.getCurrentContainer().addSubroutineDefinition(subroutine);
 
 			this.subroutines.push(subroutine);
@@ -303,13 +303,9 @@ public class ModelBuilder {
 		}
 
 		private void addVarDef(String name, VarType varType) {
-			Variable var = new Variable(name, varType);
-			if (varType == VarType.CLASS || varType == VarType.INSTANCE) {
-				this.getCurrentClass().addVariableDefinition(var);
-			}
-			else {
-				this.getCurrentContainer().addVariableDefinition(var);
-			}
+			ContentContainer parent = varType == VarType.CLASS || varType == VarType.INSTANCE ? this.getCurrentClass() : this.getCurrentContainer();
+			Variable var = new Variable(name, parent, varType);
+			parent.addVariableDefinition(var);
 		}
 
 		@Override
