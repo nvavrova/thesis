@@ -168,34 +168,56 @@ public abstract class ContentContainer {
 	//----------------------------------------------- OTHER -----------------------------------------------\\
 	//-----------------------------------------------------------------------------------------------------\\
 	public void resolveDependencies(Scope scope) {
-		for (String clsAlias : scope.definedClasses.keySet()) {
-			if (this.calledSubroutineNames.contains(clsAlias)) {
-				this.referencedClasses.put(clsAlias, scope.definedClasses.get(clsAlias));
-			}
-		}
-		for (String methodAlias : scope.definedSubroutines.keySet()) {
-			if (this.calledSubroutineNames.contains(methodAlias)) {
-				this.calledSubroutines.put(methodAlias, scope.definedSubroutines.get(methodAlias));
-			}
-		}
-		for (String varAlias : scope.definedVars.keySet()) {
-			if (this.referencedVarNames.contains(varAlias)) {
-				for (Variable var : scope.definedVars.get(varAlias)) {
-					this.addVariableReference(varAlias, var);
-				}
-			}
-		}
+		this.resolveDependencies("", scope);
 
 		Scope classScope = scope.copy();
 		classScope.addToScope(this.name, this, false);
 		for (Class cls : this.definedClasses.values()) {
-			cls.resolveDependencies(classScope);
+			if (!cls.equals(this)) {
+				cls.resolveDependencies(classScope);
+			}
 		}
 
 		Scope methodScope = scope.copy();
 		methodScope.addToScope("", this, true);
 		for (Subroutine m : this.definedSubroutines.values()) {
-			m.resolveDependencies(methodScope);
+			if (!m.equals(this)) {
+				m.resolveDependencies(methodScope);
+			}
 		}
+	}
+
+	private void resolveDependencies(String prefix, ContentContainer scopePart) {
+		if (scopePart.equals(this)) {
+			return;
+		}
+		for (String alias : scopePart.definedClasses.keySet()) {
+			String prefixedAlias = this.prefix(alias, prefix);
+			if (this.calledSubroutineNames.contains(prefixedAlias)) {
+				this.referencedClasses.put(prefixedAlias, scopePart.definedClasses.get(alias));
+			}
+			this.resolveDependencies(prefixedAlias, scopePart.definedClasses.get(alias));
+		}
+
+		for (String alias : scopePart.definedSubroutines.keySet()) {
+			String prefixedAlias = this.prefix(alias, prefix);
+			if (this.calledSubroutineNames.contains(prefixedAlias)) {
+				this.calledSubroutines.put(prefixedAlias, scopePart.definedSubroutines.get(alias));
+			}
+			this.resolveDependencies(prefixedAlias, scopePart.definedSubroutines.get(alias));
+		}
+
+		for (String alias : scopePart.definedVars.keySet()) {
+			String prefixedAlias = this.prefix(alias, prefix);
+			if (this.referencedVarNames.contains(prefixedAlias)) {
+				for (Variable var : scopePart.definedVars.get(alias)) {
+					this.addVariableReference(prefixedAlias, var);
+				}
+			}
+		}
+	}
+
+	private String prefix(String str, String prefix) {
+		return prefix.equals("") ? str : prefix + "." + str;
 	}
 }
