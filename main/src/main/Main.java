@@ -2,7 +2,6 @@ package main;
 
 import process.NonVersionedProcessor;
 import process.Processor;
-import process.VersionedProcessor;
 
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ public class Main {
 //		System.setOut(out);
 //		System.setErr(err);
 
-		Processor processor = args.length == 0 ? new VersionedProcessor(false) : new NonVersionedProcessor(args[0]);
+		Processor processor = new NonVersionedProcessor(args[0]);
 		processor.process();
 	}
 

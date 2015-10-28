@@ -1,7 +1,5 @@
 package mining;
 
-import db.DataHandler;
-import db.pojo.ProjectEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.FileHelper;
@@ -30,13 +28,13 @@ public class Miner {
 		System.setOut(out);
 		System.setErr(err);
 
-		for (ProjectEntity pe : DataHandler.loadProjects()){
-			Miner miner = new Miner(pe.getOwner(), pe.getRepo(), pe.getBugLabel());
-			Bugs bugs = miner.mine();
-
-			DataHandler dataHandler = new DataHandler(pe);
-			dataHandler.save(bugs);
-		}
+//		for (ProjectEntity pe : DataHandler.loadProjects()){
+//			Miner miner = new Miner(pe.getOwner(), pe.getRepo(), pe.getBugLabel());
+//			Bugs bugs = miner.mine();
+//
+//			DataHandler dataHandler = new DataHandler(pe);
+//			dataHandler.save(bugs);
+//		}
 	}
 
 	public Miner(String owner, String repo, String bugLabel) {

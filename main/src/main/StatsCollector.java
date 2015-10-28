@@ -1,8 +1,6 @@
 package main;
 
 import ast.Module;
-import db.DataHandler;
-import db.pojo.ProjectEntity;
 import model.ModelBuilder;
 import model.Project;
 import model.VarType;
@@ -14,7 +12,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 08-10-2015
@@ -39,18 +36,6 @@ public class StatsCollector {
 //			subfolders.add(new File("D:\\intellij_projects\\thesis\\data\\asyncio"));
 			StatsCollector.createStatsCsv(subfolders);
 		}
-		else {
-			List<ProjectEntity> projectEntities = DataHandler.loadProjects();
-			StatsCollector.createStatsCsvForProjects(projectEntities);
-		}
-	}
-
-
-	private static void createStatsCsvForProjects(List<ProjectEntity> projectEntities) throws FileNotFoundException {
-		List<File> projectFolders = projectEntities.stream()
-				.map(p -> new File(p.getDiskLocation()))
-				.collect(Collectors.toList());
-		StatsCollector.createStatsCsv(projectFolders);
 	}
 
 	private static void createStatsCsv(List<File> projectFolders) throws FileNotFoundException {
