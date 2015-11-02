@@ -251,7 +251,7 @@ public class ModelBuilder {
 		public Void visit(Identifier n) {
 			this.addVarDef(n.getValue());
 			this.addVarRef(n.getValue());
-			this.setAssignVar(n.getValue());
+			this.setAssignVar((String) n.getValue());
 			return null;
 		}
 
@@ -259,7 +259,7 @@ public class ModelBuilder {
 		public Void visit(AttributeRef n) {
 			this.addVarDef(n.toString());
 			this.addVarRef(n.toString());
-			this.setAssignVar(n.toString());
+			this.setAssignVar((String) n.toString());
 //			this.visitChildren(n);
 			return null;
 		}

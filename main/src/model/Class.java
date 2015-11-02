@@ -128,6 +128,9 @@ public class Class extends ContentContainer {
 
 	@Override
 	public boolean isInParentLine(ContentContainer container) {
-		return this.equals(container) || this.parent.isInParentLine(container);
+		if (this.equals(container)) {
+			return true;
+		}
+		return this.parent.isInParentLine(container);
 	}
 }
