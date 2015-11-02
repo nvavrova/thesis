@@ -19,6 +19,7 @@ import ast.expression.nocond.atom.numeric.Imaginary;
 import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
+import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
 import ast.expression.nocond.logical.And;
 import ast.expression.nocond.logical.Comparison;

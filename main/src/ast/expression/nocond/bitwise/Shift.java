@@ -1,27 +1,21 @@
-package ast.expression.nocond;
+package ast.expression.nocond.bitwise;
 
+import ast.Visitor;
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
 import java.util.List;
 
 /**
  * Created by Nik on 10-06-2015
  */
-public class Shift extends NonConditional {
+public class Shift extends Bitwise {
 
-	private final List<Expr> operands;
 	private final List<String> operators;
 
 	public Shift(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
-		super(locInfo);
-		this.operands = operands;
+		super(locInfo, operands);
 		this.operators = operators;
-	}
-
-	public List<Expr> getOperands() {
-		return this.operands;
 	}
 
 	public List<String> getOperators() {

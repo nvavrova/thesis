@@ -9,7 +9,7 @@ import ast.expression.compiter.CompIf;
 import ast.expression.nocond.Arithmetic;
 import ast.expression.nocond.LambdaNoCond;
 import ast.expression.nocond.Power;
-import ast.expression.nocond.Shift;
+import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.numeric.Float;
 import ast.expression.nocond.atom.numeric.Imaginary;
