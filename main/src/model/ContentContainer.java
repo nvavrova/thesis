@@ -166,10 +166,10 @@ public abstract class ContentContainer extends ContentDefinitions {
 	}
 
 	private void resolveVarReferences(String prefix, ContentDefinitions scopePart) {
-		for (String alias : scopePart.getDefinedVarsInclParentsVars().keySet()) {
+		for (String alias : scopePart.getDefinedVarsInclParentsVars().getNames()) {
 			String prefixedAlias = this.prefix(alias, prefix);
 			if (this.referencedVarNames.contains(prefixedAlias)) {
-				for (Variable var : scopePart.getDefinedVarsInclParentsVars().get(alias)) {
+				for (Variable var : scopePart.getDefinedVarsInclParentsVars().getVarsWithName(alias)) {
 					this.addVariableReference(prefixedAlias, var);
 				}
 			}

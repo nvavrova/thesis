@@ -1,7 +1,6 @@
 package model;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Nik on 26-10-2015
@@ -14,7 +13,7 @@ public class Scope extends ContentDefinitions {
 		super();
 		this.definedClasses.putAll(definitions.definedClasses);
 		this.definedSubroutines.putAll(definitions.definedSubroutines);
-		this.definedVars.putAll(definitions.definedVars);
+		this.definedVars.addAllUnrestricted(definitions.definedVars);
 	}
 
 	public void addToScope(String prefix, ContentContainer container, Boolean passInstanceObjects) {
@@ -64,10 +63,9 @@ public class Scope extends ContentDefinitions {
 		throw new IllegalArgumentException("Unknown subroutine type");
 	}
 
-	private void addVariablesToScope(String prefix, String instancePrefix, Map<String, Set<Variable>> variables, Boolean passInstanceObjects) {
-		for (String defVarName : variables.keySet()) {
-			Set<Variable> vars = variables.get(defVarName);
-			for (Variable var : vars) {
+	private void addVariablesToScope(String prefix, String instancePrefix, VarDefinitions variables, Boolean passInstanceObjects) {
+		for (String defVarName : variables.getNames()) {
+			for (Variable var : variables.getVarsWithName(defVarName)) {
 				String name = this.getAddedVariableName(var.getVarType(), defVarName, prefix, instancePrefix);
 				if (passInstanceObjects || var.getVarType() != VarType.INSTANCE) {
 					this.addVariableDefinition(name, var);
@@ -105,7 +103,7 @@ public class Scope extends ContentDefinitions {
 		Scope scope = new Scope();
 		scope.definedClasses.putAll(this.definedClasses);
 		scope.definedSubroutines.putAll(this.definedSubroutines);
-		scope.definedVars.putAll(this.definedVars);
+		scope.definedVars.addAllUnrestricted(this.definedVars);
 		return scope;
 	}
 }

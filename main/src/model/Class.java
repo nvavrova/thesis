@@ -13,7 +13,7 @@ public class Class extends ContentContainer {
 	private final List<String> parentNames;
 	private final Map<String, Class> parents;
 
-	private final Map<String, Set<Variable>> inheritedVars;
+	private final VarDefinitions inheritedVars;
 
 	public Class(String name, ContentContainer parent, Integer loc, List<String> parentNames) {
 		super(name);
@@ -22,7 +22,7 @@ public class Class extends ContentContainer {
 		this.parentNames = parentNames;
 		this.parents = new HashMap<>();
 
-		this.inheritedVars = new HashMap<>();
+		this.inheritedVars = new VarDefinitions();
 	}
 
 	@Override
@@ -43,11 +43,11 @@ public class Class extends ContentContainer {
 	}
 
 	@Override
-	public Map<String, Set<Variable>> getDefinedVarsInclParentsVars() {
-		Map<String, Set<Variable>> vars = new HashMap<>();
-		this.add(vars, this.inheritedVars);
-		this.parents.values().forEach(p -> this.add(vars, p.getDefinedVarsInclParentsVars()));
-		this.add(vars, super.getDefinedVarsInclParentsVars());
+	public VarDefinitions getDefinedVarsInclParentsVars() {
+		VarDefinitions vars = new VarDefinitions();
+		this.parents.values().forEach(p -> vars.addAllUnrestricted(p.getDefinedVarsInclParentsVars()));
+		vars.addAllEnforceRestriction(this.inheritedVars);
+		vars.addAllEnforceRestriction(this.definedVars);
 		return vars;
 	}
 
@@ -94,29 +94,26 @@ public class Class extends ContentContainer {
 	public void copyParentVars() {
 		super.copyParentVars();
 		for (Class parent : this.parents.values()) {
-			Map<String, Set<Variable>> parentVars = parent.getParentVars();
-			for (String varName : parentVars.keySet()) {
+			VarDefinitions parentVars = parent.getParentVars();
+			for (String varName : parentVars.getNames()) {
 				this.addInheritedVars(parentVars, varName);
 			}
 		}
 	}
 
-	private void addInheritedVars(Map<String, Set<Variable>> parentVars, String varName) {
-		if (!this.inheritedVars.containsKey(varName)) {
-			this.inheritedVars.put(varName, new HashSet<>());
-		}
-		for (Variable var : parentVars.get(varName)) {
+	private void addInheritedVars(VarDefinitions parentVars, String varName) {
+		for (Variable var : parentVars.getVarsWithName(varName)) {
 			Variable copy = new Variable(var.getName(), this, var.getVarType());
-			this.inheritedVars.get(varName).add(copy);
+			this.inheritedVars.addUnrestricted(varName, copy);
 		}
 	}
 
-	private Map<String, Set<Variable>> getParentVars() {
-		Map<String, Set<Variable>> vars = new HashMap<>();
+	private VarDefinitions getParentVars() {
+		VarDefinitions vars = new VarDefinitions();
 		for (Class parent : this.parents.values()) {
-			this.add(vars, parent.getParentVars());
+			vars.addAllUnrestricted(parent.getParentVars());
 		}
-		this.add(vars, this.definedVars);
+		vars.addAllUnrestricted(this.definedVars);
 		return vars;
 	}
 

@@ -11,32 +11,26 @@ import java.util.stream.Collectors;
  */
 public abstract class ContentDefinitions {
 
-	//this is a set instead of a single variable
-	//because of the special situation of defining a class and instance variable at the same time (with the same name)
-	protected final Map<String, Set<Variable>> definedVars;
+	protected final VarDefinitions definedVars;
 	protected final Map<String, Subroutine> definedSubroutines;
 	protected final Map<String, Class> definedClasses;
 
 	public ContentDefinitions() {
 		this.definedSubroutines = new HashMap<>();
-		this.definedVars = new HashMap<>();
+		this.definedVars = new VarDefinitions();
 		this.definedClasses = new HashMap<>();
 	}
 
-	public Map<String, Set<Variable>> getDefinedVarsInclParentsVars() {
+	public VarDefinitions getDefinedVarsInclParentsVars() {
 		return this.definedVars;
 	}
 
 	public Set<Variable> getDefinedVariablesSet() {
-		Set<Variable> defVars = new HashSet<>();
-		this.definedVars.values().forEach(defVars::addAll);
-		return defVars;
+		return this.definedVars.getAsSet();
 	}
 
 	public Set<Variable> getDefinedVariablesOfTypeSet(VarType varType) {
-		return this.getDefinedVariablesSet().stream()
-				.filter(var -> var.getVarType() == varType)
-				.collect(Collectors.toSet());
+		return this.definedVars.getAsSetOfType(varType);
 	}
 
 	public Set<Subroutine> getDefinedSubroutinesSet() {
@@ -66,27 +60,11 @@ public abstract class ContentDefinitions {
 		return children;
 	}
 
-
 	public void addVariableDefinition(Variable var) {
 		this.addVariableDefinition(var.getName(), var);
 	}
 
 	protected void addVariableDefinition(String name, Variable var) {
-		if (!this.definedVars.containsKey(name)) {
-			this.definedVars.put(name, new HashSet<>());
-		}
-		if (!this.definedVarOfTypeExists(name, var.getVarType())) {
-			this.definedVars.get(name).add(var);
-		}
-	}
-
-	private boolean definedVarOfTypeExists(String name, VarType varType) {
-		Set<Variable> sameNameVars = this.definedVars.get(name);
-		for (Variable sameNameVar : sameNameVars) {
-			if (sameNameVar.getVarType() == varType) {
-				return true;
-			}
-		}
-		return false;
+		this.definedVars.add(name, var);
 	}
 }

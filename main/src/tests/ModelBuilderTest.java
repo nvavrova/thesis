@@ -38,17 +38,11 @@ public class ModelBuilderTest {
 
 		Class one = classes.get("ClsOne");
 		Set<Variable> oneVars = one.getDefinedVariablesSet();
-		assert (oneVars.size() == 2);
-//		assert (oneVars.contains("self.var"));
-//		assert (oneVars.contains("ClsOne.var"));
+		assert (oneVars.size() == 2); //self.var & ClsOne.var
 
 		Class two = classes.get("ClsTwo");
 		Set<String> twoVars = two.getDefinedVariablesSet().stream().map(v -> v.getName()).collect(Collectors.toSet());
-		assert (twoVars.size() == 3);
-//		assert (twoVars.contains("self.varr"));
-//		assert (twoVars.contains("self.co"));
-//		assert (twoVars.contains("self.co2"));
-//		assert (!twoVars.contains("self.co.var"));
+		assert (twoVars.size() == 3); //self.varr, self.co & self.co2
 	}
 
 	@Test
@@ -96,16 +90,10 @@ public class ModelBuilderTest {
 		Map<String, Subroutine> userCls2 = this.sortSubroutinesByName(classes.get("UserCls2").getDefinedSubroutinesSet());
 
 		assert (userCls.get("method_one").getReferencedOutsideVariables().size() == 1); //parent_var
-
-//		assert (userCls.get("method_two").getReferencedOutsideVariables().size() == 2); //parent_var & child_var
-
-		assert (userCls2.get("method_three").getReferencedOutsideVariables().size() == 1); //out_of_cls_var
-
-//		assert (userCls2.get("method_one").getReferencedOutsideVariables().size() == 1); //parent_var
-		classes.get("SrcExtendedClass");
-
-//		System.out.println(userCls2.get("method_two").getReferencedVariablesSet().size());
+		assert (userCls.get("method_two").getReferencedOutsideVariables().size() == 2); //parent_var & child_var
+		assert (userCls2.get("method_one").getReferencedOutsideVariables().size() == 1); //parent_var
 		assert (userCls2.get("method_two").getReferencedOutsideVariables().size() == 3); //parent_var, parent_var & child_var
+		assert (userCls2.get("method_three").getReferencedOutsideVariables().size() == 1); //out_of_cls_var
 	}
 
 	@Test
