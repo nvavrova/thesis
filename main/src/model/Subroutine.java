@@ -16,8 +16,6 @@ public class Subroutine extends ContentContainer {
 	private final Boolean isAccessor;
 	private final List<String> params;
 
-	private final Set<String> referencedInstanceVariables;
-
 	public Subroutine(String name, ContentContainer parent, Integer loc, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
 		super(name);
 		this.loc = loc;
@@ -25,8 +23,6 @@ public class Subroutine extends ContentContainer {
 		this.subroutineType = subroutineType;
 		this.params = params;
 		this.isAccessor = isAccessor;
-
-		this.referencedInstanceVariables = new HashSet<>();
 	}
 
 	public Integer getLoc() {
@@ -35,27 +31,38 @@ public class Subroutine extends ContentContainer {
 
 	public Integer getAid() {
 		//Access of Import Data: Number of data members accessed in a method directly or via accessor-methods, from which the definition-class of the method is not derived.
-		//TODO: add used accessors
-		return this.referencedVarNames.size() - this.getReferencedInstanceVariables().size();
+		//TODO: add accessors
+		return this.getReferencedOutsideVariables().size();
 	}
 
 	public Integer getAld() {
 		//Access of Local Data: Number of the data members accessed in the given method, which are local to the class where the method is defined.
-		return this.getReferencedInstanceVariables().size();
+		//TODO: add accessors?
+		return this.getReferencedInsideVariables().size();
 	}
 
 	public Integer paramCount() {
 		return this.params.size();
 	}
 
-	public Set<String> getReferencedInstanceVariables() {
-		return this.referencedInstanceVariables;
+	public Set<Variable> getReferencedInsideVariables() {
+		Set<Variable> referencedVars = new HashSet<>();
+		for (Set<Variable> vars : this.referencedVars.values()) {
+			referencedVars.addAll(vars.stream()
+					.filter(v -> v.definedInParentOf(this))
+					.collect(Collectors.toSet()));
+		}
+		return referencedVars;
 	}
 
-	public Set<String> getUsedNonInstanceVars() {
-		Set<String> copyReferencedVars = this.referencedVarNames.stream().collect(Collectors.toSet());
-		copyReferencedVars.removeAll(this.referencedInstanceVariables);
-		return copyReferencedVars;
+	public Set<Variable> getReferencedOutsideVariables() {
+		Set<Variable> referencedVars = new HashSet<>();
+		for (Set<Variable> vars : this.referencedVars.values()) {
+			referencedVars.addAll(vars.stream()
+					.filter(v -> !v.definedInParentOf(this))
+					.collect(Collectors.toSet()));
+		}
+		return referencedVars;
 	}
 
 	public Boolean isAccessor() {
@@ -67,7 +74,7 @@ public class Subroutine extends ContentContainer {
 	}
 
 	public Boolean hasVariableIntersection(Subroutine m) {
-		return !Collections.disjoint(this.referencedInstanceVariables, m.getReferencedInstanceVariables());
+		return !Collections.disjoint(this.getReferencedInsideVariables(), m.getReferencedInsideVariables());
 	}
 
 	public Boolean isPrivate() {
@@ -75,10 +82,10 @@ public class Subroutine extends ContentContainer {
 	}
 
 	@Override
-	public boolean isInAncestorLine(ContentContainer container) {
+	public boolean isInParentLine(ContentContainer container) {
 		if (this.equals(container)) {
 			return true;
 		}
-		return this.parent.isInAncestorLine(container);
+		return this.parent.isInParentLine(container);
 	}
 }

@@ -6,39 +6,33 @@ import java.util.stream.Collectors;
 /**
  * Created by Nik on 20-10-2015
  */
-public abstract class ContentContainer {
+public abstract class ContentContainer extends ContentDefinitions {
 
 	protected final String name;
 
-	//variables
-	//this is a set instead of a single variable
-	//because of the special situation of defining a class and instance variable at the same time (with the same name)
-	protected final Map<String, Set<Variable>> definedVars;
 	protected final Map<String, Set<Variable>> referencedVars;
 
 	protected final Set<String> referencedVarNames;
-	//subroutines
-	protected final Map<String, Subroutine> definedSubroutines;
 	protected final Map<String, Subroutine> calledSubroutines;
 
 	protected final Set<String> calledSubroutineNames;
-	//classes
-	protected final Map<String, Class> definedClasses;
 	protected final Map<String, Class> referencedClasses;
 
+	protected final List<Assign> assigns;
+
 	public ContentContainer(String name) {
+		super();
 		this.name = name;
 
-		this.definedVars = new HashMap<>();
 		this.referencedVars = new HashMap<>();
 		this.referencedVarNames = new HashSet<>();
 
-		this.definedSubroutines = new HashMap<>();
 		this.calledSubroutines = new HashMap<>();
 		this.calledSubroutineNames = new HashSet<>();
 
-		this.definedClasses = new HashMap<>();
 		this.referencedClasses = new HashMap<>();
+
+		this.assigns = new ArrayList<>();
 	}
 
 
@@ -50,68 +44,22 @@ public abstract class ContentContainer {
 		return this.name;
 	}
 
-	public Set<Variable> getDefinedVariables() {
-		Set<Variable> defVars = new HashSet<>();
-		this.definedVars.values().forEach(defVars::addAll);
-		return defVars;
-	}
-
-	public Set<Variable> getDefinedVariablesOfType(VarType varType) {
-		return this.getDefinedVariables().stream()
-				.filter(var -> var.getVarType() == varType)
-				.collect(Collectors.toSet());
-	}
-
-	public Set<Subroutine> getDefinedSubroutines() {
-		return this.definedSubroutines.values().stream().collect(Collectors.toSet());
-	}
-
-	public Set<Class> getDefinedClassesInclSubclasses() {
-		return this.getDefinedClassesInclSubclassesByName().values().stream().collect(Collectors.toSet());
-	}
-
-	public Map<String, Class> getDefinedClassesInclSubclassesByName() {
-		Map<String, Class> classes = new HashMap<>();
-		classes.putAll(this.definedClasses);
-		for (ContentContainer cc : this.getChildren()) {
-			Map<String, Class> childClasses = cc.getDefinedClassesInclSubclassesByName();
-			for (String key : childClasses.keySet()) {
-				classes.put(cc.getName() + '.' + key, childClasses.get(key));
-			}
-		}
-		return classes;
-	}
-
-	public Set<ContentContainer> getChildren() {
-		Set<ContentContainer> children = new HashSet<>();
-		children.addAll(this.definedClasses.values());
-		children.addAll(this.definedSubroutines.values());
-		return children;
-	}
-
-	public Set<Variable> getReferencedVariables() {
+	public Set<Variable> getReferencedVariablesSet() {
 		Set<Variable> refVars = new HashSet<>();
 		this.referencedVars.values().forEach(refVars::addAll);
-		this.getChildren().forEach(c -> refVars.addAll(c.getReferencedVariables()));
+		this.getChildren().forEach(c -> refVars.addAll(c.getReferencedVariablesSet()));
 		return refVars;
 	}
 
-	public Set<Variable> getReferencedGlobals() {
-		return this.getReferencedVariables().stream()
-				.filter(v -> v.getVarType() == VarType.GLOBAL || test(v))// || (v.getVarType() == VarType.LOCAL && !v.isInAncestorLine(this)))
+	public Set<Variable> getReferencedGlobalsSet() {
+		return this.getReferencedVariablesSet().stream()
+				.filter(v -> v.getVarType() == VarType.GLOBAL || (v.getVarType() == VarType.LOCAL && !v.definedInParentOf(this)))
 				.collect(Collectors.toSet());
 	}
 
-	private boolean test(Variable v) {
-		if (v.getVarType() == VarType.LOCAL) {
-			return !v.isInAncestorLine(this);
-		}
-		return false;
-	}
-
-	public Set<Class> getReferencedClasses() {
+	public Set<Class> getReferencedClassesSet() {
 		Set<Class> classes = this.referencedClasses.values().stream().collect(Collectors.toSet());
-		this.getChildren().forEach(c -> classes.addAll(c.getReferencedClasses()));
+		this.getChildren().forEach(c -> classes.addAll(c.getReferencedClassesSet()));
 		return classes;
 	}
 
@@ -125,10 +73,6 @@ public abstract class ContentContainer {
 	//-----------------------------------------------------------------------------------------------------\\
 	//---------------------------------------------- ADDERS -----------------------------------------------\\
 	//-----------------------------------------------------------------------------------------------------\\
-	public void addVariableDefinition(Variable var) {
-		this.addVariableDefinition(var.getName(), var);
-	}
-
 	public void addVariableReference(String varName) {
 		this.referencedVarNames.add(varName);
 	}
@@ -152,23 +96,8 @@ public abstract class ContentContainer {
 		this.referencedVars.get(name).add(var);
 	}
 
-	protected void addVariableDefinition(String name, Variable var) {
-		if (!this.definedVars.containsKey(name)) {
-			this.definedVars.put(name, new HashSet<>());
-		}
-		if (!this.definedVarOfTypeExists(name, var.getVarType())) {
-			this.definedVars.get(name).add(var);
-		}
-	}
-
-	private boolean definedVarOfTypeExists(String name, VarType varType) {
-		Set<Variable> sameNameVars = this.definedVars.get(name);
-		for (Variable sameNameVar : sameNameVars) {
-			if (sameNameVar.getVarType() == varType) {
-				return true;
-			}
-		}
-		return false;
+	public void addAssign(Assign assign) {
+		this.assigns.add(assign);
 	}
 
 	//-----------------------------------------------------------------------------------------------------\\
@@ -194,32 +123,63 @@ public abstract class ContentContainer {
 		}
 	}
 
-	private void resolveDependencies(String prefix, ContentContainer scopePart) {
+	public void resolveInheritance(Scope scope) {
+		this.getChildren().forEach(c -> c.resolveInheritance(scope));
+	}
+
+	public void copyParentVars() {
+		this.getChildren().forEach(c -> c.copyParentVars());
+	}
+
+	private void resolveDependencies(String prefix, ContentDefinitions scopePart) {
 		if (scopePart.equals(this)) {
 			return;
 		}
+		this.resolveClassDependenciesAndReferences(prefix, scopePart);
+		this.resolveSubroutineDependenciesAndReferences(prefix, scopePart);
+		this.resolveVarReferences(prefix, scopePart);
+	}
+
+	private void resolveClassDependenciesAndReferences(String prefix, ContentDefinitions scopePart) {
 		for (String alias : scopePart.definedClasses.keySet()) {
 			String prefixedAlias = this.prefix(alias, prefix);
-			if (this.calledSubroutineNames.contains(prefixedAlias)) {
-				this.referencedClasses.put(prefixedAlias, scopePart.definedClasses.get(alias));
-			}
-			this.resolveDependencies(prefixedAlias, scopePart.definedClasses.get(alias));
-		}
+			Class cls = scopePart.definedClasses.get(alias);
 
+			if (this.calledSubroutineNames.contains(prefixedAlias)) {
+				this.referencedClasses.put(prefixedAlias, cls);
+				this.resolveInstanceDependencies(prefixedAlias, cls);
+			}
+			this.resolveDependencies(prefixedAlias, cls);
+		}
+	}
+
+	private void resolveSubroutineDependenciesAndReferences(String prefix, ContentDefinitions scopePart) {
 		for (String alias : scopePart.definedSubroutines.keySet()) {
 			String prefixedAlias = this.prefix(alias, prefix);
-			if (this.calledSubroutineNames.contains(prefixedAlias)) {
-				this.calledSubroutines.put(prefixedAlias, scopePart.definedSubroutines.get(alias));
-			}
-			this.resolveDependencies(prefixedAlias, scopePart.definedSubroutines.get(alias));
-		}
+			Subroutine subroutine = scopePart.definedSubroutines.get(alias);
 
-		for (String alias : scopePart.definedVars.keySet()) {
+			if (this.calledSubroutineNames.contains(prefixedAlias)) {
+				this.calledSubroutines.put(prefixedAlias, subroutine);
+			}
+			this.resolveDependencies(prefixedAlias, subroutine);
+		}
+	}
+
+	private void resolveVarReferences(String prefix, ContentDefinitions scopePart) {
+		for (String alias : scopePart.getDefinedVarsInclParentsVars().keySet()) {
 			String prefixedAlias = this.prefix(alias, prefix);
 			if (this.referencedVarNames.contains(prefixedAlias)) {
-				for (Variable var : scopePart.definedVars.get(alias)) {
+				for (Variable var : scopePart.getDefinedVarsInclParentsVars().get(alias)) {
 					this.addVariableReference(prefixedAlias, var);
 				}
+			}
+		}
+	}
+
+	private void resolveInstanceDependencies(String prefixedAlias, Class cls) {
+		for (Assign assign : this.assigns) {
+			if (assign.getValue().equals(prefixedAlias)) {
+				this.resolveDependencies(assign.getName(), cls);
 			}
 		}
 	}
@@ -228,5 +188,5 @@ public abstract class ContentContainer {
 		return prefix.equals("") ? str : prefix + "." + str;
 	}
 
-	public abstract boolean isInAncestorLine(ContentContainer container);
+	public abstract boolean isInParentLine(ContentContainer container);
 }

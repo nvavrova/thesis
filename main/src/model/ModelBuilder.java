@@ -172,10 +172,6 @@ public class ModelBuilder {
 				right.accept(this);
 				this.inAssignRight = false;
 
-				if (this.leftAssign != null && this.rightAssign != null) {
-//					this.getCurrentContainer().addAssign(this.leftAssign, this.rightAssign);
-				}
-
 				this.leftAssign = null;
 				this.rightAssign = null;
 			}
@@ -256,7 +252,7 @@ public class ModelBuilder {
 		public Void visit(Identifier n) {
 			this.addVarDef(n.getValue());
 			this.addVarRef(n.getValue());
-			this.setAssignVar(n.getValue());
+			this.setAssignVar((String) n.getValue());
 			return null;
 		}
 
@@ -264,7 +260,7 @@ public class ModelBuilder {
 		public Void visit(AttributeRef n) {
 			this.addVarDef(n.toString());
 			this.addVarRef(n.toString());
-			this.setAssignVar(n.toString());
+			this.setAssignVar((String) n.toString());
 //			this.visitChildren(n);
 			return null;
 		}
@@ -311,7 +307,7 @@ public class ModelBuilder {
 		@Override
 		public Void visit(Call n) {
 			this.addSubroutineRef(n.getBase().toString());
-			this.setAssignVar(n.getBase().toString()); //TODO: fix this
+			this.setAssignCall(n.getBase().toString()); //TODO: fix this
 			this.visitChildren(n);
 			return null;
 		}
@@ -319,26 +315,33 @@ public class ModelBuilder {
 		@Override
 		public Void visit(DirectCall n) {
 			this.addSubroutineRef(n.getBase().toString() + "." + n.getCall().getName());
-			this.setAssignVar(n.getBase().toString() + "." + n.getCall().getName()); //TODO: fix this
+			this.setAssignCall((n.getBase().toString() + "." + n.getCall().getName())); //TODO: fix this
 			this.visitChildren(n);
 			return null;
 		}
 
 		private void setAssignCall(String value) {
-			if (this.inAssign && this.inAssignLeft && this.leftAssign == null) {
-				this.leftAssign = value;
-			}
-			if (this.inAssign && this.inAssignRight && this.rightAssign == null) {
-				this.rightAssign = value;
-			}
+			this.setAssignVar(value, AssignType.CALL);
 		}
 
 		private void setAssignVar(String value) {
+			this.setAssignVar(value, AssignType.VARIABLE);
+		}
+
+		private void setAssignVar(String value, AssignType type) {
 			if (this.inAssign && this.inAssignLeft && this.leftAssign == null) {
 				this.leftAssign = value;
 			}
 			if (this.inAssign && this.inAssignRight && this.rightAssign == null) {
 				this.rightAssign = value;
+				this.addAssign(type);
+			}
+		}
+
+		private void addAssign(AssignType type) {
+			if (this.leftAssign != null && this.rightAssign != null) {
+				model.Assign assign = new model.Assign(0, leftAssign, rightAssign, type);
+				this.getCurrentContainer().addAssign(assign);
 			}
 		}
 

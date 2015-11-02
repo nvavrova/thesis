@@ -32,18 +32,30 @@ public class Module extends ContentContainer {
 		this.classImports.put(name, c);
 	}
 
+	public void resolveInheritance() {
+		Scope scope = this.buildScope();
+		this.definedClasses.values().forEach(c -> c.resolveInheritance(scope));
+	}
+
+	public void resolveInheritedItems() {
+		this.definedClasses.values().forEach(c -> c.copyParentVars());
+	}
+
 	public void resolveDependencies() {
+		Scope scope = this.buildScope();
+		this.getChildren().forEach(c -> c.resolveDependencies(scope));
+	}
+
+	private Scope buildScope() {
 		Scope scope = new Scope();
 		scope.addToScope("", this, true);
 		for (String clsAlias : this.classImports.keySet()) {
-			scope.addClassToScope(clsAlias, this.classImports.get(clsAlias));
+			scope.addClassToScope("", clsAlias, this.classImports.get(clsAlias));
 		}
 		for (String moduleAlias : this.moduleImports.keySet()) {
 			scope.addToScope(moduleAlias, this.moduleImports.get(moduleAlias), false);
 		}
-		for (ContentContainer c : this.getChildren()) {
-			c.resolveDependencies(scope);
-		}
+		return scope;
 	}
 
 	public boolean containsClass(String name) {
@@ -69,7 +81,7 @@ public class Module extends ContentContainer {
 	}
 
 	@Override
-	public boolean isInAncestorLine(ContentContainer container) {
+	public boolean isInParentLine(ContentContainer container) {
 		return this.equals(container);
 	}
 }

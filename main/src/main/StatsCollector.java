@@ -86,16 +86,16 @@ public class StatsCollector {
 		//TODO: get the module
 //		line.add(c.getModule().getFilePath());
 		line.add(c.getName());
-		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isPrivate()).count()));
-		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isProtected()).count()));
-		line.add(String.valueOf(c.getDefinedVariables().stream().filter(v -> v.isPublic()).count()));
-		line.add(String.valueOf(c.getDefinedSubroutines().stream().filter(s -> s.isAccessor()).count()));
+		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(v -> v.isPrivate()).count()));
+		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(v -> v.isProtected()).count()));
+		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(v -> v.isPublic()).count()));
+		line.add(String.valueOf(c.getDefinedSubroutinesSet().stream().filter(s -> s.isAccessor()).count()));
 		line.add(String.valueOf(c.getLcom()));
 		line.add(String.valueOf(c.getLoc()));
 		line.add(String.valueOf(c.parentsCount()));
 		line.add(String.valueOf(c.subroutinesWithNoParamsCount()));
-		line.add(String.valueOf(c.getReferencedGlobals().size()));
-		line.add(String.valueOf(c.getDefinedVariablesOfType(VarType.GLOBAL).size()));
+		line.add(String.valueOf(c.getReferencedGlobalsSet().size()));
+		line.add(String.valueOf(c.getDefinedVariablesOfTypeSet(VarType.GLOBAL).size()));
 		return line;
 	}
 

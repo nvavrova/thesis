@@ -35,7 +35,7 @@ public class Variable {
 		return !this.isPrivate() && !this.isProtected();
 	}
 
-	public boolean isInAncestorLine(ContentContainer container) {
-		return container.isInAncestorLine(this.parent);
+	public boolean definedInParentOf(ContentContainer container) {
+		return container.isInParentLine(this.parent);
 	}
 }

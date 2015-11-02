@@ -6,27 +6,19 @@ import java.util.Set;
 /**
  * Created by Nik on 26-10-2015
  */
-public class Scope extends ContentContainer {
+public class Scope extends ContentDefinitions {
 
-	public Scope() {
-		super("");
-	}
+	public Scope() {}
 
-	@Override
-	public void resolveDependencies(Scope scope) {
-	}
-
-	@Override
-	public boolean isInAncestorLine(ContentContainer container) {
-		throw new IllegalAccessError();
+	public Scope(ContentDefinitions definitions) {
+		super();
+		this.definedClasses.putAll(definitions.definedClasses);
+		this.definedSubroutines.putAll(definitions.definedSubroutines);
+		this.definedVars.putAll(definitions.definedVars);
 	}
 
 	public void addToScope(String prefix, ContentContainer container, Boolean passInstanceObjects) {
 		this.addToScope(prefix, "self", container, passInstanceObjects);
-	}
-
-	public void addClassToScope(String name, Class cls) {
-		this.addClassToScope("", name, cls);
 	}
 
 	public void addToScope(String prefix, String instancePrefix, ContentContainer container, Boolean passInstanceObjects) {
@@ -38,11 +30,11 @@ public class Scope extends ContentContainer {
 	private void addClassesToScope(String prefix, Map<String, Class> classes) {
 		for (String defClsName : classes.keySet()) {
 			Class cls = classes.get(defClsName);
-			addClassToScope(prefix, defClsName, cls);
+			this.addClassToScope(prefix, defClsName, cls);
 		}
 	}
 
-	private void addClassToScope(String prefix, String defClsName, Class cls) {
+	public void addClassToScope(String prefix, String defClsName, Class cls) {
 		String name = this.addPrefix(defClsName, prefix);
 		if (!this.definedClasses.containsKey(name)) {
 			this.definedClasses.put(name, cls);
