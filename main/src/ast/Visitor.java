@@ -6,9 +6,9 @@ import ast.expression.ExprList;
 import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
-import ast.expression.nocond.Arithmetic;
+import ast.expression.nocond.arithmetic.Nnary;
 import ast.expression.nocond.LambdaNoCond;
-import ast.expression.nocond.Power;
+import ast.expression.nocond.arithmetic.Power;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.numeric.Float;
@@ -29,9 +29,9 @@ import ast.expression.nocond.trailer.ArgList;
 import ast.expression.nocond.trailer.SliceBound;
 import ast.expression.nocond.trailer.SubscriptIndex;
 import ast.expression.nocond.trailer.SubscriptSliceList;
-import ast.expression.nocond.unary.Invert;
-import ast.expression.nocond.unary.Minus;
-import ast.expression.nocond.unary.Plus;
+import ast.expression.nocond.arithmetic.unary.Invert;
+import ast.expression.nocond.arithmetic.unary.Minus;
+import ast.expression.nocond.arithmetic.unary.Plus;
 import ast.param.ListParam;
 import ast.param.Params;
 import ast.param.TypedParam;
@@ -118,7 +118,7 @@ public interface Visitor<T> {
 	T visit(Shift n);
 
 	//............................................. ARITHMETIC ............................................\\
-	T visit(Arithmetic n);
+	T visit(Nnary n);
 
 	//.............................................. BITWISE ..............................................\\
 	T visit(ast.expression.nocond.bitwise.And n);

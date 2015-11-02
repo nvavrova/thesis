@@ -3,7 +3,7 @@ package ast;
 import ast.argument.*;
 import ast.argument.SimpleArgument;
 import ast.expression.*;
-import ast.expression.nocond.Arithmetic;
+import ast.expression.nocond.arithmetic.Nnary;
 import ast.expression.nocond.atom.maker.DictMaker;
 import ast.expression.nocond.atom.maker.SetMaker;
 import ast.expression.nocond.atom.numeric.Imaginary;
@@ -19,7 +19,7 @@ import ast.expression.nocond.atom.comprehension.EnumComprehension;
 import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.LambdaNoCond;
-import ast.expression.nocond.Power;
+import ast.expression.nocond.arithmetic.Power;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.numeric.Float;
@@ -29,10 +29,10 @@ import ast.expression.nocond.trailer.ArgList;
 import ast.expression.nocond.trailer.SliceBound;
 import ast.expression.nocond.trailer.SubscriptIndex;
 import ast.expression.nocond.trailer.SubscriptSliceList;
-import ast.expression.nocond.unary.Invert;
-import ast.expression.nocond.unary.Minus;
-import ast.expression.nocond.unary.Plus;
-import ast.expression.nocond.unary.Unary;
+import ast.expression.nocond.arithmetic.unary.Invert;
+import ast.expression.nocond.arithmetic.unary.Minus;
+import ast.expression.nocond.arithmetic.unary.Plus;
+import ast.expression.nocond.arithmetic.unary.Unary;
 import ast.param.ListParam;
 import ast.param.Params;
 import ast.param.UntypedParam;
@@ -326,7 +326,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(Arithmetic n) {
+	public T visit(Nnary n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -813,7 +813,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 
-	public void visitChildren(Arithmetic n) {
+	public void visitChildren(Nnary n) {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 

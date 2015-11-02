@@ -1,4 +1,4 @@
-package ast.expression.nocond.unary;
+package ast.expression.nocond.arithmetic.unary;
 
 import ast.expression.Expr;
 import ast.expression.nocond.NonConditional;

@@ -9,6 +9,8 @@ import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
 import ast.expression.compiter.CompIter;
 import ast.expression.nocond.*;
+import ast.expression.nocond.arithmetic.Nnary;
+import ast.expression.nocond.arithmetic.Power;
 import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.comprehension.CondComprehension;
 import ast.expression.nocond.atom.comprehension.EnumComprehension;
@@ -26,9 +28,9 @@ import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.logical.Or;
 import ast.expression.nocond.trailer.*;
-import ast.expression.nocond.unary.Invert;
-import ast.expression.nocond.unary.Minus;
-import ast.expression.nocond.unary.Plus;
+import ast.expression.nocond.arithmetic.unary.Invert;
+import ast.expression.nocond.arithmetic.unary.Minus;
+import ast.expression.nocond.arithmetic.unary.Plus;
 import ast.param.*;
 import ast.path.DottedPath;
 import ast.path.Path;
@@ -937,7 +939,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
+			return new Nnary(this.getLocInfo(ctx), operands, ctx.operators);
 		}
 
 		@Override
@@ -950,7 +952,7 @@ public class AstBuilder {
 			if (operands.size() == 1) {
 				return operands.get(0);
 			}
-			return new Arithmetic(this.getLocInfo(ctx), operands, ctx.operators);
+			return new Nnary(this.getLocInfo(ctx), operands, ctx.operators);
 		}
 
 		@Override

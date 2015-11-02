@@ -1,6 +1,7 @@
-package ast.expression.nocond;
+package ast.expression.nocond.arithmetic;
 
 import ast.expression.Expr;
+import ast.expression.nocond.NonConditional;
 import org.antlr.v4.runtime.misc.NotNull;
 import ast.Visitor;
 
@@ -9,12 +10,12 @@ import java.util.List;
 /**
  * Created by Nik on 10-06-2015
  */
-public class Arithmetic extends NonConditional {
+public class Nnary extends NonConditional {
 
 	private final List<Expr> operands;
 	private final List<String> operators;
 
-	public Arithmetic(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
+	public Nnary(@NotNull Integer locInfo, @NotNull List<Expr> operands, @NotNull List<String> operators) {
 		super(locInfo);
 
 		this.operands = operands;
