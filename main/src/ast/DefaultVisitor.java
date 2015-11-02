@@ -1,7 +1,6 @@
 package ast;
 
 import ast.argument.*;
-import ast.argument.Argument;
 import ast.argument.SimpleArgument;
 import ast.expression.*;
 import ast.expression.nocond.Arithmetic;

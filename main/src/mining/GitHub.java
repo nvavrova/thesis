@@ -31,9 +31,6 @@ public class GitHub {
 				BufferedReader br = new BufferedReader(new FileReader(tokenFile));
 				params.put("access_token", br.readLine());
 			}
-			catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
 			catch (IOException e) {
 				e.printStackTrace();
 			}

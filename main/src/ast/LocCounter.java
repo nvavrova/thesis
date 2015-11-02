@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class LocCounter {
 
-	private static final Pattern emptyOrComment = Pattern.compile("([ \t]*|[ \t]*#.*)");
+	private final static String emptyOrCommentRegex = "([ \t]*|[ \t]*#.*)";
 
 	private final FileOpener fileOpener;
 
@@ -39,6 +39,7 @@ public class LocCounter {
 	}
 
 	private boolean isEmptyOrComment(String line) {
+		Pattern emptyOrComment = Pattern.compile(emptyOrCommentRegex);
 		Matcher matcher = emptyOrComment.matcher(line);
 		return matcher.matches();
 	}

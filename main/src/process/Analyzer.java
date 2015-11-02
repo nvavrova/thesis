@@ -3,6 +3,7 @@ package process;
 import model.Class;
 import model.Subroutine;
 import model.Project;
+import model.Variable;
 import util.LexicalHelper;
 
 /**
@@ -19,8 +20,8 @@ public class Analyzer {
 
 	public void analyze() {
 		System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
-		System.out.println("Name: " + project.getName());
-		System.out.println("Location: " + project.getPath());
+		System.out.println("Name: " + this.project.getName());
+		System.out.println("Location: " + this.project.getPath());
 
 		//TODO
 
@@ -53,8 +54,12 @@ public class Analyzer {
 				&& this.hasTooManyMethodsWithNoParams(cls) && this.usesGlobals(cls);
 	}
 
+	public boolean isFeatureEnvy(Class cls) {
+		return false; //TODO
+	}
+
 	public boolean usesGlobals(Class cls) {
-		return cls.getReferencedGlobals().size() > 1;
+		return cls.getReferencedGlobalsSet().size() > 1;
 	}
 
 	private Boolean hasControllerName(String name) {
@@ -67,7 +72,7 @@ public class Analyzer {
 
 
 	private boolean isDataClass(Class cls) {
-		Long publicVarCount = cls.getDefinedVariables().stream().filter(v -> v.isPrivate()).count();
+		Long publicVarCount = cls.getDefinedVariablesSet().stream().filter(Variable::isPrivate).count();
 		return publicVarCount > 11;
 //		return cls.getNumberOfAccessors() > 5;
 	}
@@ -82,7 +87,7 @@ public class Analyzer {
 
 
 	private boolean noInheritance(Class cls) {
-		return cls.getParents().size() == 0;
+		return cls.getParentNames().size() == 0;
 	}
 
 	private boolean hasTooManyParents(Class cls) {
@@ -90,7 +95,7 @@ public class Analyzer {
 	}
 
 	private boolean hasLongMethod(Class cls) {
-		for (Subroutine m : cls.getDefinedSubroutines()) {
+		for (Subroutine m : cls.getDefinedSubroutinesSet()) {
 			if (this.isLong(m)) {
 				return true;
 			}
@@ -99,9 +104,8 @@ public class Analyzer {
 	}
 
 	private Integer relatedDataClassesCount(Class cls) {
-		//TODO
-		Long count = cls.getReferencedClasses().stream()
-//				.filter(c -> c.isDataClass())
+		Long count = cls.getReferencedClassesSet().stream()
+				.filter(c -> this.isDataClass(c))
 				.count();
 		return count.intValue();
 	}
@@ -111,7 +115,7 @@ public class Analyzer {
 	}
 
 	private Boolean hasControllerMethods(Class cls) {
-		for (Subroutine m : cls.getDefinedSubroutines()) {
+		for (Subroutine m : cls.getDefinedSubroutinesSet()) {
 			if (this.isController(m)) {
 				return true;
 			}
@@ -121,7 +125,7 @@ public class Analyzer {
 
 	private Integer relatedPrivateFieldsWithOneMethodCount(Class cls) {
 		//TODO
-		Long count = cls.getReferencedClasses().stream()
+		Long count = cls.getReferencedClassesSet().stream()
 //				.filter(Class::privateFieldsWithOnePublicMethod)
 				.count();
 		return count.intValue();

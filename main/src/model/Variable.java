@@ -5,8 +5,8 @@ package model;
  */
 public class Variable {
 
-	private final String name;
 	private final ContentContainer parent;
+	private final String name;
 	private final VarType varType;
 
 	public Variable(String name, ContentContainer parent, VarType varType) {
@@ -35,7 +35,7 @@ public class Variable {
 		return !this.isPrivate() && !this.isProtected();
 	}
 
-	public boolean isInAncestorLine(ContentContainer container) {
-		return container.isInAncestorLine(this.parent);
+	public boolean definedInParentOf(ContentContainer container) {
+		return container.isInParentLine(this.parent);
 	}
 }

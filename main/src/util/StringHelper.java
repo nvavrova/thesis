@@ -26,7 +26,7 @@ public class StringHelper {
 	}
 
 	public static String getStackTraceString(Exception ex) {
-		String stackTrace = "";
+		String stackTrace;
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		ex.printStackTrace(pw);

@@ -13,6 +13,7 @@ import ast.statement.simple.Assign;
 import ast.statement.simple.Global;
 import ast.statement.simple.ImportFrom;
 import ast.statement.simple.ImportPaths;
+import util.LexicalHelper;
 import util.StringHelper;
 
 import java.io.File;
@@ -23,8 +24,6 @@ import java.util.stream.Collectors;
  * Created by Nik on 17-05-2015
  */
 public class ModelBuilder {
-
-	private static final String SELF_KEYWORD = "self";
 
 	private final Project project;
 
@@ -172,10 +171,6 @@ public class ModelBuilder {
 				right.accept(this);
 				this.inAssignRight = false;
 
-				if (this.leftAssign != null && this.rightAssign != null) {
-//					this.getCurrentContainer().addAssign(this.leftAssign, this.rightAssign);
-				}
-
 				this.leftAssign = null;
 				this.rightAssign = null;
 			}
@@ -216,7 +211,7 @@ public class ModelBuilder {
 		public Void visit(Function n) {
 //			if (this.inClass()) {
 			List<String> paramNames = n.getParams().getParamNames().stream()
-					.filter(p -> !p.equals(SELF_KEYWORD))
+					.filter(p -> !p.equals(LexicalHelper.SELF_KEYWORD))
 					.collect(Collectors.toList());
 			SubroutineType type = !this.inClass() ? SubroutineType.FUNCTION :
 					(n.isStatic() ? SubroutineType.STATIC_METHOD : SubroutineType.INSTANCE_METHOD);
@@ -278,7 +273,7 @@ public class ModelBuilder {
 		}
 
 		private boolean hasInstanceVarName(String varName) {
-			return varName.startsWith(SELF_KEYWORD + ".");
+			return varName.startsWith(LexicalHelper.SELF_KEYWORD + ".");
 		}
 
 		private void addVarDef(String fullName) {
@@ -311,7 +306,7 @@ public class ModelBuilder {
 		@Override
 		public Void visit(Call n) {
 			this.addSubroutineRef(n.getBase().toString());
-			this.setAssignVar(n.getBase().toString()); //TODO: fix this
+			this.setAssignCall(n.getBase().toString()); //TODO: fix this
 			this.visitChildren(n);
 			return null;
 		}
@@ -319,26 +314,33 @@ public class ModelBuilder {
 		@Override
 		public Void visit(DirectCall n) {
 			this.addSubroutineRef(n.getBase().toString() + "." + n.getCall().getName());
-			this.setAssignVar(n.getBase().toString() + "." + n.getCall().getName()); //TODO: fix this
+			this.setAssignCall((n.getBase().toString() + "." + n.getCall().getName())); //TODO: fix this
 			this.visitChildren(n);
 			return null;
 		}
 
 		private void setAssignCall(String value) {
-			if (this.inAssign && this.inAssignLeft && this.leftAssign == null) {
-				this.leftAssign = value;
-			}
-			if (this.inAssign && this.inAssignRight && this.rightAssign == null) {
-				this.rightAssign = value;
-			}
+			this.setAssignVar(value, AssignType.CALL);
 		}
 
 		private void setAssignVar(String value) {
+			this.setAssignVar(value, AssignType.VARIABLE);
+		}
+
+		private void setAssignVar(String value, AssignType type) {
 			if (this.inAssign && this.inAssignLeft && this.leftAssign == null) {
 				this.leftAssign = value;
 			}
 			if (this.inAssign && this.inAssignRight && this.rightAssign == null) {
 				this.rightAssign = value;
+				this.addAssign(type);
+			}
+		}
+
+		private void addAssign(AssignType type) {
+			if (this.leftAssign != null && this.rightAssign != null) {
+				model.Assign assign = new model.Assign(this.leftAssign, this.rightAssign, type);
+				this.getCurrentContainer().addAssign(assign);
 			}
 		}
 

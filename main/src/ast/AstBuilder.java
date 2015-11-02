@@ -547,8 +547,7 @@ public class AstBuilder {
 			List<SimplePath> ids = ctx.import_as_name().stream()
 					.map(e -> (SimplePath) e.accept(this))
 					.collect(Collectors.toList());
-			CollectionWrapper<SimplePath> wrap = new CollectionWrapper<>(this.getLocInfo(ctx), ids);
-			return wrap;
+			return new CollectionWrapper<>(this.getLocInfo(ctx), ids);
 		}
 
 		@Override
@@ -557,8 +556,7 @@ public class AstBuilder {
 			List<DottedPath> dottedPaths = ctx.dotted_as_name().stream()
 					.map(e -> (DottedPath) e.accept(this))
 					.collect(Collectors.toList());
-			CollectionWrapper<DottedPath> wrap = new CollectionWrapper<>(this.getLocInfo(ctx), dottedPaths);
-			return wrap;
+			return new CollectionWrapper<>(this.getLocInfo(ctx), dottedPaths);
 		}
 
 		@Override
@@ -1114,8 +1112,7 @@ public class AstBuilder {
 		@Override
 		public AstNode visitSliceop(@NotNull PythonParser.SliceopContext ctx) {
 			//      ':' test?
-			Expr expression = ctx.test() == null ? null : (Expr) ctx.test().accept(this);
-			return expression; //Expr
+			return ctx.test() == null ? null : (Expr) ctx.test().accept(this); //Expr
 		}
 
 		@Override

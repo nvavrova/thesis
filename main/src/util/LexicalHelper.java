@@ -2,12 +2,13 @@ package util;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by Nik on 01-07-2015
  */
 public class LexicalHelper {
+	public final static String SELF_KEYWORD = "self";
+
 	private final static String[] CONTROLLER_NAMES = {"Manage", "Process", "Control", "Handle", "System"}; //TODO
 	private final static String[] PROCEDURAL_NAMES = {"Make", "Create", "Exec", "Compute"}; //TODO
 

@@ -1,32 +1,23 @@
 package model;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Nik on 26-10-2015
  */
-public class Scope extends ContentContainer {
+public class Scope extends ContentDefinitions {
 
-	public Scope() {
-		super("");
-	}
+	public Scope() {}
 
-	@Override
-	public void resolveDependencies(Scope scope) {
-	}
-
-	@Override
-	public boolean isInAncestorLine(ContentContainer container) {
-		throw new IllegalAccessError();
+	public Scope(ContentDefinitions definitions) {
+		super();
+		this.definedClasses.putAll(definitions.definedClasses);
+		this.definedSubroutines.putAll(definitions.definedSubroutines);
+		this.definedVars.addAllUnrestricted(definitions.definedVars);
 	}
 
 	public void addToScope(String prefix, ContentContainer container, Boolean passInstanceObjects) {
 		this.addToScope(prefix, "self", container, passInstanceObjects);
-	}
-
-	public void addClassToScope(String name, Class cls) {
-		this.addClassToScope("", name, cls);
 	}
 
 	public void addToScope(String prefix, String instancePrefix, ContentContainer container, Boolean passInstanceObjects) {
@@ -38,11 +29,11 @@ public class Scope extends ContentContainer {
 	private void addClassesToScope(String prefix, Map<String, Class> classes) {
 		for (String defClsName : classes.keySet()) {
 			Class cls = classes.get(defClsName);
-			addClassToScope(prefix, defClsName, cls);
+			this.addClassToScope(prefix, defClsName, cls);
 		}
 	}
 
-	private void addClassToScope(String prefix, String defClsName, Class cls) {
+	public void addClassToScope(String prefix, String defClsName, Class cls) {
 		String name = this.addPrefix(defClsName, prefix);
 		if (!this.definedClasses.containsKey(name)) {
 			this.definedClasses.put(name, cls);
@@ -64,7 +55,7 @@ public class Scope extends ContentContainer {
 			return defSubName;
 		}
 		if (subroutineType == SubroutineType.INSTANCE_METHOD) {
-			return this.addPrefix(defSubName, instancePrefix); //, true
+			return this.addPrefix(defSubName, instancePrefix);
 		}
 		if (subroutineType == SubroutineType.STATIC_METHOD) {
 			return this.addPrefix(defSubName, prefix);
@@ -72,10 +63,9 @@ public class Scope extends ContentContainer {
 		throw new IllegalArgumentException("Unknown subroutine type");
 	}
 
-	private void addVariablesToScope(String prefix, String instancePrefix, Map<String, Set<Variable>> variables, Boolean passInstanceObjects) {
-		for (String defVarName : variables.keySet()) {
-			Set<Variable> vars = variables.get(defVarName);
-			for (Variable var : vars) {
+	private void addVariablesToScope(String prefix, String instancePrefix, VarDefinitions variables, Boolean passInstanceObjects) {
+		for (String defVarName : variables.getNames()) {
+			for (Variable var : variables.getVarsWithName(defVarName)) {
 				String name = this.getAddedVariableName(var.getVarType(), defVarName, prefix, instancePrefix);
 				if (passInstanceObjects || var.getVarType() != VarType.INSTANCE) {
 					this.addVariableDefinition(name, var);
@@ -86,7 +76,7 @@ public class Scope extends ContentContainer {
 
 	private String getAddedVariableName(VarType varType, String defVarName, String prefix, String instancePrefix) {
 		if (varType == VarType.INSTANCE) {
-			return this.addPrefix(defVarName, instancePrefix); //, true
+			return this.addPrefix(defVarName, instancePrefix);
 		}
 		if (varType == VarType.CLASS || varType == VarType.LOCAL || varType == VarType.GLOBAL) {
 			return this.addPrefix(defVarName, prefix);
@@ -102,18 +92,11 @@ public class Scope extends ContentContainer {
 		return this.emptyPrefix(newPrefix) ? name : newPrefix + "." + name;
 	}
 
-	private String addPrefix(String name, String newPrefix, Boolean replaceEmptyWithSelf) {
-		if (replaceEmptyWithSelf && this.emptyPrefix(newPrefix)) {
-			return this.addPrefix(name, "self");
-		}
-		return this.addPrefix(name, newPrefix);
-	}
-
 	public Scope copy() {
 		Scope scope = new Scope();
 		scope.definedClasses.putAll(this.definedClasses);
 		scope.definedSubroutines.putAll(this.definedSubroutines);
-		scope.definedVars.putAll(this.definedVars);
+		scope.definedVars.addAllUnrestricted(this.definedVars);
 		return scope;
 	}
 }

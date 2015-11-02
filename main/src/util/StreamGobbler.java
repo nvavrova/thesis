@@ -24,7 +24,7 @@ public class StreamGobbler extends Thread {
 		try {
 			InputStreamReader isr = new InputStreamReader(this.inputStream);
 			BufferedReader br = new BufferedReader(isr);
-			String line = null;
+			String line;
 			while ((line = br.readLine()) != null) {
 				this.streamValues.add(line);
 			}

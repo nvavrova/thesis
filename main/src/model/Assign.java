@@ -3,25 +3,24 @@ package model;
 /**
  * Created by Nik on 23-10-2015
  */
-public class Assign extends Instruction {
+public class Assign {
 
-	private final String leftElement;
-	private final String rightElement;
+	private final String name;
+	private final String value;
 	private final AssignType type;
 
-	public Assign(Integer order, String leftElement, String rightElement, AssignType type) {
-		super(order);
-		this.leftElement = leftElement;
-		this.rightElement = rightElement;
+	public Assign(String name, String value, AssignType type) {
+		this.name = name;
+		this.value = value;
 		this.type = type;
 	}
 
-	public String getLeftElement() {
-		return this.leftElement;
+	public String getName() {
+		return this.name;
 	}
 
-	public String getRightElement() {
-		return this.rightElement;
+	public String getValue() {
+		return this.value;
 	}
 
 	public AssignType getType() {

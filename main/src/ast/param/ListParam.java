@@ -30,7 +30,7 @@ public class ListParam extends Param {
 	@Override
 	public List<String> getNames() {
 		List<String> names = new ArrayList<>();
-		params.forEach(p -> names.addAll(p.getNames()));
+		this.params.forEach(p -> names.addAll(p.getNames()));
 		return names;
 	}
 }

@@ -10,15 +10,19 @@ public class Class extends ContentContainer {
 
 	private final Integer loc;
 	private final ContentContainer parent;
-	private final List<String> parents;
-	private final Map<String, Class> dependentOn;
+	private final List<String> parentNames;
+	private final Map<String, Class> parents;
 
-	public Class(String name, ContentContainer parent, Integer loc, List<String> parents) {
+	private final VarDefinitions inheritedVars;
+
+	public Class(String name, ContentContainer parent, Integer loc, List<String> parentNames) {
 		super(name);
 		this.loc = loc;
 		this.parent = parent;
-		this.parents = parents;
-		this.dependentOn = new HashMap<>();
+		this.parentNames = parentNames;
+		this.parents = new HashMap<>();
+
+		this.inheritedVars = new VarDefinitions();
 	}
 
 	@Override
@@ -34,17 +38,30 @@ public class Class extends ContentContainer {
 		return this.calculateLcom();
 	}
 
-	public List<String> getParents() {
+	public Map<String, Class> getParents() {
 		return this.parents;
 	}
 
+	@Override
+	public VarDefinitions getDefinedVarsInclParentsVars() {
+		VarDefinitions vars = new VarDefinitions();
+		this.parents.values().forEach(p -> vars.addAllUnrestricted(p.getDefinedVarsInclParentsVars()));
+		vars.addAllEnforceRestriction(this.inheritedVars);
+		vars.addAllEnforceRestriction(this.definedVars);
+		return vars;
+	}
+
+	public List<String> getParentNames() {
+		return this.parentNames;
+	}
+
 	public Integer parentsCount() {
-		return this.parents.size();
+		return this.parentNames.size();
 	}
 
 	private Boolean privateFieldsWithOnePublicMethod() {
 		return //this.privateVariablesCount() > 10 &&
-				this.getDefinedSubroutines().stream().filter(s -> !s.isPrivate()).count() == 1;
+				this.getDefinedSubroutinesSet().stream().filter(s -> !s.isPrivate()).count() == 1;
 	}
 
 	private Integer calculateLcom() {
@@ -63,20 +80,54 @@ public class Class extends ContentContainer {
 	}
 
 	@Override
-	public void resolveDependencies(Scope scope) {
-		super.resolveDependencies(scope);
-		for (String clsName : this.parents) {
+	public void resolveInheritance(Scope scope) {
+		super.resolveInheritance(scope);
+		for (String clsName : this.parentNames) {
 			if (scope.definedClasses.containsKey(clsName)) {
-				this.referencedClasses.put(clsName, scope.definedClasses.get(clsName));
+				this.parents.put(clsName, scope.definedClasses.get(clsName));
+				this.referencedClasses.put(clsName, this.parents.get(clsName));
 			}
 		}
 	}
 
 	@Override
-	public boolean isInAncestorLine(ContentContainer container) {
-		if (this.equals(container)) {
-			return true;
+	public void copyParentVars() {
+		super.copyParentVars();
+		for (Class parent : this.parents.values()) {
+			VarDefinitions parentVars = parent.getParentVars();
+			for (String varName : parentVars.getNames()) {
+				this.addInheritedVars(parentVars, varName);
+			}
 		}
-		return this.parent.isInAncestorLine(container);
+	}
+
+	private void addInheritedVars(VarDefinitions parentVars, String varName) {
+		for (Variable var : parentVars.getVarsWithName(varName)) {
+			Variable copy = new Variable(var.getName(), this, var.getVarType());
+			this.inheritedVars.addUnrestricted(varName, copy);
+		}
+	}
+
+	private VarDefinitions getParentVars() {
+		VarDefinitions vars = new VarDefinitions();
+		for (Class parent : this.parents.values()) {
+			vars.addAllUnrestricted(parent.getParentVars());
+		}
+		vars.addAllUnrestricted(this.definedVars);
+		return vars;
+	}
+
+	private void add(Map<String, Set<Variable>> target, Map<String, Set<Variable>> values) {
+		for (String name : values.keySet()) {
+			if (!target.containsKey(name)) {
+				target.put(name, new HashSet<>());
+			}
+			target.get(name).addAll(values.get(name));
+		}
+	}
+
+	@Override
+	public boolean isInParentLine(ContentContainer container) {
+		return this.equals(container) || this.parent.isInParentLine(container);
 	}
 }

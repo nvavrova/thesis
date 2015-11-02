@@ -34,7 +34,8 @@ public class TrailedAtomBuilder {
 
 
 	private TrailedAtom attachTrailer(Integer locInfo, Atom base, Trailer trailer) {
-		return TABVisitor.buildTrailedAtom(locInfo, base, trailer);
+		TABVisitor tabVisitor = new TABVisitor(locInfo, base);
+		return trailer.accept(tabVisitor);
 	}
 
 	private TrailedAtom getResult() {
@@ -75,17 +76,12 @@ public class TrailedAtomBuilder {
 	}
 
 
-	private static class TABVisitor implements TrailerVisitor<TrailedAtom> {
+	private class TABVisitor implements TrailerVisitor<TrailedAtom> {
 
 		private final Integer locInfo;
 		private final Atom base;
 
-		public static TrailedAtom buildTrailedAtom(Integer locInfo, Atom base, Trailer trailer) {
-			TABVisitor tabVisitor = new TABVisitor(locInfo, base);
-			return trailer.accept(tabVisitor);
-		}
-
-		private TABVisitor(Integer locInfo, Atom base) {
+		public TABVisitor(Integer locInfo, Atom base) {
 			this.locInfo = locInfo;
 			this.base = base;
 		}

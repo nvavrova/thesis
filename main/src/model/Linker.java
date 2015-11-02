@@ -23,11 +23,9 @@ public class Linker {
 	}
 
 	public void link() {
+		this.project.getModules().forEach(model.Module::resolveInheritance);
+		this.project.getModules().forEach(model.Module::resolveInheritedItems);
 		this.project.getModules().forEach(model.Module::resolveDependencies);
-//		this.project.getModules().forEach(model.Module::resolveGlobalUse);
-//		this.project.getModules().forEach(model.Module::resolveInstanceVarUse);
-//		this.project.getMethods().forEach(Method::resolveClassInstances);
-//		this.project.getMethods().forEach(Method::resolveNonClassVarUsage);
 	}
 
 	public void addModuleImport(String source, String target, String alias) {
@@ -86,7 +84,7 @@ public class Linker {
 
 		if (this.project.hasModule(path)) {
 			Module importedModule = this.project.getModule(path);
-			for (model.Class c : importedModule.getDefinedClassesInclSubclasses()) {
+			for (model.Class c : importedModule.getDefinedClassesInclSubclassesSet()) {
 				sourceModule.addImport(c, c.getName());
 			}
 		}
