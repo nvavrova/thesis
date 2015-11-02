@@ -1,42 +1,37 @@
 package ast;
 
 import ast.argument.*;
-import ast.argument.SimpleArgument;
-import ast.expression.*;
-import ast.expression.nocond.arithmetic.Nnary;
-import ast.expression.nocond.atom.maker.DictMaker;
-import ast.expression.nocond.atom.maker.SetMaker;
-import ast.expression.nocond.atom.numeric.Imaginary;
-import ast.expression.nocond.atom.numeric.Int;
-import ast.expression.nocond.bitwise.And;
-import ast.expression.nocond.bitwise.Bitwise;
-import ast.expression.nocond.bitwise.Or;
-import ast.expression.nocond.bitwise.Xor;
+import ast.expression.Conditional;
+import ast.expression.Expr;
+import ast.expression.ExprList;
+import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
+import ast.expression.nocond.LambdaNoCond;
+import ast.expression.nocond.arithmetic.Nnary;
+import ast.expression.nocond.arithmetic.Power;
+import ast.expression.nocond.arithmetic.Unary;
+import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.comprehension.CondComprehension;
 import ast.expression.nocond.atom.comprehension.EnumComprehension;
-import ast.expression.nocond.logical.Comparison;
-import ast.expression.nocond.logical.Not;
-import ast.expression.nocond.LambdaNoCond;
-import ast.expression.nocond.arithmetic.Power;
-import ast.expression.nocond.bitwise.Shift;
-import ast.expression.nocond.atom.*;
+import ast.expression.nocond.atom.maker.DictMaker;
+import ast.expression.nocond.atom.maker.SetMaker;
 import ast.expression.nocond.atom.numeric.Float;
+import ast.expression.nocond.atom.numeric.Imaginary;
+import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.*;
+import ast.expression.nocond.bitwise.*;
+import ast.expression.nocond.logical.Comparison;
+import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.trailer.ArgList;
 import ast.expression.nocond.trailer.SliceBound;
 import ast.expression.nocond.trailer.SubscriptIndex;
 import ast.expression.nocond.trailer.SubscriptSliceList;
-import ast.expression.nocond.arithmetic.unary.Invert;
-import ast.expression.nocond.arithmetic.unary.Minus;
-import ast.expression.nocond.arithmetic.unary.Plus;
-import ast.expression.nocond.arithmetic.unary.Unary;
 import ast.param.ListParam;
 import ast.param.Params;
-import ast.param.UntypedParam;
 import ast.param.TypedParam;
+import ast.param.UntypedParam;
 import ast.path.DottedPath;
 import ast.path.SimplePath;
 import ast.statement.compound.*;
@@ -332,6 +327,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
+	public T visit(Unary n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
 	public T visit(Bool n) {
 		return null;
 	}
@@ -506,25 +507,6 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		this.visitChildren(n);
 		return null;
 	}
-
-	@Override
-	public T visit(Invert n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
-	public T visit(Minus n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
-	public T visit(Plus n) {
-		this.visitChildren(n);
-		return null;
-	}
-
 
 	public void visitChildren(Module n) {
 		n.getBody().forEach(s -> s.accept(this));

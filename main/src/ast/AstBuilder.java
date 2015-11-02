@@ -8,9 +8,11 @@ import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
 import ast.expression.compiter.CompIter;
-import ast.expression.nocond.*;
+import ast.expression.nocond.LambdaNoCond;
+import ast.expression.nocond.NonConditional;
 import ast.expression.nocond.arithmetic.Nnary;
 import ast.expression.nocond.arithmetic.Power;
+import ast.expression.nocond.arithmetic.Unary;
 import ast.expression.nocond.atom.*;
 import ast.expression.nocond.atom.comprehension.CondComprehension;
 import ast.expression.nocond.atom.comprehension.EnumComprehension;
@@ -28,9 +30,6 @@ import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.logical.Or;
 import ast.expression.nocond.trailer.*;
-import ast.expression.nocond.arithmetic.unary.Invert;
-import ast.expression.nocond.arithmetic.unary.Minus;
-import ast.expression.nocond.arithmetic.unary.Plus;
 import ast.param.*;
 import ast.path.DottedPath;
 import ast.path.Path;
@@ -959,19 +958,8 @@ public class AstBuilder {
 		public AstNode visitFactor(@NotNull PythonParser.FactorContext ctx) {
 			//      '+' factor | '-' factor | '~' factor | power
 			if (ctx.factor() != null) {
-				if (ctx.op.getText().equals("+")) {
-					Expr value = (Expr) ctx.factor().accept(this);
-					return new Plus(this.getLocInfo(ctx), value);
-				}
-				if (ctx.op.getText().equals("-")) {
-					Expr value = (Expr) ctx.factor().accept(this);
-					return new Minus(this.getLocInfo(ctx), value);
-				}
-				if (ctx.op.getText().equals("~")) {
-					Expr value = (Expr) ctx.factor().accept(this);
-					return new Invert(this.getLocInfo(ctx), value);
-				}
-				throw new IllegalArgumentException("Unknown context");
+				Expr value = (Expr) ctx.factor().accept(this);
+				return new Unary(this.getLocInfo(ctx), value, ctx.op.getText());
 			}
 			if (ctx.power() != null) {
 				return ctx.power().accept(this);

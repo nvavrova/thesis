@@ -6,20 +6,21 @@ import ast.expression.ExprList;
 import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
 import ast.expression.compiter.CompIf;
-import ast.expression.nocond.arithmetic.Nnary;
 import ast.expression.nocond.LambdaNoCond;
+import ast.expression.nocond.arithmetic.Nnary;
 import ast.expression.nocond.arithmetic.Power;
-import ast.expression.nocond.bitwise.Shift;
+import ast.expression.nocond.arithmetic.Unary;
 import ast.expression.nocond.atom.*;
-import ast.expression.nocond.atom.numeric.Float;
-import ast.expression.nocond.atom.numeric.Imaginary;
-import ast.expression.nocond.atom.numeric.Int;
-import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.comprehension.CondComprehension;
 import ast.expression.nocond.atom.comprehension.EnumComprehension;
 import ast.expression.nocond.atom.maker.DictMaker;
 import ast.expression.nocond.atom.maker.SetMaker;
+import ast.expression.nocond.atom.numeric.Float;
+import ast.expression.nocond.atom.numeric.Imaginary;
+import ast.expression.nocond.atom.numeric.Int;
+import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.*;
+import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
 import ast.expression.nocond.logical.And;
 import ast.expression.nocond.logical.Comparison;
@@ -29,9 +30,6 @@ import ast.expression.nocond.trailer.ArgList;
 import ast.expression.nocond.trailer.SliceBound;
 import ast.expression.nocond.trailer.SubscriptIndex;
 import ast.expression.nocond.trailer.SubscriptSliceList;
-import ast.expression.nocond.arithmetic.unary.Invert;
-import ast.expression.nocond.arithmetic.unary.Minus;
-import ast.expression.nocond.arithmetic.unary.Plus;
 import ast.param.ListParam;
 import ast.param.Params;
 import ast.param.TypedParam;
@@ -119,6 +117,7 @@ public interface Visitor<T> {
 
 	//............................................. ARITHMETIC ............................................\\
 	T visit(Nnary n);
+	T visit(Unary n);
 
 	//.............................................. BITWISE ..............................................\\
 	T visit(ast.expression.nocond.bitwise.And n);
@@ -162,9 +161,4 @@ public interface Visitor<T> {
 	T visit(SliceBound n);
 	T visit(SubscriptIndex n);
 	T visit(SubscriptSliceList n);
-	
-	//................................................ UNARY ..............................................\\
-	T visit(Invert n);
-	T visit(Minus n);
-	T visit(Plus n);
 }
