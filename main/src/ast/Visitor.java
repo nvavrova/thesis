@@ -22,10 +22,9 @@ import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.*;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
-import ast.expression.nocond.logical.And;
+import ast.expression.nocond.logical.Binary;
 import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
-import ast.expression.nocond.logical.Or;
 import ast.expression.nocond.trailer.ArgList;
 import ast.expression.nocond.trailer.SliceBound;
 import ast.expression.nocond.trailer.SubscriptIndex;
@@ -131,9 +130,8 @@ public interface Visitor<T> {
 	T visit(EnumComprehension n);
 
 	//............................................... LOGICAL .............................................\\
-	T visit(And n);
+	T visit(Binary n);
 	T visit(Not n);
-	T visit(Or n);
 
 	//............................................... PRIMARY .............................................\\
 	T visit(AttributeRef n);

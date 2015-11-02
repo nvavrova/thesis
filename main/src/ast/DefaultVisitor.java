@@ -22,6 +22,7 @@ import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.*;
 import ast.expression.nocond.bitwise.*;
+import ast.expression.nocond.logical.Binary;
 import ast.expression.nocond.logical.Comparison;
 import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.trailer.ArgList;
@@ -467,19 +468,13 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(ast.expression.nocond.logical.And n) {
+	public T visit(Binary n) {
 		this.visitChildren(n);
 		return null;
 	}
 
 	@Override
 	public T visit(Not n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
-	public T visit(ast.expression.nocond.logical.Or n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -875,16 +870,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getValues().forEach(e -> e.accept(this));
 	}
 
-	public void visitChildren(ast.expression.nocond.logical.And n) {
+	public void visitChildren(Binary n) {
 		n.getOperands().forEach(e -> e.accept(this));
 	}
 
 	public void visitChildren(Not n) {
 		n.getExpression().accept(this);
-	}
-
-	public void visitChildren(ast.expression.nocond.logical.Or n) {
-		n.getOperands().forEach(e -> e.accept(this));
 	}
 
 	public void visitChildren(ArgList n) {

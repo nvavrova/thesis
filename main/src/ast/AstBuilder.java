@@ -25,10 +25,7 @@ import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
-import ast.expression.nocond.logical.And;
-import ast.expression.nocond.logical.Comparison;
-import ast.expression.nocond.logical.Not;
-import ast.expression.nocond.logical.Or;
+import ast.expression.nocond.logical.*;
 import ast.expression.nocond.trailer.*;
 import ast.param.*;
 import ast.path.DottedPath;
@@ -820,7 +817,7 @@ public class AstBuilder {
 			if (children.size() == 1) {
 				return children.get(0);
 			}
-			return new Or(this.getLocInfo(ctx), children);
+			return new Binary(this.getLocInfo(ctx), children, "or");
 		}
 
 		@Override
@@ -833,7 +830,7 @@ public class AstBuilder {
 			if (children.size() == 1) {
 				return children.get(0);
 			}
-			return new And(this.getLocInfo(ctx), children);
+			return new Binary(this.getLocInfo(ctx), children, "and");
 		}
 
 		@Override
