@@ -28,14 +28,17 @@ public class Subroutine extends ContentContainer {
 		return this.loc;
 	}
 
-	public Integer getAid() {
-		//Access of Import Data: Number of data members accessed in a method directly or via accessor-methods, from which the definition-class of the method is not derived.
-		Long accessorCalls = this.calledSubroutines.values().stream().filter(Subroutine::isAccessor).count();
-		return accessorCalls.intValue() + this.getReferencedOutsideVariables().size();
+	public Integer getAccessOfImportData() {
+		//Number of data members accessed in a method directly or via accessor-methods, from which the definition-class of the method is not derived.
+		Long outsideAccessorCalls = this.calledSubroutines.values().stream()
+				.filter(Subroutine::isAccessor)
+				.filter(s -> !this.parent.isInParentLine(s.parent))
+				.count();
+		return outsideAccessorCalls.intValue() + this.getReferencedOutsideVariables().size();
 	}
 
-	public Integer getAld() {
-		//Access of Local Data: Number of the data members accessed in the given method, which are local to the class where the method is defined.
+	public Integer getAccessOfLocalData() {
+		//Number of the data members accessed in the given method, which are local to the class where the method is defined.
 		return this.getReferencedInsideVariables().size();
 	}
 

@@ -42,6 +42,10 @@ public class Class extends ContentContainer {
 		return this.parents;
 	}
 
+	public Set<Class> getParentsSet() {
+		return this.parents.values().stream().collect(Collectors.toSet());
+	}
+
 	@Override
 	public VarDefinitions getDefinedVarsInclParentsVars() {
 		VarDefinitions vars = new VarDefinitions();
@@ -84,8 +88,11 @@ public class Class extends ContentContainer {
 		super.resolveInheritance(scope);
 		for (String clsName : this.parentNames) {
 			if (scope.definedClasses.containsKey(clsName)) {
-				this.parents.put(clsName, scope.definedClasses.get(clsName));
-				this.referencedClasses.put(clsName, this.parents.get(clsName));
+				Class parentCls = scope.definedClasses.get(clsName);
+				if (!this.equals(parentCls)) {
+					this.parents.put(clsName, parentCls);
+					this.referencedClasses.put(clsName, parentCls);
+				}
 			}
 		}
 	}
@@ -95,6 +102,7 @@ public class Class extends ContentContainer {
 		super.copyParentVars();
 		for (Class parent : this.parents.values()) {
 			VarDefinitions parentVars = parent.getParentVars();
+
 			for (String varName : parentVars.getNames()) {
 				this.addInheritedVars(parentVars, varName);
 			}
@@ -115,15 +123,6 @@ public class Class extends ContentContainer {
 		}
 		vars.addAllUnrestricted(this.definedVars);
 		return vars;
-	}
-
-	private void add(Map<String, Set<Variable>> target, Map<String, Set<Variable>> values) {
-		for (String name : values.keySet()) {
-			if (!target.containsKey(name)) {
-				target.put(name, new HashSet<>());
-			}
-			target.get(name).addAll(values.get(name));
-		}
 	}
 
 	@Override

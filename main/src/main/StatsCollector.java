@@ -2,6 +2,7 @@ package main;
 
 import ast.Module;
 import model.*;
+import model.Class;
 import process.File2Tree;
 import util.FileHelper;
 import util.StringHelper;
@@ -30,8 +31,6 @@ public class StatsCollector {
 		if (args.length > 0) {
 			File sourceFolder = new File(args[0]);
 			List<File> subfolders = FileHelper.getSubfolders(sourceFolder);
-//			List<File> subfolders = new ArrayList<>();
-//			subfolders.add(new File("D:\\intellij_projects\\thesis\\data\\asyncio"));
 			StatsCollector.createStatsCsv(subfolders);
 		}
 	}
@@ -42,6 +41,7 @@ public class StatsCollector {
 		List<String> header = new ArrayList<>();
 		header.add("project");
 		header.add("module");
+		header.add("error");
 		header.add("class name");
 		header.add("# of private variables");
 		header.add("# of protected variables");
@@ -53,6 +53,9 @@ public class StatsCollector {
 		header.add("# of methods with no params");
 		header.add("# of used globals");
 		header.add("# of defined globals");
+		header.add("# of methods");
+		header.add("average method AID");
+		header.add("average method ALD");
 		csv.println(StringHelper.implode(header, CSV_DELIMITER));
 
 		projectFolders.forEach(project -> StatsCollector.createStatsCsv(project, csv));
@@ -67,10 +70,13 @@ public class StatsCollector {
 			ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
 			Project project = mb.getProject();
 
-			//TODO
-//			for (model.Class c : project.getClasses()) {
-//				csv.println(StringHelper.implode(createClassLine(c, project), CSV_DELIMITER));
-//			}
+			for (model.Module module : project.getModules()) {
+				Map<String, Class> classes = module.getDefinedClassesInclSubclassesByName();
+				for (String clsAlias : classes.keySet()) {
+					Class cls = classes.get(clsAlias);
+					csv.println(StringHelper.implode(createClassLine(clsAlias, cls, module, project), CSV_DELIMITER));
+				}
+			}
 		}
 		catch (Exception ex) {
 			StatsCollector.handleException(ex);
@@ -78,22 +84,35 @@ public class StatsCollector {
 		System.out.println("-----------------------------------------------------------------------------------------------------------");
 	}
 
-	private static List<String> createClassLine(model.Class c, Project project) {
+	private static List<String> createClassLine(String alias, model.Class cls, model.Module module, Project project) {
 		List<String> line = new ArrayList<>();
 		line.add(project.getPath());
-		//TODO: get the module
-//		line.add(c.getModule().getFilePath());
-		line.add(c.getName());
-		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(Variable::isPrivate).count()));
-		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(Variable::isProtected).count()));
-		line.add(String.valueOf(c.getDefinedVariablesSet().stream().filter(Variable::isPublic).count()));
-		line.add(String.valueOf(c.getDefinedSubroutinesSet().stream().filter(Subroutine::isAccessor).count()));
-		line.add(String.valueOf(c.getLcom()));
-		line.add(String.valueOf(c.getLoc()));
-		line.add(String.valueOf(c.parentsCount()));
-		line.add(String.valueOf(c.subroutinesWithNoParamsCount()));
-		line.add(String.valueOf(c.getReferencedGlobalsSet().size()));
-		line.add(String.valueOf(c.getDefinedVariablesOfTypeSet(VarType.GLOBAL).size()));
+		line.add(module.getFilePath());
+		line.add(module.getError());
+		line.add(alias);
+		line.add(String.valueOf(cls.getDefinedVariablesSet().stream().filter(Variable::isPrivate).count()));
+		line.add(String.valueOf(cls.getDefinedVariablesSet().stream().filter(Variable::isProtected).count()));
+		line.add(String.valueOf(cls.getDefinedVariablesSet().stream().filter(Variable::isPublic).count()));
+		line.add(String.valueOf(cls.getDefinedSubroutinesSet().stream().filter(Subroutine::isAccessor).count()));
+		line.add(String.valueOf(cls.getLcom()));
+		line.add(String.valueOf(cls.getLoc()));
+		line.add(String.valueOf(cls.parentsCount()));
+		line.add(String.valueOf(cls.subroutinesWithNoParamsCount()));
+		line.add(String.valueOf(cls.getReferencedGlobalsSet().size()));
+		line.add(String.valueOf(cls.getDefinedVariablesOfTypeSet(VarType.GLOBAL).size()));
+
+		int amountMethods = cls.getDefinedSubroutinesSet().size();
+		Double aid = 0.0;
+		Double ald = 0.0;
+		for (Subroutine s : cls.getDefinedSubroutinesSet()) {
+			aid += s.getAccessOfImportData();
+			ald += s.getAccessOfLocalData();
+		}
+
+		line.add(String.valueOf(amountMethods));
+		line.add(String.valueOf(aid/amountMethods));
+		line.add(String.valueOf(ald/amountMethods));
+
 		return line;
 	}
 
