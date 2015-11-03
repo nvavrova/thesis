@@ -138,7 +138,6 @@ public interface Visitor<T> {
 	T visit(Call n);
 	T visit(DirectCall n);
 	T visit(Slice n);
-	T visit(Subscription n);
 	
 	//atom
 	T visit(Bool n);

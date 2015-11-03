@@ -420,12 +420,6 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(Subscription n) {
-		this.visitChildren(n);
-		return null;
-	}
-
-	@Override
 	public T visit(And n) {
 		this.visitChildren(n);
 		return null;
@@ -825,12 +819,6 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	public void visitChildren(Slice n) {
 		n.getBase().accept(this);
 		n.getBounds().accept(this);
-	}
-
-	public void visitChildren(Subscription n) {
-		n.getSubscript().accept(this);
-		n.getBase().accept(this);
-
 	}
 
 	public void visitChildren(SetMaker n) {
