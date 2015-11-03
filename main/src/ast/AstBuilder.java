@@ -1157,10 +1157,7 @@ public class AstBuilder {
 			Suite suite = (Suite) ctx.suite().accept(this);
 			if (ctx.arglist() != null) {
 				ArgList argList = (ArgList) ctx.arglist().accept(this);
-				List<SimpleArgument> args = argList.getArguments().stream()
-						.map(a -> (SimpleArgument) a) //TODO: fix an AST building error here
-						.collect(Collectors.toList());
-				return new ClassDef(this.getLocInfo(ctx), id, suite, args);
+				return new ClassDef(this.getLocInfo(ctx), id, suite, argList.getArguments());
 			}
 			return new ClassDef(this.getLocInfo(ctx), id, suite, Collections.emptyList());
 		}

@@ -19,4 +19,6 @@ public abstract class Argument extends AstNode {
 	public Expr getValue() {
 		return this.value;
 	}
+
+	public abstract <T> T accept(ArgumentVisitor<T> visitor);
 }

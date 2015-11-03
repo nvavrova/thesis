@@ -181,11 +181,9 @@ public class ModelBuilder {
 		public Void visit(ClassDef n) {
 			Integer locInfo = n.getLocInfo();
 
-			//accounts for the classes within classes
-//			String name = this.getPrevClassName() + n.getName().getValue();
-
+			ClassArgumentCollector argCollector = new ClassArgumentCollector();
 			List<String> parents = n.getInheritance().stream()
-					.map(p -> p.getValue().toString())
+					.map(p -> p.accept(argCollector))
 					.collect(Collectors.toList());
 
 			Class c = new Class(n.getName().getValue(), this.getCurrentContainer(), locInfo, parents);

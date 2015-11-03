@@ -25,4 +25,9 @@ public class DefValArgument extends Argument {
 	public <T> T accept(Visitor<T> visitor) {
 		return visitor.visit(this);
 	}
+
+	@Override
+	public <T> T accept(ArgumentVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 }
