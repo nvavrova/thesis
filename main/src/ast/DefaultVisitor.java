@@ -408,7 +408,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	@Override
-	public T visit(DirectCall n) {
+	public T visit(ObjectMethodCall n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -811,7 +811,7 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		n.getArgs().accept(this);
 	}
 
-	public void visitChildren(DirectCall n) {
+	public void visitChildren(ObjectMethodCall n) {
 		n.getBase().accept(this);
 		n.getCall().accept(this);
 	}

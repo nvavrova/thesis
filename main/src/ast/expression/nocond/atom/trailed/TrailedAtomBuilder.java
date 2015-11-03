@@ -70,7 +70,7 @@ public class TrailedAtomBuilder {
 			Call newCall = new Call(target.getLocInfo(), lastId, target.getArgs());
 
 			Atom base = attributes.size() == 0 ? attrRef.getBase() : attrRef;
-			return new DirectCall(target.getLocInfo(), base, newCall);
+			return new ObjectMethodCall(target.getLocInfo(), base, newCall);
 		}
 		return target;
 	}

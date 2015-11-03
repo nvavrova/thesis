@@ -5,7 +5,7 @@ import ast.expression.ExprList;
 import ast.expression.nocond.atom.Identifier;
 import ast.expression.nocond.atom.trailed.AttributeRef;
 import ast.expression.nocond.atom.trailed.Call;
-import ast.expression.nocond.atom.trailed.DirectCall;
+import ast.expression.nocond.atom.trailed.ObjectMethodCall;
 import ast.path.Path;
 import ast.statement.compound.ClassDef;
 import ast.statement.compound.Function;
@@ -306,15 +306,15 @@ public class ModelBuilder {
 		@Override
 		public Void visit(Call n) {
 			this.addSubroutineRef(n.getBase().toString());
-			this.setAssignCall(n.getBase().toString()); //TODO: fix this
+			this.setAssignCall(n.getBase().toString());
 			this.visitChildren(n);
 			return null;
 		}
 
 		@Override
-		public Void visit(DirectCall n) {
+		public Void visit(ObjectMethodCall n) {
 			this.addSubroutineRef(n.getBase().toString() + "." + n.getCall().getName());
-			this.setAssignCall((n.getBase().toString() + "." + n.getCall().getName())); //TODO: fix this
+			this.setAssignCall((n.getBase().toString() + "." + n.getCall().getName()));
 			this.visitChildren(n);
 			return null;
 		}
@@ -351,7 +351,7 @@ public class ModelBuilder {
 		}
 
 		@Override
-		public void visitChildren(DirectCall n) {
+		public void visitChildren(ObjectMethodCall n) {
 			//prevents registering function names as variables
 			n.getCall().accept(this);
 		}

@@ -7,11 +7,11 @@ import org.antlr.v4.runtime.misc.NotNull;
 /**
  * Created by Nik on 08-07-2015
  */
-public class DirectCall extends TrailedAtom {
+public class ObjectMethodCall extends TrailedAtom {
 
 	private final Call call;
 
-	public DirectCall(@NotNull Integer locInfo, @NotNull Atom base, @NotNull Call call) {
+	public ObjectMethodCall(@NotNull Integer locInfo, @NotNull Atom base, @NotNull Call call) {
 		super(locInfo, base);
 		this.call = call;
 	}

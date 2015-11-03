@@ -136,7 +136,7 @@ public interface Visitor<T> {
 	//............................................... PRIMARY .............................................\\
 	T visit(AttributeRef n);
 	T visit(Call n);
-	T visit(DirectCall n);
+	T visit(ObjectMethodCall n);
 	T visit(Slice n);
 	
 	//atom
