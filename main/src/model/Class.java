@@ -89,7 +89,7 @@ public class Class extends ContentContainer {
 		for (String clsName : this.parentNames) {
 			if (scope.definedClasses.containsKey(clsName)) {
 				Class parentCls = scope.definedClasses.get(clsName);
-				if (!this.equals(parentCls)) {
+				if (!parentCls.isInInheritanceLine(this)) {
 					this.parents.put(clsName, parentCls);
 					this.referencedClasses.put(clsName, parentCls);
 				}
@@ -123,6 +123,18 @@ public class Class extends ContentContainer {
 		}
 		vars.addAllUnrestricted(this.definedVars);
 		return vars;
+	}
+
+	private boolean isInInheritanceLine(ContentContainer container) {
+		if (this.equals(container)) {
+			return true;
+		}
+		for (Class parent : this.parents.values()) {
+			if (parent.isInInheritanceLine(container)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

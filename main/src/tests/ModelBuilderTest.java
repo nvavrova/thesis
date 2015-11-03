@@ -139,6 +139,16 @@ public class ModelBuilderTest {
 		assert (dependencies2.contains(classes.get("Base1")));
 	}
 
+	@Test
+	public void checkCyclicDependencies() {
+		Map<String, Class> classes = TestHelper.getClasses("cyclic_dependencies");
+
+		Class cls1 = classes.get("ClassOne");
+		Class cls2 = classes.get("ClassTwo");
+
+		assert (cls1.getReferencedClassesSet().size() + cls2.getReferencedClassesSet().size() == 1);
+	}
+
 	private Map<String, Subroutine> sortSubroutinesByName(Set<Subroutine> subroutines) {
 		Map<String, Subroutine> sorted = new HashMap<>();
 		for (Subroutine subroutine : subroutines) {
