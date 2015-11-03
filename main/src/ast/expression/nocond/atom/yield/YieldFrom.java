@@ -1,4 +1,4 @@
-package ast.statement.flow;
+package ast.expression.nocond.atom.yield;
 
 import ast.expression.Expr;
 import org.antlr.v4.runtime.misc.NotNull;

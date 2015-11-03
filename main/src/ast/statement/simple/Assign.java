@@ -2,7 +2,7 @@ package ast.statement.simple;
 
 import ast.Visitor;
 import ast.expression.ExprList;
-import ast.statement.flow.Yield;
+import ast.expression.nocond.atom.yield.Yield;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;

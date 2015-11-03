@@ -23,6 +23,9 @@ import ast.expression.nocond.atom.numeric.Imaginary;
 import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.TrailedAtomBuilder;
+import ast.expression.nocond.atom.yield.Yield;
+import ast.expression.nocond.atom.yield.YieldFrom;
+import ast.expression.nocond.atom.yield.YieldValues;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
 import ast.expression.nocond.logical.*;
@@ -450,7 +453,8 @@ public class AstBuilder {
 		@Override
 		public AstNode visitYield_stmt(@NotNull PythonParser.Yield_stmtContext ctx) {
 			//      yield_expr
-			return ctx.yield_expr().accept(this);
+			Yield yield = (Yield) ctx.yield_expr().accept(this);
+			return new ast.statement.flow.Yield(this.getLocInfo(ctx), yield);
 		}
 
 		@Override
@@ -1154,7 +1158,7 @@ public class AstBuilder {
 			if (ctx.arglist() != null) {
 				ArgList argList = (ArgList) ctx.arglist().accept(this);
 				List<SimpleArgument> args = argList.getArguments().stream()
-						.map(a -> (SimpleArgument) a)
+						.map(a -> (SimpleArgument) a) //TODO: fix an AST building error here
 						.collect(Collectors.toList());
 				return new ClassDef(this.getLocInfo(ctx), id, suite, args);
 			}

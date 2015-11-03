@@ -21,6 +21,8 @@ import ast.expression.nocond.atom.numeric.Imaginary;
 import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
 import ast.expression.nocond.atom.trailed.*;
+import ast.expression.nocond.atom.yield.YieldFrom;
+import ast.expression.nocond.atom.yield.YieldValues;
 import ast.expression.nocond.bitwise.*;
 import ast.expression.nocond.logical.Binary;
 import ast.expression.nocond.logical.Comparison;
@@ -215,6 +217,12 @@ public class DefaultVisitor<T> implements Visitor<T> {
 
 	@Override
 	public T visit(Return n) {
+		this.visitChildren(n);
+		return null;
+	}
+
+	@Override
+	public T visit(Yield n) {
 		this.visitChildren(n);
 		return null;
 	}
@@ -657,6 +665,10 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		if (n.hasValues()) {
 			n.getValues().accept(this);
 		}
+	}
+
+	public void visitChildren(Yield n) {
+		n.getYield().accept(this);
 	}
 
 	public void visitChildren(YieldValues n) {
