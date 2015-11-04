@@ -10,22 +10,16 @@ import java.util.stream.Collectors;
  */
 public class Subroutine extends ContentContainer {
 	private final SubroutineType subroutineType;
-	private final Integer loc;
 	private final ContentContainer parent;
 	private final Boolean isAccessor;
 	private final List<String> params;
 
-	public Subroutine(String name, ContentContainer parent, Integer loc, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
-		super(name);
-		this.loc = loc;
+	public Subroutine(String name, Integer loc, ContentContainer parent, SubroutineType subroutineType, List<String> params, Boolean isAccessor) {
+		super(name, loc);
 		this.parent = parent;
 		this.subroutineType = subroutineType;
 		this.params = params;
 		this.isAccessor = isAccessor;
-	}
-
-	public Integer getLoc() {
-		return this.loc;
 	}
 
 	public Integer getAccessOfImportData() {

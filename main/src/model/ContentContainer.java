@@ -19,8 +19,9 @@ public abstract class ContentContainer extends ContentDefinitions {
 	protected final List<Assign> assigns;
 
 	protected final String name;
+	protected final Integer loc;
 
-	public ContentContainer(String name) {
+	public ContentContainer(String name, Integer loc) {
 		super();
 		this.name = name;
 
@@ -33,6 +34,7 @@ public abstract class ContentContainer extends ContentDefinitions {
 		this.referencedClasses = new HashMap<>();
 
 		this.assigns = new ArrayList<>();
+		this.loc = loc;
 	}
 
 
@@ -95,6 +97,10 @@ public abstract class ContentContainer extends ContentDefinitions {
 
 	public void addAssign(Assign assign) {
 		this.assigns.add(assign);
+	}
+
+	public Integer getLoc() {
+		return this.loc;
 	}
 
 	//-----------------------------------------------------------------------------------------------------\\

@@ -14,8 +14,8 @@ public class Module extends ContentContainer {
 	private final String filePath;
 	private final String error;
 
-	public Module(String name, String filePath, String error) {
-		super(name);
+	public Module(String name, Integer loc, String filePath, String error) {
+		super(name, loc);
 
 		this.filePath = filePath;
 		this.error = error;
@@ -70,6 +70,10 @@ public class Module extends ContentContainer {
 
 	public String getFilePath() {
 		return this.filePath;
+	}
+
+	public boolean hasError() {
+		return !this.error.equals("");
 	}
 
 	public String getError() {

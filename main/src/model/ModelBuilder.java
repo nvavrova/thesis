@@ -139,7 +139,7 @@ public class ModelBuilder {
 		@Override
 		public void visitChildren(ast.Module n) {
 			String filePath = n.getFilePath();
-			model.Module module = new model.Module(n.getName(), filePath, StringHelper.implode(n.getErrors(), "\n"));
+			model.Module module = new model.Module(n.getName(), n.getLocInfo(), filePath, StringHelper.implode(n.getErrors(), "\n"));
 
 			this.project.addModule(module);
 
@@ -186,7 +186,7 @@ public class ModelBuilder {
 					.map(p -> p.accept(argCollector))
 					.collect(Collectors.toList());
 
-			Class c = new Class(n.getName().getValue(), this.getCurrentContainer(), locInfo, parents);
+			Class c = new Class(n.getName().getValue(), locInfo, this.getCurrentContainer(), parents);
 			this.getCurrentContainer().addClassDefinition(c);
 
 			this.classes.push(c);
@@ -198,22 +198,14 @@ public class ModelBuilder {
 			return null;
 		}
 
-//		private String getPrevClassName() {
-//			if (this.classes.size() == 0) {
-//				return "";
-//			}
-//			return this.classes.lastElement().getName() + ".";
-//		}
-
 		@Override
 		public Void visit(Function n) {
-//			if (this.inClass()) {
 			List<String> paramNames = n.getParams().getParamNames().stream()
 					.filter(p -> !p.equals(LexicalHelper.SELF_KEYWORD))
 					.collect(Collectors.toList());
 			SubroutineType type = !this.inClass() ? SubroutineType.FUNCTION :
 					(n.isStatic() ? SubroutineType.STATIC_METHOD : SubroutineType.INSTANCE_METHOD);
-			Subroutine subroutine = new Subroutine(n.getNameString(), this.getCurrentContainer(), n.getLocInfo(), type, paramNames, n.isAccessor());
+			Subroutine subroutine = new Subroutine(n.getNameString(), n.getLocInfo(), this.getCurrentContainer(), type, paramNames, n.isAccessor());
 			this.getCurrentContainer().addSubroutineDefinition(subroutine);
 
 			this.subroutines.push(subroutine);
@@ -223,9 +215,6 @@ public class ModelBuilder {
 			this.subroutines.pop();
 
 			return null;
-//			}
-//			this.visitChildren(n);
-//			return null;
 		}
 
 		@Override

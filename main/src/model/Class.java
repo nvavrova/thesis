@@ -8,16 +8,14 @@ import java.util.stream.Collectors;
  */
 public class Class extends ContentContainer {
 
-	private final Integer loc;
 	private final ContentContainer parent;
 	private final List<String> parentNames;
 	private final Map<String, Class> parents;
 
 	private final VarDefinitions inheritedVars;
 
-	public Class(String name, ContentContainer parent, Integer loc, List<String> parentNames) {
-		super(name);
-		this.loc = loc;
+	public Class(String name, Integer loc, ContentContainer parent, List<String> parentNames) {
+		super(name, loc);
 		this.parent = parent;
 		this.parentNames = parentNames;
 		this.parents = new HashMap<>();
@@ -28,10 +26,6 @@ public class Class extends ContentContainer {
 	@Override
 	public String getName() {
 		return this.name;
-	}
-
-	public Integer getLoc() {
-		return this.loc;
 	}
 
 	public Integer getLcom() {
