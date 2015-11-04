@@ -13,19 +13,10 @@ public class Project {
 
 	private final Map<String, Module> modules;
 	private final File folder;
-	private String version;
 
 	public Project(File folder) {
 		this.folder = folder;
 		this.modules = new HashMap<>();
-	}
-
-	public String getVersion() {
-		return this.version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
 	}
 
 	public File getFolder() {
