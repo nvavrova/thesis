@@ -183,11 +183,11 @@ public class ModelBuilder {
 			Integer locInfo = n.getLocInfo();
 
 			ClassArgumentCollector argCollector = new ClassArgumentCollector();
-			List<String> parents = n.getInheritance().stream()
+			List<String> superclassNames = n.getInheritance().stream()
 					.map(p -> p.accept(argCollector))
 					.collect(Collectors.toList());
 
-			Class c = new Class(n.getName().getValue(), locInfo, this.getCurrentContainer(), parents);
+			Class c = new Class(n.getName().getValue(), locInfo, this.getCurrentContainer(), superclassNames);
 			this.getCurrentContainer().addClassDefinition(c);
 
 			this.classes.push(c);

@@ -9,16 +9,16 @@ import java.util.stream.Collectors;
 public class Class extends ContentContainer {
 
 	private final ContentContainer parent;
-	private final List<String> parentNames;
-	private final Map<String, Class> parents;
+	private final List<String> superclassNames;
+	private final Map<String, Class> superclasses;
 
 	private final VarDefinitions inheritedVars;
 
-	public Class(String name, Integer loc, ContentContainer parent, List<String> parentNames) {
+	public Class(String name, Integer loc, ContentContainer parent, List<String> superclassNames) {
 		super(name, loc);
 		this.parent = parent;
-		this.parentNames = parentNames;
-		this.parents = new HashMap<>();
+		this.superclassNames = superclassNames;
+		this.superclasses = new HashMap<>();
 
 		this.inheritedVars = new VarDefinitions();
 	}
@@ -32,29 +32,29 @@ public class Class extends ContentContainer {
 		return this.calculateLcom();
 	}
 
-	public Map<String, Class> getParents() {
-		return this.parents;
+	public Map<String, Class> getSuperclasses() {
+		return this.superclasses;
 	}
 
 	public Set<Class> getParentsSet() {
-		return this.parents.values().stream().collect(Collectors.toSet());
+		return this.superclasses.values().stream().collect(Collectors.toSet());
 	}
 
 	@Override
 	public VarDefinitions getDefinedVarsInclParentsVars() {
 		VarDefinitions vars = new VarDefinitions();
-		this.parents.values().forEach(p -> vars.addAllUnrestricted(p.getDefinedVarsInclParentsVars()));
+		this.superclasses.values().forEach(p -> vars.addAllUnrestricted(p.getDefinedVarsInclParentsVars()));
 		vars.addAllEnforceRestriction(this.inheritedVars);
 		vars.addAllEnforceRestriction(this.definedVars);
 		return vars;
 	}
 
-	public List<String> getParentNames() {
-		return this.parentNames;
+	public List<String> getSuperclassNames() {
+		return this.superclassNames;
 	}
 
-	public Integer parentsCount() {
-		return this.parentNames.size();
+	public Integer superclassCount() {
+		return this.superclassNames.size();
 	}
 
 	private Boolean privateFieldsWithOnePublicMethod() {
@@ -80,11 +80,11 @@ public class Class extends ContentContainer {
 	@Override
 	public void resolveInheritance(Scope scope) {
 		super.resolveInheritance(scope);
-		for (String clsName : this.parentNames) {
+		for (String clsName : this.superclassNames) {
 			if (scope.definedClasses.containsKey(clsName)) {
 				Class parentCls = scope.definedClasses.get(clsName);
 				if (!parentCls.isInInheritanceLine(this)) {
-					this.parents.put(clsName, parentCls);
+					this.superclasses.put(clsName, parentCls);
 					this.referencedClasses.put(clsName, parentCls);
 				}
 			}
@@ -94,7 +94,7 @@ public class Class extends ContentContainer {
 	@Override
 	public void copyParentVars() {
 		super.copyParentVars();
-		for (Class parent : this.parents.values()) {
+		for (Class parent : this.superclasses.values()) {
 			VarDefinitions parentVars = parent.getParentVars();
 
 			for (String varName : parentVars.getNames()) {
@@ -112,7 +112,7 @@ public class Class extends ContentContainer {
 
 	private VarDefinitions getParentVars() {
 		VarDefinitions vars = new VarDefinitions();
-		for (Class parent : this.parents.values()) {
+		for (Class parent : this.superclasses.values()) {
 			vars.addAllUnrestricted(parent.getParentVars());
 		}
 		vars.addAllUnrestricted(this.definedVars);
@@ -123,7 +123,7 @@ public class Class extends ContentContainer {
 		if (this.equals(container)) {
 			return true;
 		}
-		for (Class parent : this.parents.values()) {
+		for (Class parent : this.superclasses.values()) {
 			if (parent.isInInheritanceLine(container)) {
 				return true;
 			}

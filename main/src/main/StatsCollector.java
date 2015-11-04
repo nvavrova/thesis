@@ -132,7 +132,7 @@ public class StatsCollector {
 			line.add(String.valueOf(cls.getDefinedSubroutinesSet().stream().filter(Subroutine::isAccessor).count()));
 			line.add(String.valueOf(cls.getLcom()));
 			line.add(String.valueOf(cls.getLoc()));
-			line.add(String.valueOf(cls.parentsCount()));
+			line.add(String.valueOf(cls.superclassCount()));
 			line.add(String.valueOf(cls.subroutinesWithNoParamsCount()));
 			line.add(String.valueOf(cls.getReferencedGlobalsSet().size()));
 			line.add(String.valueOf(cls.getDefinedVariablesOfTypeSet(VarType.GLOBAL).size()));
