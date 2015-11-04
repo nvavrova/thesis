@@ -1,6 +1,7 @@
 package model;
 
 import ast.DefaultVisitor;
+import ast.argument.*;
 import ast.expression.ExprList;
 import ast.expression.nocond.atom.Identifier;
 import ast.expression.nocond.atom.trailed.AttributeRef;
@@ -377,6 +378,34 @@ public class ModelBuilder {
 
 		private ContentContainer getCurrentContainer() {
 			return this.contentContainers.peek();
+		}
+	}
+
+	public class ClassArgumentCollector implements ArgumentVisitor<String> {
+
+		@Override
+		public String visit(Arg n) {
+			throw new IllegalArgumentException();
+		}
+
+		@Override
+		public String visit(CondArgument n) {
+			throw new IllegalArgumentException();
+		}
+
+		@Override
+		public String visit(DefValArgument n) {
+			return n.getValue().toString(); //in case it's an identifier - name of another class
+		}
+
+		@Override
+		public String visit(Kwarg n) {
+			throw new IllegalArgumentException();
+		}
+
+		@Override
+		public String visit(SimpleArgument n) {
+			return n.getValue().toString();
 		}
 	}
 }
