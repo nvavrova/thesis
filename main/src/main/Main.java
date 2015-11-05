@@ -1,9 +1,19 @@
 package main;
 
-import process.NonVersionedProcessor;
-import process.Processor;
+import analysis.DesignDefect;
+import analysis.Register;
+import analysis.detector.BlobDecorDetector;
+import ast.Module;
+import model.ModelBuilder;
+import model.Project;
+import process.File2Tree;
+import util.FileHelper;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Main {
 
@@ -14,8 +24,28 @@ public class Main {
 //		System.setOut(out);
 //		System.setErr(err);
 
-		Processor processor = new NonVersionedProcessor(args[0]);
-		processor.process();
+		Register register = new Register();
+
+		//TODO: add Detectors
+		register.add(new BlobDecorDetector());
+
+		File projectsFolder = new File(args[0]);
+		for (File file : projectsFolder.listFiles()) {
+			if (file.isDirectory()) {
+				Project project = createProject(file);
+				register.check(project);
+			}
+		}
+
+		Map<String, Set<DesignDefect>> designDefects = register.finish();
+		//TODO: do something with the results
+	}
+
+	private static Project createProject(File projectFolder) {
+		List<String> allFiles = FileHelper.getPythonFilePaths(projectFolder);
+		Map<String, Module> trees = File2Tree.getAsts(allFiles);
+		ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
+		return mb.getProject();
 	}
 
 }

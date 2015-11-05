@@ -88,4 +88,9 @@ public class Module extends ContentContainer {
 	public boolean isInParentLine(ContentContainer container) {
 		return this.equals(container);
 	}
+
+	@Override
+	public <T> T accept(ContentContainerVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 }

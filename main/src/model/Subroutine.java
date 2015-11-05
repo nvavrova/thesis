@@ -75,4 +75,9 @@ public class Subroutine extends ContentContainer {
 		}
 		return this.parent.isInParentLine(container);
 	}
+
+	@Override
+	public <T> T accept(ContentContainerVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
 }

@@ -37,7 +37,6 @@ public abstract class ContentContainer extends ContentDefinitions {
 		this.loc = loc;
 	}
 
-
 	//-----------------------------------------------------------------------------------------------------\\
 	//---------------------------------------------- GETTERS ----------------------------------------------\\
 	//-----------------------------------------------------------------------------------------------------\\
@@ -192,4 +191,5 @@ public abstract class ContentContainer extends ContentDefinitions {
 	}
 
 	public abstract boolean isInParentLine(ContentContainer container);
+	public abstract <T> T accept(ContentContainerVisitor<T> visitor);
 }
