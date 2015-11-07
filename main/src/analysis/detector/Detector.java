@@ -70,19 +70,19 @@ public abstract class Detector {
 	}
 
 	//override these where necessary
-	protected Boolean isPreliminarilyDefective(Class cls) {
+	protected Boolean isPreliminarilyDefective(Module module) {
 		return false;
 	}
-	protected Boolean isPreliminarilyDefective(Module module) {
+	protected Boolean isPreliminarilyDefective(Class cls) {
 		return false;
 	}
 	protected Boolean isPreliminarilyDefective(Subroutine subroutine) {
 		return false;
 	}
-	protected Boolean confirmDefect(Class cls) {
+	protected Boolean confirmDefect(Module module) {
 		return false;
 	}
-	protected Boolean confirmDefect(Module module) {
+	protected Boolean confirmDefect(Class cls) {
 		return false;
 	}
 	protected Boolean confirmDefect(Subroutine subroutine) {

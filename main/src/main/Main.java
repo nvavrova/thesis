@@ -3,6 +3,9 @@ package main;
 import analysis.DesignDefect;
 import analysis.Register;
 import analysis.detector.BlobDecorDetector;
+import analysis.detector.FunctionalDecompositionDecorDetector;
+import analysis.detector.SpaghettiCodeDecorDetector;
+import analysis.detector.SwissArmyKnifeDecorDetector;
 import ast.Module;
 import model.ModelBuilder;
 import model.Project;
@@ -28,6 +31,9 @@ public class Main {
 
 		//TODO: add Detectors
 		register.add(new BlobDecorDetector());
+		register.add(new FunctionalDecompositionDecorDetector());
+		register.add(new SpaghettiCodeDecorDetector());
+		register.add(new SwissArmyKnifeDecorDetector());
 
 		File projectsFolder = new File(args[0]);
 		for (File file : projectsFolder.listFiles()) {

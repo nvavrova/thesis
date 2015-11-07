@@ -38,6 +38,7 @@ public class Register {
 	}
 
 	private void check(ContentContainer contentContainer) {
+		this.metrics.register(contentContainer);
 		this.detectors.forEach(d -> d.process(contentContainer));
 		contentContainer.getChildren().forEach(c -> this.check(c));
 	}

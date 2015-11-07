@@ -1,5 +1,6 @@
 package analysis.detector;
 
+import analysis.Metric;
 import model.Class;
 import model.Subroutine;
 import model.Variable;
@@ -34,7 +35,7 @@ public class BlobDecorDetector extends Detector {
 		return this.hasControllerName(m.getName());
 	}
 
-	private Boolean hasControllerName(String name) {
+	private boolean hasControllerName(String name) {
 		return LexicalHelper.isControllerName(name);
 	}
 
@@ -45,14 +46,15 @@ public class BlobDecorDetector extends Detector {
 	private boolean isDataClass(Class cls) {
 		Long publicVarCount = cls.getDefinedVariablesSet().stream().filter(Variable::isPrivate).count();
 		return publicVarCount > 11;
+		//nr of accessors very high
 //		return cls.getNumberOfAccessors() > 5;
 	}
 
 	private boolean isLargeClass(Class cls) {
-		return false; //TODO
+		return this.metrics.isInTop(Metric.CLASS_LOC, 10, cls.getLoc());
 	}
 
 	private boolean hasLowCohesion(Class cls) {
-		return false; //TODO
+		return this.metrics.isInTop(Metric.CLASS_LCOM, 10, cls.getLcom());
 	}
 }
