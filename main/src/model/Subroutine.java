@@ -77,6 +77,12 @@ public class Subroutine extends ContentContainer {
 	}
 
 	@Override
+	public String getFullPath() {
+		String type = this.subroutineType == SubroutineType.FUNCTION ? "function " : "method ";
+		return this.parent.getFullPath() + " > " + type + this.name;
+	}
+
+	@Override
 	public <T> T accept(ContentContainerVisitor<T> visitor) {
 		return visitor.visit(this);
 	}

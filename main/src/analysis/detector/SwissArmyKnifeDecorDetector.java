@@ -1,22 +1,39 @@
 package analysis.detector;
 
+import analysis.Metric;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Nik on 07-11-2015
  */
 public class SwissArmyKnifeDecorDetector extends Detector {
 
+	private final Map<String, Integer> parents;
+
+	public SwissArmyKnifeDecorDetector() {
+		this.parents = new HashMap<>();
+	}
+
 	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
-		return cls.superclassCount() > 1;
+		boolean check = cls.superclassCount() > 1;
+
+		if (check) {
+			this.parents.put(cls.getFullPath(), cls.superclassCount());
+		}
+
+		return check;
 	}
 
 	@Override
-	protected Boolean confirmDefect(model.Class cls) {
-		return this.hasTooManyParents(cls);
+	protected Boolean confirmDefect(String fullPath) {
+		return this.hasTooManyParents(fullPath);
 	}
 
-	private boolean hasTooManyParents(model.Class cls) {
-		return cls.superclassCount() > 1;
+	private boolean hasTooManyParents(String fullClsPath) {
+		return this.metrics.isInTop(Metric.CLASS_SUPERCLASSES, 15, this.parents.get(fullClsPath));
 	}
 
 }

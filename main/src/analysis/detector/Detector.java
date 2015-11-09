@@ -19,12 +19,10 @@ public abstract class Detector {
 
 	protected Metrics metrics;
 	private final PreliminaryVisitor preliminaryVisitor;
-	private final ConfirmatoryVisitor confirmatoryVisitor;
 	private boolean finished;
 
 	public Detector() {
 		this.preliminaryVisitor = new PreliminaryVisitor();
-		this.confirmatoryVisitor = new ConfirmatoryVisitor();
 	}
 
 	public void addMetrics(Metrics metrics) {
@@ -60,7 +58,7 @@ public abstract class Detector {
 	}
 
 	private void confirmAndAdd(Map<String, Set<DesignDefect>> result, ContentContainer cc, DesignDefect designDefect) {
-		Boolean confirmed = this.confirmatoryVisitor.checkForDefect(cc);
+		Boolean confirmed = this.confirmDefect(cc.getFullPath());
 		if (confirmed) {
 			if (!result.containsKey("TODO")) {
 				result.put("TODO", new HashSet<>());
@@ -79,15 +77,7 @@ public abstract class Detector {
 	protected Boolean isPreliminarilyDefective(Subroutine subroutine) {
 		return false;
 	}
-	protected Boolean confirmDefect(Module module) {
-		return false;
-	}
-	protected Boolean confirmDefect(Class cls) {
-		return false;
-	}
-	protected Boolean confirmDefect(Subroutine subroutine) {
-		return false;
-	}
+	protected abstract Boolean confirmDefect(String fullPath);
 
 	private class PreliminaryVisitor implements ContentContainerVisitor<Boolean> {
 
@@ -108,28 +98,6 @@ public abstract class Detector {
 		@Override
 		public Boolean visit(Subroutine m) {
 			return isPreliminarilyDefective(m);
-		}
-	}
-
-	private class ConfirmatoryVisitor implements ContentContainerVisitor<Boolean> {
-
-		public Boolean checkForDefect(ContentContainer contentContainer) {
-			return contentContainer.accept(this);
-		}
-
-		@Override
-		public Boolean visit(Module m) {
-			return confirmDefect(m);
-		}
-
-		@Override
-		public Boolean visit(model.Class m) {
-			return confirmDefect(m);
-		}
-
-		@Override
-		public Boolean visit(Subroutine m) {
-			return confirmDefect(m);
 		}
 	}
 }

@@ -191,5 +191,6 @@ public abstract class ContentContainer extends ContentDefinitions {
 	}
 
 	public abstract boolean isInParentLine(ContentContainer container);
+	public abstract String getFullPath();
 	public abstract <T> T accept(ContentContainerVisitor<T> visitor);
 }

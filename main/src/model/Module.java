@@ -90,6 +90,11 @@ public class Module extends ContentContainer {
 	}
 
 	@Override
+	public String getFullPath() {
+		return this.filePath;
+	}
+
+	@Override
 	public <T> T accept(ContentContainerVisitor<T> visitor) {
 		return visitor.visit(this);
 	}

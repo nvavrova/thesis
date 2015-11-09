@@ -57,6 +57,11 @@ public class Class extends ContentContainer {
 		return this.superclassNames.size();
 	}
 
+	public Integer accessorCount() {
+		Long l = this.definedSubroutines.values().stream().filter(Subroutine::isAccessor).count();
+		return l.intValue();
+	}
+
 	private Boolean privateFieldsWithOnePublicMethod() {
 		return //this.privateVariablesCount() > 10 &&
 				this.getDefinedSubroutinesSet().stream().filter(s -> !s.isPrivate()).count() == 1;
@@ -137,6 +142,11 @@ public class Class extends ContentContainer {
 			return true;
 		}
 		return this.parent.isInParentLine(container);
+	}
+
+	@Override
+	public String getFullPath() {
+		return this.parent.getFullPath() + " > class " + this.name;
 	}
 
 	@Override

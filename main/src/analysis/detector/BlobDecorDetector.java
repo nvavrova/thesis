@@ -3,26 +3,51 @@ package analysis.detector;
 import analysis.Metric;
 import model.Class;
 import model.Subroutine;
-import model.Variable;
 import util.LexicalHelper;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 05-11-2015
  */
 public class BlobDecorDetector extends Detector {
 
+	private final Map<String, Set<Integer>> relatedAccessorCounts;
+	private final Map<String, Integer> loc;
+	private final Map<String, Integer> lcom;
+
+	public BlobDecorDetector() {
+		this.relatedAccessorCounts = new HashMap<>();
+		this.loc = new HashMap<>();
+		this.lcom = new HashMap<>();
+	}
+
 	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
-		return (this.hasControllerName(cls.getName()) || this.hasControllerMethods(cls))
-				&& this.relatedDataClassesCount(cls) > 1;
+
+		boolean seemsDefective = this.hasControllerName(cls.getName()) || this.hasControllerMethods(cls);
+
+		if (seemsDefective) {
+			Set<Integer> relatedAccessorCounts = cls.getReferencedClassesSet().stream()
+					.map(Class::accessorCount)
+					.collect(Collectors.toSet());
+			this.relatedAccessorCounts.put(cls.getFullPath(), relatedAccessorCounts);
+			this.loc.put(cls.getFullPath(), cls.getLoc());
+			this.lcom.put(cls.getFullPath(), cls.getLcom());
+		}
+
+		return seemsDefective;
 	}
 
 	@Override
-	protected Boolean confirmDefect(model.Class cls) {
-		return this.isLargeClass(cls) || this.hasLowCohesion(cls);
+	protected Boolean confirmDefect(String clsFullPath) {
+		return (this.isLargeClass(clsFullPath) || this.hasLowCohesion(clsFullPath)) && this.relatedDataClassesCount(clsFullPath) > 2;
 	}
 
-	private Boolean hasControllerMethods(Class cls) {
+	private boolean hasControllerMethods(Class cls) {
 		for (Subroutine m : cls.getDefinedSubroutinesSet()) {
 			if (this.isController(m)) {
 				return true;
@@ -39,22 +64,18 @@ public class BlobDecorDetector extends Detector {
 		return LexicalHelper.isControllerName(name);
 	}
 
-	private long relatedDataClassesCount(Class cls) {
-		return cls.getReferencedClassesSet().stream().filter(c -> this.isDataClass(c)).count();
+	private boolean isLargeClass(String clsFullPath) {
+		return this.metrics.isInTop(Metric.CLASS_LOC, 15, this.loc.get(clsFullPath));
 	}
 
-	private boolean isDataClass(Class cls) {
-		Long publicVarCount = cls.getDefinedVariablesSet().stream().filter(Variable::isPrivate).count();
-		return publicVarCount > 11;
-		//nr of accessors very high
-//		return cls.getNumberOfAccessors() > 5;
+	private boolean hasLowCohesion(String clsFullPath) {
+		return this.metrics.isInTop(Metric.CLASS_LCOM, 15, this.lcom.get(clsFullPath));
 	}
 
-	private boolean isLargeClass(Class cls) {
-		return this.metrics.isInTop(Metric.CLASS_LOC, 10, cls.getLoc());
-	}
-
-	private boolean hasLowCohesion(Class cls) {
-		return this.metrics.isInTop(Metric.CLASS_LCOM, 10, cls.getLcom());
+	private long relatedDataClassesCount(String clsFullPath) {
+		return this.relatedAccessorCounts.get(clsFullPath).stream()
+				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
+				.count();
 	}
 }
+;
