@@ -32,8 +32,14 @@ public class SwissArmyKnifeDecorDetector extends Detector {
 		return this.hasTooManyParents(fullPath);
 	}
 
+	@Override
+	protected String getName() {
+		return "Swiss Army Knife (DECOR)";
+	}
+
 	private boolean hasTooManyParents(String fullClsPath) {
-		return this.metrics.isInTop(Metric.CLASS_SUPERCLASSES, 15, this.parents.get(fullClsPath));
+		return this.metrics.isExtremeOutlier(Metric.CLASS_SUPERCLASSES, this.parents.get(fullClsPath));
+//		return this.metrics.isInTop(Metric.CLASS_SUPERCLASSES, 10, this.parents.get(fullClsPath));
 	}
 
 }

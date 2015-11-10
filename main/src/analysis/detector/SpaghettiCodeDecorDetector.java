@@ -43,6 +43,11 @@ public class SpaghettiCodeDecorDetector extends Detector {
 		return this.hasLongMethod(fullPath) && this.hasTooManyMethodsWithNoParams(fullPath);
 	}
 
+	@Override
+	protected String getName() {
+		return "Spaghetti Code (DECOR)";
+	}
+
 	private boolean hasProceduralName(String name) {
 		return LexicalHelper.isProceduralName(name);
 	}
@@ -57,7 +62,8 @@ public class SpaghettiCodeDecorDetector extends Detector {
 
 	private boolean hasLongMethod(String fullClassPath) {
 		for (Integer mSize : this.methodSizes.get(fullClassPath)) {
-			if (this.metrics.isInTop(Metric.SUBROUTINE_LOC, 12, mSize)) {
+			if (this.metrics.isMildOutlier(Metric.SUBROUTINE_LOC, mSize)) {
+//			if (this.metrics.isInTop(Metric.SUBROUTINE_LOC, 12, mSize)) {
 				return true;
 			}
 		}
@@ -65,7 +71,8 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	}
 
 	private boolean hasTooManyMethodsWithNoParams(String fullClassPath) {
-		return this.metrics.isInTop(Metric.CLASS_METHODS_NO_PARAMS, 12, this.nrMethodsWithNoParams.get(fullClassPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_METHODS_NO_PARAMS, this.nrMethodsWithNoParams.get(fullClassPath));
+//		return this.metrics.isInTop(Metric.CLASS_METHODS_NO_PARAMS, 12, this.nrMethodsWithNoParams.get(fullClassPath));
 	}
 
 }

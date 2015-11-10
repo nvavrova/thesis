@@ -1,33 +1,29 @@
 package analysis;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * Created by Nik on 09-11-2015
  */
 public class IntMetricVals {
-	private Integer amountOfRegisteredValues;
 	private Integer sum;
-	private final Map<Integer, Integer> values;
+	private final List<Integer> values;
+	private boolean sorted;
+
+	private Double average;
+	private Double median;
+	private Double standardDeviation;
+	private Double q1;
+	private Double q3;
 
 	public IntMetricVals() {
-		this.values = new HashMap<>();
-		this.amountOfRegisteredValues = 0;
+		this.values = new ArrayList<>();
+		this.sorted = false;
 		this.sum = 0;
 	}
 
 	public void add(Integer item) {
-		if (!this.values.containsKey(item)) {
-			this.values.put(item, 0);
-		}
-		Integer value = this.values.get(item) + 1;
-		this.values.put(item, value);
-
-		this.amountOfRegisteredValues++;
+		this.values.add(item);
 		this.sum += item;
 	}
 
@@ -39,37 +35,71 @@ public class IntMetricVals {
 		return value <= this.valueAtXPercent(percentage);
 	}
 
+	public boolean isMildOutlier(Integer val) {
+		return this.isOutlier(val, 1.5);
+	}
+
+	public boolean isExtremeOutlier(Integer val) {
+		return this.isOutlier(val, 3.0);
+	}
+
+	private boolean isOutlier(Integer val, Double iqrMultiplicand) {
+		this.sortAndCalculateStats();
+		Double iqr = this.q3 - this.q1;
+		return val < this.q1 - iqrMultiplicand * iqr || val > this.q3 + iqrMultiplicand * iqr;
+	}
+
 	public boolean atLeast2StdDevFromAvg(Integer val) {
+		this.sortAndCalculateStats();
 		return this.nrOfStandardDeviationsFromAvg(val) >= 2;
 	}
 
-	private Integer valueAtXPercent(Integer percentage) {
-		Integer counted = 0;
-		List<Integer> orderedKeys = this.values.keySet().stream().collect(Collectors.toList());
-		Collections.sort(orderedKeys);
-		for (Integer value : orderedKeys) {
-			counted += this.values.get(value);
-			if (this.amountOfRegisteredValues.doubleValue() / 100 * percentage <= counted) {
-				return value;
-			}
+	private Double median(List<Integer> sortedVals) {
+		if (sortedVals.size() % 2 == 0) {
+			int i = sortedVals.size() / 2;
+			return (sortedVals.get(i).doubleValue() + sortedVals.get(i + 1)) / 2.0;
 		}
-		throw new IllegalArgumentException();
+		int i = (sortedVals.size() / 2) + 1;
+		return sortedVals.get(i).doubleValue();
+	}
+
+	private Integer valueAtXPercent(Integer percentage) {
+		this.sortAndCalculateStats();
+		Double d = this.values.size() / 100.0 * percentage;
+		Long l = Math.round(d);
+		return this.values.get(l.intValue());
 	}
 
 	private Double nrOfStandardDeviationsFromAvg(Integer val) {
-		return Math.abs((this.average() - val) / this.standardDeviation());
+		return Math.abs((this.average() - val) / this.standardDeviation);
 	}
 
 	private Double average() {
-		return this.sum.doubleValue() / this.amountOfRegisteredValues;
+		return this.sum.doubleValue() / this.values.size();
 	}
 
 	private Double standardDeviation() {
-		Double avg = this.average();
 		Double sumOfIndividualDevSquares = 0.0;
-		for (Integer value : this.values.keySet()) {
-			sumOfIndividualDevSquares += this.values.get(value) * Math.pow(value - avg, 2);
+		for (Integer value : this.values) {
+			sumOfIndividualDevSquares += Math.pow(value - this.average, 2);
 		}
-		return Math.sqrt(sumOfIndividualDevSquares / this.amountOfRegisteredValues);
+		return Math.sqrt(sumOfIndividualDevSquares / this.values.size());
+	}
+
+	private void sortAndCalculateStats() {
+		if (!this.sorted) {
+			Collections.sort(this.values);
+		}
+
+		this.average = this.average();
+		this.median = this.median(this.values);
+		this.standardDeviation = this.standardDeviation();
+
+		int valSize = this.values.size();
+		boolean even = valSize % 2 == 0;
+		Integer q1Index = even ? (valSize - 2) / 2 : valSize / 2;
+		Integer q3Index = even ? q1Index + 2 : q1Index + 1;
+		this.q1 = this.median(this.values.subList(0, q1Index));
+		this.q3 = this.median(this.values.subList(q3Index, valSize));
 	}
 }

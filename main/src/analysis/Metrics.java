@@ -22,6 +22,7 @@ public class Metrics {
 
 	private final IntMetricVals subroutineLoc;
 	private final IntMetricVals subroutineParams;
+	private final IntMetricVals subroutineAid;
 
 	public Metrics() {
 		this.collector = new Collector();
@@ -36,6 +37,7 @@ public class Metrics {
 
 		this.subroutineLoc = new IntMetricVals();
 		this.subroutineParams = new IntMetricVals();
+		this.subroutineAid = new IntMetricVals();
 	}
 
 	public void register(ContentContainer contentContainer) {
@@ -47,6 +49,14 @@ public class Metrics {
 
 	public void terminateCollecting() {
 		this.finishedCollecting = true;
+	}
+
+	public boolean isExtremeOutlier(Metric metric, Integer value) {
+		return this.getCounter(metric).isExtremeOutlier(value);
+	}
+
+	public boolean isMildOutlier(Metric metric, Integer value) {
+		return this.getCounter(metric).isMildOutlier(value);
 	}
 
 	public boolean isInTop(Metric metric, Integer percentage, Integer value) {
@@ -92,6 +102,9 @@ public class Metrics {
 		if (metric == Metric.SUBROUTINE_PARAMS) {
 			return this.subroutineParams;
 		}
+		if (metric == Metric.SUBROUTINE_AID) {
+			return this.subroutineAid;
+		}
 		throw new IllegalArgumentException();
 	}
 
@@ -121,6 +134,7 @@ public class Metrics {
 		public Void visit(Subroutine m) {
 			subroutineLoc.add(m.getLoc());
 			subroutineParams.add(m.paramCount());
+			subroutineAid.add(m.getAccessOfImportData());
 			return null;
 		}
 	}

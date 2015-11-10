@@ -34,13 +34,13 @@ public class Register {
 			throw new IllegalStateException();
 		}
 		this.detectorsAdded = true; //don't allow any additional detectors
-		project.getModules().forEach(m -> this.check(m));
+		project.getModules().forEach(m -> this.check(project.getPath(), m));
 	}
 
-	private void check(ContentContainer contentContainer) {
+	private void check(String projectPath, ContentContainer contentContainer) {
 		this.metrics.register(contentContainer);
-		this.detectors.forEach(d -> d.process(contentContainer));
-		contentContainer.getChildren().forEach(c -> this.check(c));
+		this.detectors.forEach(d -> d.process(projectPath, contentContainer));
+		contentContainer.getChildren().forEach(c -> this.check(projectPath, c));
 	}
 
 	public Map<String, Set<DesignDefect>> finish() {

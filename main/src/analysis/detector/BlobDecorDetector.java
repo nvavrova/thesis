@@ -47,6 +47,11 @@ public class BlobDecorDetector extends Detector {
 		return (this.isLargeClass(clsFullPath) || this.hasLowCohesion(clsFullPath)) && this.relatedDataClassesCount(clsFullPath) > 2;
 	}
 
+	@Override
+	protected String getName() {
+		return "Blob (DECOR)";
+	}
+
 	private boolean hasControllerMethods(Class cls) {
 		for (Subroutine m : cls.getDefinedSubroutinesSet()) {
 			if (this.isController(m)) {
@@ -65,16 +70,19 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	private boolean isLargeClass(String clsFullPath) {
-		return this.metrics.isInTop(Metric.CLASS_LOC, 15, this.loc.get(clsFullPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_LOC, this.loc.get(clsFullPath));
+//		return this.metrics.isInTop(Metric.CLASS_LOC, 15, this.loc.get(clsFullPath));
 	}
 
 	private boolean hasLowCohesion(String clsFullPath) {
-		return this.metrics.isInTop(Metric.CLASS_LCOM, 15, this.lcom.get(clsFullPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_LCOM, this.lcom.get(clsFullPath));
+//		return this.metrics.isInTop(Metric.CLASS_LCOM, 15, this.lcom.get(clsFullPath));
 	}
 
 	private long relatedDataClassesCount(String clsFullPath) {
 		return this.relatedAccessorCounts.get(clsFullPath).stream()
-				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
+				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_ACCESSORS, v))
+//				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
 				.count();
 	}
 }

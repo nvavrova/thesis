@@ -15,13 +15,14 @@ import java.util.Set;
  */
 public abstract class Detector {
 
-	private Map<ContentContainer, Set<DesignDefect>> defects;
+	private Map<String, Set<DesignDefect>> defects;
 
 	protected Metrics metrics;
 	private final PreliminaryVisitor preliminaryVisitor;
 	private boolean finished;
 
 	public Detector() {
+		this.defects = new HashMap<>();
 		this.preliminaryVisitor = new PreliminaryVisitor();
 	}
 
@@ -30,41 +31,36 @@ public abstract class Detector {
 		this.finished = false;
 	}
 
-	public void process(ContentContainer contentContainer) {
+	public void process(String projectPath, ContentContainer contentContainer) {
 		if (this.finished) {
 			throw new IllegalStateException();
 		}
-		this.processChecked(contentContainer);
+		this.processChecked(projectPath, contentContainer);
 	}
 
-	private void processChecked(ContentContainer contentContainer) {
+	private void processChecked(String projectPath, ContentContainer contentContainer) {
 		Boolean defective = this.preliminaryVisitor.checkForDefect(contentContainer);
 		if (defective) {
-			if (!this.defects.containsKey(contentContainer)) {
-				this.defects.put(contentContainer, new HashSet<>());
+			if (!this.defects.containsKey(projectPath)) {
+				this.defects.put(projectPath, new HashSet<>());
 			}
-			this.defects.get(contentContainer).add(new DesignDefect());
+			this.defects.get(projectPath).add(new DesignDefect(contentContainer.getFullPath(), this.getName()));
 		}
 	}
 
 	public Map<String, Set<DesignDefect>> finish() {
 		Map<String, Set<DesignDefect>> result = new HashMap<>();
-		for (ContentContainer cc : this.defects.keySet()) {
-			for (DesignDefect designDefect : this.defects.get(cc)) {
-				this.confirmAndAdd(result, cc, designDefect);
+		for (String projectPath : this.defects.keySet()) {
+			for (DesignDefect designDefect : this.defects.get(projectPath)) {
+				if (this.confirmDefect(designDefect.getFullPath())) {
+					if (!result.containsKey(projectPath)) {
+						result.put(projectPath, new HashSet<>());
+					}
+					result.get(projectPath).add(designDefect);
+				}
 			}
 		}
 		return result;
-	}
-
-	private void confirmAndAdd(Map<String, Set<DesignDefect>> result, ContentContainer cc, DesignDefect designDefect) {
-		Boolean confirmed = this.confirmDefect(cc.getFullPath());
-		if (confirmed) {
-			if (!result.containsKey("TODO")) {
-				result.put("TODO", new HashSet<>());
-			}
-			result.get("TODO").add(designDefect);
-		}
 	}
 
 	//override these where necessary
@@ -78,6 +74,7 @@ public abstract class Detector {
 		return false;
 	}
 	protected abstract Boolean confirmDefect(String fullPath);
+	protected abstract String getName();
 
 	private class PreliminaryVisitor implements ContentContainerVisitor<Boolean> {
 

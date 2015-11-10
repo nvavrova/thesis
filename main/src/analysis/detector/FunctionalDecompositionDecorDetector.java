@@ -46,6 +46,11 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 		return this.relatedClassesWithOneMethodAndLotOfPrivateFields(fullPath) >= 2;
 	}
 
+	@Override
+	protected String getName() {
+		return "Functional Decomposition (DECOR)";
+	}
+
 	private boolean hasOneMethod(Class cls) {
 		return cls.getDefinedSubroutinesSet().size() == 1;
 	}
@@ -60,7 +65,8 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 
 	private Integer relatedClassesWithOneMethodAndLotOfPrivateFields(String fullClsPath) {
 		Long count = this.nrRelatedClassPrivateFields.get(fullClsPath).stream()
-				.filter(v -> this.metrics.isInTop(Metric.CLASS_METHODS, 25, v))
+				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_METHODS, v))
+//				.filter(v -> this.metrics.isInTop(Metric.CLASS_METHODS, 25, v))
 				.count();
 		return count.intValue();
 	}
