@@ -30,6 +30,10 @@ public class Main {
 
 		Register register = new Register();
 
+		register.add(new LongMethodDetector());
+		register.add(new LongParamListDetector());
+		register.add(new LargeClassDetector());
+		register.add(new DataClassDetector());
 		register.add(new BlobDecorDetector());
 		register.add(new FunctionalDecompositionDecorDetector());
 		register.add(new SpaghettiCodeDecorDetector());

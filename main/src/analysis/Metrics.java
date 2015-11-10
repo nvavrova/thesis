@@ -1,9 +1,6 @@
 package analysis;
 
-import model.ContentContainer;
-import model.ContentContainerVisitor;
-import model.Module;
-import model.Subroutine;
+import model.*;
 
 /**
  * Created by Nik on 04-11-2015
@@ -19,6 +16,7 @@ public class Metrics {
 	private final IntMetricVals classMethods;
 	private final IntMetricVals classAccessors;
 	private final IntMetricVals classMethodsNoParams;
+	private final IntMetricVals classPublicFields;
 
 	private final IntMetricVals subroutineLoc;
 	private final IntMetricVals subroutineParams;
@@ -34,6 +32,7 @@ public class Metrics {
 		this.classMethods = new IntMetricVals();
 		this.classAccessors = new IntMetricVals();
 		this.classMethodsNoParams = new IntMetricVals();
+		this.classPublicFields = new IntMetricVals();
 
 		this.subroutineLoc = new IntMetricVals();
 		this.subroutineParams = new IntMetricVals();
@@ -96,6 +95,9 @@ public class Metrics {
 		if (metric == Metric.CLASS_METHODS_NO_PARAMS) {
 			return this.classMethodsNoParams;
 		}
+		if (metric == Metric.CLASS_PUBLIC_FIELDS) {
+			return this.classPublicFields;
+		}
 		if (metric == Metric.SUBROUTINE_LOC) {
 			return this.subroutineLoc;
 		}
@@ -127,6 +129,8 @@ public class Metrics {
 			classMethods.add(m.getDefinedSubroutinesSet().size());
 			classAccessors.add(m.accessorCount());
 			classMethodsNoParams.add(m.subroutinesWithNoParamsCount());
+			Long publicFields = m.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPublic).count();
+			classPublicFields.add(publicFields.intValue());
 			return null;
 		}
 
