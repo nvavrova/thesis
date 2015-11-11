@@ -19,14 +19,16 @@ import java.util.Set;
 
 public class Main {
 
+	private static GitLocationProcessor gitLocs;
+
+	private static final String CSV_NAME = "RESULTS";
+
 	public static void main(String[] args) throws IOException {
 
 		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
 		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
 		System.setOut(out);
 		System.setErr(err);
-
-		PrintStream resultStream = new PrintStream(new FileOutputStream(FileHelper.getRunFileName("RESULTS", "csv")));
 
 		Register register = new Register();
 
@@ -40,6 +42,11 @@ public class Main {
 		register.add(new SwissArmyKnifeDecorDetector());
 		register.add(new FeatureEnvyLiShatnawiDetector());
 
+		if (args.length > 1) {
+			gitLocs = new GitLocationProcessor(args[1]);
+			gitLocs.readData();
+		}
+
 //		Project project = createProject(new File(args[0]));
 //		register.check(project);
 		File projectsFolder = new File(args[0]);
@@ -49,13 +56,17 @@ public class Main {
 				register.check(project);
 			}
 		}
-		resultStream.println("Project,Location,Defect");
+
+		CsvCreator csvCreator = new CsvCreator();
+		csvCreator.createStream(CSV_NAME, "Project", "Url", "Location", "Defect");
 		Map<String, Set<DesignDefect>> designDefects = register.finish();
 		for (String projectLocation : designDefects.keySet()) {
+			String projectUrl = gitLocs != null && gitLocs.hasLink(projectLocation) ? gitLocs.getLink(projectLocation) : "";
 			for (DesignDefect dd : designDefects.get(projectLocation)) {
-				resultStream.println(projectLocation + "," + dd.getFullPath() + "," + dd.getDefect());
+				csvCreator.addLine(CSV_NAME, projectLocation, projectUrl, dd.getFullPath(), dd.getDefect());
 			}
 		}
+		csvCreator.close();
 	}
 
 	private static Project createProject(File projectFolder) {
