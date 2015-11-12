@@ -55,11 +55,14 @@ public class IntMetricVals {
 	}
 
 	private Double median(List<Integer> sortedVals) {
-		if (sortedVals.size() % 2 == 0) {
-			int i = sortedVals.size() / 2;
+		int valSize = sortedVals.size();
+		if (valSize % 2 == 0) {
+			int i = valSize / 2;
+			i = this.applyBoundaries(i, valSize - 2);
 			return (sortedVals.get(i).doubleValue() + sortedVals.get(i + 1)) / 2.0;
 		}
-		int i = (sortedVals.size() / 2) + 1;
+		int i = (valSize / 2) + 1;
+		i = this.applyBoundaries(i, valSize - 1);
 		return sortedVals.get(i).doubleValue();
 	}
 
@@ -96,10 +99,30 @@ public class IntMetricVals {
 		this.standardDeviation = this.standardDeviation();
 
 		int valSize = this.values.size();
-		boolean even = valSize % 2 == 0;
-		Integer q1Index = even ? (valSize - 2) / 2 : valSize / 2;
-		Integer q3Index = even ? q1Index + 2 : q1Index + 1;
-		this.q1 = this.median(this.values.subList(0, q1Index));
-		this.q3 = this.median(this.values.subList(q3Index, valSize));
+
+		if (valSize == 1) {
+			this.q1 = this.values.get(0).doubleValue();
+			this.q3 = this.values.get(0).doubleValue();
+		}
+		else if (valSize == 2) {
+			this.q1 = this.values.get(0).doubleValue();
+			this.q3 = this.values.get(1).doubleValue();
+		}
+		else {
+			boolean even = valSize % 2 == 0;
+			Integer q1Index = even ? (valSize - 2) / 2 : valSize / 2;
+			Integer q3Index = even ? q1Index + 2 : q1Index + 1;
+			q1Index = this.applyBoundaries(q1Index, valSize - 1);
+			q3Index = this.applyBoundaries(q3Index, valSize - 1);
+
+			this.q1 = this.median(this.values.subList(0, q1Index));
+			this.q3 = this.median(this.values.subList(q3Index, valSize));
+		}
+	}
+
+	private Integer applyBoundaries(Integer index, Integer maxSize) {
+		index = Math.min(index, maxSize);
+		index = Math.max(index, 0);
+		return index;
 	}
 }

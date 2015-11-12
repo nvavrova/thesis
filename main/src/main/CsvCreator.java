@@ -26,8 +26,8 @@ public class CsvCreator {
 		for (String header : headers) {
 			headerParts.add(header);
 		}
-		this.addLine(streamId, headerParts);
 		this.streams.put(streamId, stream);
+		this.addLine(streamId, headerParts);
 	}
 
 	public void addLine(String streamId, String... parts) {
