@@ -81,8 +81,8 @@ public class BlobDecorDetector extends Detector {
 
 	private long relatedDataClassesCount(String clsFullPath) {
 		return this.relatedAccessorCounts.get(clsFullPath).stream()
-				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_ACCESSORS, v))
-//				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
+//				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_ACCESSORS, v))
+				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
 				.count();
 	}
 }

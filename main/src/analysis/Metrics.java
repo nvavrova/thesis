@@ -17,6 +17,7 @@ public class Metrics {
 	private final IntMetricVals classAccessors;
 	private final IntMetricVals classMethodsNoParams;
 	private final IntMetricVals classPublicFields;
+	private final IntMetricVals classPrivateFields;
 
 	private final IntMetricVals subroutineLoc;
 	private final IntMetricVals subroutineParams;
@@ -33,6 +34,7 @@ public class Metrics {
 		this.classAccessors = new IntMetricVals();
 		this.classMethodsNoParams = new IntMetricVals();
 		this.classPublicFields = new IntMetricVals();
+		this.classPrivateFields = new IntMetricVals();
 
 		this.subroutineLoc = new IntMetricVals();
 		this.subroutineParams = new IntMetricVals();
@@ -98,6 +100,9 @@ public class Metrics {
 		if (metric == Metric.CLASS_PUBLIC_FIELDS) {
 			return this.classPublicFields;
 		}
+		if (metric == Metric.CLASS_PRIVATE_FIELDS) {
+			return this.classPrivateFields;
+		}
 		if (metric == Metric.SUBROUTINE_LOC) {
 			return this.subroutineLoc;
 		}
@@ -131,6 +136,8 @@ public class Metrics {
 			classMethodsNoParams.add(m.subroutinesWithNoParamsCount());
 			Long publicFields = m.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPublic).count();
 			classPublicFields.add(publicFields.intValue());
+			Long privateFields = m.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPrivate).count();
+			classPrivateFields.add(privateFields.intValue());
 			return null;
 		}
 

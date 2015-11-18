@@ -23,18 +23,16 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 
 	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
-		boolean check = this.hasOneMethod(cls) && this.hasProceduralName(cls.getName()) && this.noInheritance(cls);
+		boolean check = this.hasProceduralName(cls.getName()) && this.noInheritance(cls);
 
 		if (check) {
 			Set<Integer> relatedPrivateVars = new HashSet<>();
-			for (Class rc : cls.getReferencedClassesSet()) {
-				if (rc.getDefinedSubroutinesSet().size() == 1) {
-					Long privateVars = rc.getDefinedVarsInclParentsVars().getAsSet().stream()
-							.filter(Variable::isPrivate)
-							.count();
-					relatedPrivateVars.add(privateVars.intValue());
-				}
-			}
+			cls.getReferencedClassesSet().stream().filter(rc -> this.hasOneMethod(rc)).forEach(rc -> {
+				Long privateVars = rc.getDefinedVarsInclParentsVars().getAsSet().stream()
+						.filter(Variable::isPrivate)
+						.count();
+				relatedPrivateVars.add(privateVars.intValue());
+			});
 			this.nrRelatedClassPrivateFields.put(cls.getFullPath(), relatedPrivateVars);
 		}
 
@@ -65,8 +63,7 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 
 	private Integer relatedClassesWithOneMethodAndLotOfPrivateFields(String fullClsPath) {
 		Long count = this.nrRelatedClassPrivateFields.get(fullClsPath).stream()
-				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_METHODS, v))
-//				.filter(v -> this.metrics.isInTop(Metric.CLASS_METHODS, 25, v))
+				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_PRIVATE_FIELDS, v))
 				.count();
 		return count.intValue();
 	}
