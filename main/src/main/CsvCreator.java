@@ -21,7 +21,7 @@ public class CsvCreator {
 	}
 
 	protected void createStream(String streamId, String... headers) throws FileNotFoundException {
-		PrintStream stream = new PrintStream(new FileOutputStream(FileHelper.getRunFileName(streamId + "_stats", "csv")));
+		PrintStream stream = new PrintStream(new FileOutputStream(FileHelper.getLogName(streamId + "_stats", "csv")));
 		List<String> headerParts = new ArrayList<>();
 		for (String header : headers) {
 			headerParts.add(header);

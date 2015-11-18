@@ -46,6 +46,7 @@ public class StatsCollector {
 
 		private final static String CLASS_STREAM_NAME = "class";
 		private final static String MODULE_STREAM_NAME = "module";
+		private final static String PROJECT_STREAM_NAME = "project";
 
 		public StatsCsvCreator(List<File> projectFolders, String gitLocationsFile) {
 			this.projectFolders = projectFolders;
@@ -56,6 +57,7 @@ public class StatsCollector {
 			this.gitLocs.readData();
 			this.createClassStream();
 			this.createModuleStream();
+			this.createProjectStream();
 			this.projectFolders.forEach(project -> this.createStatsCsv(project));
 		}
 
@@ -70,6 +72,10 @@ public class StatsCollector {
 			this.createStream(MODULE_STREAM_NAME, "project", "git link", "module", "parses", "LOC", "# of classes");
 		}
 
+		private void createProjectStream() throws FileNotFoundException {
+			this.createStream(PROJECT_STREAM_NAME, "project", "git link", "modules", "LOC", "classes", "parse ratio");
+		}
+
 		private void createStatsCsv(File projectFolder) {
 			System.out.println("----------------------------------------------- NEW PROJECT -----------------------------------------------");
 			System.out.println("Name: " + projectFolder.getAbsolutePath());
@@ -78,22 +84,38 @@ public class StatsCollector {
 				Map<String, Module> trees = File2Tree.getAsts(allFiles);
 				ModelBuilder mb = new ModelBuilder(projectFolder, trees.values());
 				Project project = mb.getProject();
+				String link = this.gitLocs.hasLink(project.getPath()) ? this.gitLocs.getLink(project.getPath()) : "";
 
+				Long loc = 0L;
+				Integer classCount = 0;
+				Integer correctlyParsed = 0;
 				for (model.Module module : project.getModules()) {
-					String link = this.gitLocs.hasLink(project.getPath()) ? this.gitLocs.getLink(project.getPath()) : "";
 					this.printModuleLine(module, project.getPath(), link);
 
 					Map<String, Class> classes = module.getDefinedClassesInclSubclassesByName();
+					classCount += classes.size();
 					for (String clsAlias : classes.keySet()) {
 						Class cls = classes.get(clsAlias);
 						this.printClassLine(clsAlias, cls, project.getPath(), module.getFilePath());
 					}
+
+					if (!module.hasError()) {
+						correctlyParsed++;
+					}
+					loc += module.getLoc();
 				}
+				int moduleCount = project.getModules().size();
+				this.printProjectLine(project.getPath(), link, moduleCount, loc, classCount, correctlyParsed.doubleValue() / moduleCount);
 			}
 			catch (Exception ex) {
 				handleException(ex);
 			}
 			System.out.println("-----------------------------------------------------------------------------------------------------------");
+		}
+
+		private void printProjectLine(String projectPath, String gitLink, Integer moduleCount, Long loc, Integer classCount, Double parseRatio) {
+			List<String> projectLine = this.createProjectLine(projectPath, gitLink, moduleCount, loc, classCount, parseRatio);
+			this.addLine(PROJECT_STREAM_NAME, projectLine);
 		}
 
 		private void printModuleLine(model.Module module, String projectPath, String gitLink) {
@@ -107,12 +129,24 @@ public class StatsCollector {
 		}
 
 
+		private List<String> createProjectLine(String projectPath, String gitLink, Integer moduleCount, Long loc, Integer classCount, Double parseRatio) {
+			List<String> line = new ArrayList<>();
+			line.add(projectPath);
+			line.add(gitLink);
+			line.add(String.valueOf(moduleCount));
+			line.add(String.valueOf(loc));
+			line.add(String.valueOf(classCount));
+			line.add(String.valueOf(parseRatio));
+			return line;
+		}
+
+
 		private List<String> createModuleLine(model.Module module, String projectPath, String gitLink) {
 			List<String> line = new ArrayList<>();
 			line.add(projectPath);
 			line.add(gitLink);
 			line.add(module.getFilePath());
-			line.add(module.hasError() ? "FALSE" : "TRUE");
+			line.add(module.hasError() ? "0" : "1");
 			line.add(String.valueOf(module.getLoc()));
 			line.add(String.valueOf(module.getDefinedClassesInclSubclassesSet().size()));
 			return line;

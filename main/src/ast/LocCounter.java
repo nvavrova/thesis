@@ -20,13 +20,25 @@ public class LocCounter {
 	}
 
 	public Integer count() {
-		List<String> lines = this.fileOpener.getLines();
-		return this.count(lines);
+		try {
+			List<String> lines = this.fileOpener.getLines();
+			this.count(lines);
+		}
+		catch (FileOpener.FileSizeLimitExceededException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	public Integer count(Integer startLine, Integer endLine) {
-		List<String> lines = this.fileOpener.getLines(startLine - 1, endLine);
-		return this.count(lines);
+		try {
+			List<String> lines = this.fileOpener.getLines(startLine - 1, endLine);
+			this.count(lines);
+		}
+		catch (FileOpener.FileSizeLimitExceededException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	private Integer count(List<String> lines) {

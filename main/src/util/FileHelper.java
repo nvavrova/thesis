@@ -15,10 +15,10 @@ public class FileHelper {
 	public static final String PYTHON_EXTENSION = ".py";
 
 	public static String getLogName(String type) {
-		return getRunFileName(type, "log");
+		return getLogName(type, "log");
 	}
 
-	public static String getRunFileName(String type, String extension) {
+	public static String getLogName(String type, String extension) {
 		File folder = new File("logs");
 		if (!folder.exists()) {
 			folder.mkdir();

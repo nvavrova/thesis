@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * Created by Nik on 11-11-2015
- *
+ * <p>
  * Takes path to the CSV file in format "project_disk_location,project_git_link"
  */
 public class GitLocationProcessor {
@@ -24,8 +24,13 @@ public class GitLocationProcessor {
 	public void readData() {
 		if (links.keySet().size() == 0) {
 			FileOpener fileOpener = new FileOpener(this.fileName);
-			List<String> lines = fileOpener.getLines();
-			lines.forEach(l -> this.processLine(l));
+			try {
+				List<String> lines = fileOpener.getLines();
+				lines.forEach(l -> this.processLine(l));
+			}
+			catch (FileOpener.FileSizeLimitExceededException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
