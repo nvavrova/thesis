@@ -130,13 +130,15 @@ public class StatsCollector {
 
 
 		private List<String> createProjectLine(String projectPath, String gitLink, Integer moduleCount, Long loc, Integer classCount, Double parseRatio) {
+			Double parsePercentage = parseRatio * 100;
+
 			List<String> line = new ArrayList<>();
 			line.add(projectPath);
 			line.add(gitLink);
 			line.add(String.valueOf(moduleCount));
 			line.add(String.valueOf(loc));
 			line.add(String.valueOf(classCount));
-			line.add(String.valueOf(parseRatio));
+			line.add(String.valueOf(parsePercentage.intValue()));
 			return line;
 		}
 
