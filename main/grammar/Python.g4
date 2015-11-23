@@ -769,7 +769,8 @@ comp_iter
 
 /// comp_for: 'for' exprlist 'in' or_test [comp_iter]
 comp_for
- : FOR exprlist IN or_test (',' or_test)* comp_iter?
+ : FOR exprlist IN test_nocond ((',' test_nocond)+ ','?)? comp_iter?
+ | FOR exprlist IN or_test ((',' or_test)+ ','?)? comp_iter?
  ;
 
 /// comp_if: 'if' test_nocond [comp_iter]
