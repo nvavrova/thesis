@@ -1212,13 +1212,24 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitComp_for(@NotNull PythonParser.Comp_forContext ctx) {
-			//      FOR exprlist IN or_test (',' or_test)* comp_iter?
+			//      FOR exprlist IN or_test ((',' or_test)+ ','?)? comp_iter? |
+			//      FOR exprlist IN test_nocond ((',' test_nocond)+ ','?)? comp_iter?
+
 			ExprList targets = (ExprList) ctx.exprlist().accept(this);
-			List<Expr> source = ctx.or_test().stream()
-					.map(s -> (Expr) s.accept(this))
-					.collect(Collectors.toList());
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
-			return new CompFor(this.getLocInfo(ctx), iter, targets, source);
+			if (ctx.or_test() != null) {
+				List<Expr> source = ctx.or_test().stream()
+						.map(s -> (Expr) s.accept(this))
+						.collect(Collectors.toList());
+				return new CompFor(this.getLocInfo(ctx), iter, targets, source);
+			}
+			if (ctx.test_nocond() != null) {
+				List<Expr> source = ctx.test_nocond().stream()
+						.map(s -> (Expr) s.accept(this))
+						.collect(Collectors.toList());
+				return new CompFor(this.getLocInfo(ctx), iter, targets, source);
+			}
+			throw new IllegalArgumentException("Unknown context");
 		}
 
 		@Override
