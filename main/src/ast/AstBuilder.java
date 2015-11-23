@@ -206,7 +206,7 @@ public class AstBuilder {
 			List<Param> regular = this.getParameters(upcasted);
 
 			Param positional = ctx.positional != null ? (Param) ctx.positional.accept(this) : null;
-			Param keyword = ctx.keyword != null? (Param) ctx.keyword.accept(this) : null;
+			Param keyword = ctx.keyword != null ? (Param) ctx.keyword.accept(this) : null;
 			return new Params(this.getLocInfo(ctx), regular, positional, keyword);
 		}
 
@@ -1212,24 +1212,14 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitComp_for(@NotNull PythonParser.Comp_forContext ctx) {
-			//      FOR exprlist IN or_test ((',' or_test)+ ','?)? comp_iter? |
 			//      FOR exprlist IN test_nocond ((',' test_nocond)+ ','?)? comp_iter?
 
 			ExprList targets = (ExprList) ctx.exprlist().accept(this);
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
-			if (ctx.or_test() != null) {
-				List<Expr> source = ctx.or_test().stream()
-						.map(s -> (Expr) s.accept(this))
-						.collect(Collectors.toList());
-				return new CompFor(this.getLocInfo(ctx), iter, targets, source);
-			}
-			if (ctx.test_nocond() != null) {
-				List<Expr> source = ctx.test_nocond().stream()
-						.map(s -> (Expr) s.accept(this))
-						.collect(Collectors.toList());
-				return new CompFor(this.getLocInfo(ctx), iter, targets, source);
-			}
-			throw new IllegalArgumentException("Unknown context");
+			List<Expr> source = ctx.test_nocond().stream()
+					.map(s -> (Expr) s.accept(this))
+					.collect(Collectors.toList());
+			return new CompFor(this.getLocInfo(ctx), iter, targets, source);
 		}
 
 		@Override
