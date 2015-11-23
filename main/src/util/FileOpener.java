@@ -1,9 +1,6 @@
 package util;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +10,7 @@ import java.util.stream.Collectors;
  */
 public class FileOpener {
 
-	private static final Integer LINE_LIMIT = 100000;
+	private static final Integer SIZE_LIMIT_BYTES = 5*1024*1024;
 
 	private final String filePath;
 	private List<String> lines;
@@ -27,7 +24,8 @@ public class FileOpener {
 	}
 
 	public List<String> getLines() throws FileSizeLimitExceededException {
-		return this.read();
+		this.read();
+		return this.lines;
 	}
 
 	public List<String> getLines(Integer start, Integer end) throws FileSizeLimitExceededException {
@@ -45,9 +43,15 @@ public class FileOpener {
 		return sb.toString();
 	}
 
-	private List<String> read() throws FileSizeLimitExceededException {
+	private void read() throws FileSizeLimitExceededException {
 		if (this.read) {
-			return this.lines;
+			return;
+		}
+
+		this.read = true;
+		File f = new File(this.filePath);
+		if (f.length() > SIZE_LIMIT_BYTES) {
+			throw new FileSizeLimitExceededException("File \"" + this.filePath + "\" too large (" + f.length() + " bytes)");
 		}
 		try {
 			FileInputStream fis = new FileInputStream(this.filePath);
@@ -55,9 +59,6 @@ public class FileOpener {
 			BufferedReader br = new BufferedReader(inStrReader);
 
 			List<String> res = br.lines().collect(Collectors.toList());
-			if (res.size() > LINE_LIMIT) {
-				throw new FileSizeLimitExceededException("");
-			}
 			//hack to fix wrong encoding of ISO-8859-1
 			if (res.size() > 1 && res.get(0).startsWith("\u00EF\u00BB\u00BF")) {
 				res.set(0, res.get(0).substring(3));
@@ -67,12 +68,11 @@ public class FileOpener {
 			inStrReader.close();
 			br.close();
 
-			return res;
+			this.lines = res;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		return Collections.emptyList();
 	}
 
 	public class FileSizeLimitExceededException extends Exception {

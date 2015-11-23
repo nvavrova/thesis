@@ -1,11 +1,15 @@
 package main;
 
-import util.FileOpener;
 import util.StringHelper;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 11-11-2015
@@ -22,13 +26,16 @@ public class GitLocationProcessor {
 	}
 
 	public void readData() {
-		if (links.keySet().size() == 0) {
-			FileOpener fileOpener = new FileOpener(this.fileName);
+		if (this.links.keySet().size() == 0) {
 			try {
-				List<String> lines = fileOpener.getLines();
+				FileInputStream fis = new FileInputStream(this.fileName);
+				InputStreamReader inStrReader = new InputStreamReader(fis);
+				BufferedReader br = new BufferedReader(inStrReader);
+
+				List<String> lines = br.lines().collect(Collectors.toList());
 				lines.forEach(l -> this.processLine(l));
 			}
-			catch (FileOpener.FileSizeLimitExceededException e) {
+			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 		}

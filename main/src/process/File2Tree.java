@@ -21,6 +21,7 @@ public class File2Tree {
 	public static Map<String, Module> getAsts(List<String> filePaths) {
 		Map<String, Module> trees = new HashMap<>();
 		for (String filePath : filePaths) {
+			System.out.println("AST building for: " + filePath);
 			Module tree = File2Tree.parseAndBuildAst(filePath);
 			trees.put(filePath, tree);
 		}
