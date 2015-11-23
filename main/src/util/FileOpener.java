@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class FileOpener {
 
 	private static final Integer SIZE_LIMIT_BYTES = 5*1024*1024;
+	private static final Integer LINE_LIMIT = 100000;
 
 	private final String filePath;
 	private List<String> lines;
@@ -59,6 +60,11 @@ public class FileOpener {
 			BufferedReader br = new BufferedReader(inStrReader);
 
 			List<String> res = br.lines().collect(Collectors.toList());
+
+			if (res.size() > LINE_LIMIT) {
+				throw new FileSizeLimitExceededException("File \"" + this.filePath + "\" too large (" + res.size() + " lines)");
+			}
+
 			//hack to fix wrong encoding of ISO-8859-1
 			if (res.size() > 1 && res.get(0).startsWith("\u00EF\u00BB\u00BF")) {
 				res.set(0, res.get(0).substring(3));
