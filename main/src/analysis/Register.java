@@ -4,6 +4,7 @@ import analysis.detector.Detector;
 import model.ContentContainer;
 import model.Project;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -43,9 +44,10 @@ public class Register {
 		contentContainer.getChildren().forEach(c -> this.check(projectPath, c));
 	}
 
-	public Map<String, Set<DesignDefect>> finish() {
+	public Map<String, Set<DesignDefect>> finish() throws IOException {
 		this.finished = true; //don't allow any additional checking
-		this.metrics.terminateCollecting();
+		Map<Metric, Set<Integer>> reqMetrics = aggregateRequiredMetrics();
+		this.metrics.terminateCollecting(reqMetrics);
 
 		Map<String, Set<DesignDefect>> results = new HashMap<>();
 		for (Detector detector : this.detectors) {
@@ -58,5 +60,19 @@ public class Register {
 			}
 		}
 		return results;
+	}
+
+	private Map<Metric, Set<Integer>> aggregateRequiredMetrics() {
+		Map<Metric, Set<Integer>> aggregatedRequiredMetrics = new HashMap<>();
+		for (Detector detector : this.detectors) {
+			Map<Metric, Set<Integer>> detectorPercentages = detector.getRequiredPercentages();
+			for (Metric metric : detectorPercentages.keySet()) {
+				if (!aggregatedRequiredMetrics.containsKey(metric)) {
+					aggregatedRequiredMetrics.put(metric, new HashSet<>());
+				}
+				aggregatedRequiredMetrics.get(metric).addAll(detectorPercentages.get(metric));
+			}
+		}
+		return aggregatedRequiredMetrics;
 	}
 }

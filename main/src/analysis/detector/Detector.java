@@ -1,9 +1,10 @@
 package analysis.detector;
 
 import analysis.DesignDefect;
+import analysis.Metric;
 import analysis.Metrics;
-import model.*;
 import model.Class;
+import model.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,12 +18,16 @@ public abstract class Detector {
 
 	private Map<String, Set<DesignDefect>> defects;
 
+	private final Map<Metric, Set<Integer>> requiredPercentages;
+
 	protected Metrics metrics;
 	private final PreliminaryVisitor preliminaryVisitor;
 	private boolean finished;
 
 	public Detector() {
 		this.defects = new HashMap<>();
+		this.requiredPercentages = new HashMap<>();
+		this.addRequiredPercentages();
 		this.preliminaryVisitor = new PreliminaryVisitor();
 	}
 
@@ -61,6 +66,19 @@ public abstract class Detector {
 			}
 		}
 		return result;
+	}
+
+	public Map<Metric, Set<Integer>> getRequiredPercentages() {
+		return this.requiredPercentages;
+	}
+
+	protected void addRequiredPercentages() {}
+
+	protected void addRequiredPercentage(Metric metric, Integer percentage) {
+		if (!this.requiredPercentages.containsKey(metric)) {
+			this.requiredPercentages.put(metric, new HashSet<>());
+		}
+		this.requiredPercentages.get(metric).add(percentage);
 	}
 
 	//override these where necessary

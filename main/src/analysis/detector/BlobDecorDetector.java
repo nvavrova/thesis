@@ -26,6 +26,11 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	@Override
+	protected void addRequiredPercentages() {
+		this.addRequiredPercentage(Metric.CLASS_ACCESSORS, 85);
+	}
+
+	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
 
 		boolean seemsDefective = this.hasControllerName(cls.getName()) || this.hasControllerMethods(cls);

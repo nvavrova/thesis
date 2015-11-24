@@ -24,6 +24,12 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	}
 
 	@Override
+	protected void addRequiredPercentages() {
+		this.addRequiredPercentage(Metric.SUBROUTINE_LOC, 85);
+		this.addRequiredPercentage(Metric.CLASS_METHODS_NO_PARAMS, 85);
+	}
+
+	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
 		boolean check = this.noInheritance(cls) && this.hasProceduralName(cls.getName()) && this.usesGlobals(cls);
 

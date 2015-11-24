@@ -1,15 +1,25 @@
 package analysis;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 09-11-2015
  */
 public class IntMetricVals {
-	private Integer sum;
-	private final List<Integer> values;
 	private boolean sorted;
 
+	private final String valuesFileName;
+
+	private PrintStream valueStream;
+	private List<Integer> values;
+	private final Map<Integer, Integer> percentageLimits;
+
+	private Integer sum;
+	private Integer amountOfValues;
 	private Double average;
 	private Double median;
 	private Double standardDeviation;
@@ -17,22 +27,45 @@ public class IntMetricVals {
 	private Double q3;
 
 	public IntMetricVals() {
-		this.values = new ArrayList<>();
 		this.sorted = false;
-		this.sum = 0;
+		this.values = new ArrayList<>();
+
+		this.valuesFileName = UUID.randomUUID().toString();
+		try {
+			this.valueStream = new PrintStream(new FileOutputStream(this.valuesFileName));
+		}
+		catch (FileNotFoundException e) {
+			System.err.println("Cannot create metrics file. Switched to using a list for storage.");
+			e.printStackTrace();
+		}
+
+		this.percentageLimits = new HashMap<>();
 	}
 
 	public void add(Integer item) {
-		this.values.add(item);
-		this.sum += item;
+		if (this.sorted) {
+			throw new IllegalStateException();
+		}
+		if (this.valueStream != null) {
+			this.valueStream.println(item);
+		}
+		else {
+			this.values.add(item);
+		}
 	}
 
-	public boolean isInTop(Integer percentage, Double value) {
-		return value >= this.valueAtXPercent(percentage);
+	public boolean isInTop(Integer percentage, Integer value) {
+		if (!this.sorted) {
+			throw new IllegalStateException();
+		}
+		return value >= this.percentageLimits.get(100 - percentage);
 	}
 
-	public boolean isInBottom(Integer percentage, Double value) {
-		return value <= this.valueAtXPercent(percentage);
+	public boolean isInBottom(Integer percentage, Integer value) {
+		if (!this.sorted) {
+			throw new IllegalStateException();
+		}
+		return value <= this.percentageLimits.get(percentage);
 	}
 
 	public boolean isMildOutlier(Integer val) {
@@ -44,14 +77,83 @@ public class IntMetricVals {
 	}
 
 	private boolean isOutlier(Integer val, Double iqrMultiplicand) {
-		this.sortAndCalculateStats();
+		if (!this.sorted) {
+			throw new IllegalStateException();
+		}
 		Double iqr = this.q3 - this.q1;
 		return val < this.q1 - iqrMultiplicand * iqr || val > this.q3 + iqrMultiplicand * iqr;
 	}
 
 	public boolean atLeast2StdDevFromAvg(Integer val) {
-		this.sortAndCalculateStats();
+		if (!this.sorted) {
+			throw new IllegalStateException();
+		}
 		return this.nrOfStandardDeviationsFromAvg(val) >= 2;
+	}
+
+	private Double nrOfStandardDeviationsFromAvg(Integer val) {
+		return Math.abs((this.average - val) / this.standardDeviation);
+	}
+
+	public void sortAndCalculateStats(Set<Integer> requiredPercentages) throws IOException {
+		if (this.sorted) {
+			throw new IllegalStateException();
+		}
+		this.sorted = true;
+
+		if (this.valueStream != null) {
+			this.loadValuesAndHandleFile();
+		}
+		Collections.sort(this.values);
+
+		this.amountOfValues = this.values.size();
+		this.sum = 0;
+		this.values.forEach(v -> this.sum += v);
+
+		this.average = this.sum.doubleValue() / this.amountOfValues;
+		this.median = this.median(this.values);
+		this.standardDeviation = this.standardDeviation();
+
+		if (this.amountOfValues == 1) {
+			this.q1 = this.values.get(0).doubleValue();
+			this.q3 = this.values.get(0).doubleValue();
+		}
+		else if (this.amountOfValues == 2) {
+			this.q1 = this.values.get(0).doubleValue();
+			this.q3 = this.values.get(1).doubleValue();
+		}
+		else {
+			boolean even = this.amountOfValues % 2 == 0;
+			Integer q1Index = even ? (this.amountOfValues - 2) / 2 : this.amountOfValues / 2;
+			Integer q3Index = even ? q1Index + 2 : q1Index + 1;
+			q1Index = this.applyBoundaries(q1Index, this.amountOfValues - 1);
+			q3Index = this.applyBoundaries(q3Index, this.amountOfValues - 1);
+
+			this.q1 = this.median(this.values.subList(0, q1Index));
+			this.q3 = this.median(this.values.subList(q3Index, this.amountOfValues));
+		}
+
+		for (Integer percentage : requiredPercentages) {
+			this.percentageLimits.put(percentage, this.valueAtXPercent(percentage));
+		}
+		this.values = Collections.emptyList();
+	}
+
+	private void loadValuesAndHandleFile() throws IOException {
+		this.valueStream.close();
+
+		FileInputStream fis = new FileInputStream(this.valuesFileName);
+		InputStreamReader inStrReader = new InputStreamReader(fis);
+		BufferedReader br = new BufferedReader(inStrReader);
+		this.values = br.lines().map(Integer::parseInt).collect(Collectors.toList());
+		br.close();
+
+		try {
+			Files.delete(Paths.get(this.valuesFileName));
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private Double median(List<Integer> sortedVals) {
@@ -66,58 +168,18 @@ public class IntMetricVals {
 		return sortedVals.get(i).doubleValue();
 	}
 
-	private Integer valueAtXPercent(Integer percentage) {
-		this.sortAndCalculateStats();
-		Double d = this.values.size() / 100.0 * percentage;
-		Long l = Math.round(d);
-		return this.values.get(l.intValue());
-	}
-
-	private Double nrOfStandardDeviationsFromAvg(Integer val) {
-		return Math.abs((this.average() - val) / this.standardDeviation);
-	}
-
-	private Double average() {
-		return this.sum.doubleValue() / this.values.size();
-	}
-
 	private Double standardDeviation() {
 		Double sumOfIndividualDevSquares = 0.0;
 		for (Integer value : this.values) {
 			sumOfIndividualDevSquares += Math.pow(value - this.average, 2);
 		}
-		return Math.sqrt(sumOfIndividualDevSquares / this.values.size());
+		return Math.sqrt(sumOfIndividualDevSquares / this.amountOfValues);
 	}
 
-	private void sortAndCalculateStats() {
-		if (!this.sorted) {
-			Collections.sort(this.values);
-		}
-
-		this.average = this.average();
-		this.median = this.median(this.values);
-		this.standardDeviation = this.standardDeviation();
-
-		int valSize = this.values.size();
-
-		if (valSize == 1) {
-			this.q1 = this.values.get(0).doubleValue();
-			this.q3 = this.values.get(0).doubleValue();
-		}
-		else if (valSize == 2) {
-			this.q1 = this.values.get(0).doubleValue();
-			this.q3 = this.values.get(1).doubleValue();
-		}
-		else {
-			boolean even = valSize % 2 == 0;
-			Integer q1Index = even ? (valSize - 2) / 2 : valSize / 2;
-			Integer q3Index = even ? q1Index + 2 : q1Index + 1;
-			q1Index = this.applyBoundaries(q1Index, valSize - 1);
-			q3Index = this.applyBoundaries(q3Index, valSize - 1);
-
-			this.q1 = this.median(this.values.subList(0, q1Index));
-			this.q3 = this.median(this.values.subList(q3Index, valSize));
-		}
+	private Integer valueAtXPercent(Integer percentage) {
+		Double d = this.amountOfValues / 100.0 * percentage;
+		Long l = Math.round(d);
+		return this.values.get(l.intValue());
 	}
 
 	private Integer applyBoundaries(Integer index, Integer maxSize) {

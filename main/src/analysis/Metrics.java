@@ -2,6 +2,11 @@ package analysis;
 
 import model.*;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Created by Nik on 04-11-2015
  */
@@ -10,35 +15,24 @@ public class Metrics {
 	private final Collector collector;
 	private boolean finishedCollecting;
 
-	private final IntMetricVals classLoc;
-	private final IntMetricVals classLcom;
-	private final IntMetricVals classSuperclasses;
-	private final IntMetricVals classMethods;
-	private final IntMetricVals classAccessors;
-	private final IntMetricVals classMethodsNoParams;
-	private final IntMetricVals classPublicFields;
-	private final IntMetricVals classPrivateFields;
-
-	private final IntMetricVals subroutineLoc;
-	private final IntMetricVals subroutineParams;
-	private final IntMetricVals subroutineAid;
+	private final Map<Metric, IntMetricVals> intMetrics;
 
 	public Metrics() {
 		this.collector = new Collector();
 		this.finishedCollecting = false;
 
-		this.classLoc = new IntMetricVals();
-		this.classLcom = new IntMetricVals();
-		this.classSuperclasses = new IntMetricVals();
-		this.classMethods = new IntMetricVals();
-		this.classAccessors = new IntMetricVals();
-		this.classMethodsNoParams = new IntMetricVals();
-		this.classPublicFields = new IntMetricVals();
-		this.classPrivateFields = new IntMetricVals();
-
-		this.subroutineLoc = new IntMetricVals();
-		this.subroutineParams = new IntMetricVals();
-		this.subroutineAid = new IntMetricVals();
+		this.intMetrics = new HashMap<>();
+		this.intMetrics.put(Metric.CLASS_LOC, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_SUPERCLASSES, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_METHODS, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_ACCESSORS, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_LCOM, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_METHODS_NO_PARAMS, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_PUBLIC_FIELDS, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_PRIVATE_FIELDS, new IntMetricVals());
+		this.intMetrics.put(Metric.SUBROUTINE_LOC, new IntMetricVals());
+		this.intMetrics.put(Metric.SUBROUTINE_PARAMS, new IntMetricVals());
+		this.intMetrics.put(Metric.SUBROUTINE_AID, new IntMetricVals());
 	}
 
 	public void register(ContentContainer contentContainer) {
@@ -48,8 +42,12 @@ public class Metrics {
 		this.collector.collect(contentContainer);
 	}
 
-	public void terminateCollecting() {
+	public void terminateCollecting(Map<Metric, Set<Integer>> requiredMetricPercentages) throws IOException {
 		this.finishedCollecting = true;
+		for (Metric metric : this.intMetrics.keySet()) {
+			IntMetricVals counter = this.intMetrics.get(metric);
+			counter.sortAndCalculateStats(requiredMetricPercentages.get(metric));
+		}
 	}
 
 	public boolean isExtremeOutlier(Metric metric, Integer value) {
@@ -61,58 +59,16 @@ public class Metrics {
 	}
 
 	public boolean isInTop(Metric metric, Integer percentage, Integer value) {
-		return this.isInTop(metric, percentage, value.doubleValue());
-	}
-
-	public boolean isInTop(Metric metric, Integer percentage, Double value) {
 		IntMetricVals counter = this.getCounter(metric);
 		return counter.isInTop(percentage, value);
 	}
-
 	public boolean isInBottom(Metric metric, Integer percentage, Integer value) {
-		return this.isInBottom(metric, percentage, value.doubleValue());
-	}
-
-	public boolean isInBottom(Metric metric, Integer percentage, Double value) {
 		IntMetricVals counter = this.getCounter(metric);
 		return counter.isInBottom(percentage, value);
 	}
 
 	private IntMetricVals getCounter(Metric metric) {
-		if (metric == Metric.CLASS_LOC) {
-			return this.classLoc;
-		}
-		if (metric == Metric.CLASS_SUPERCLASSES) {
-			return this.classSuperclasses;
-		}
-		if (metric == Metric.CLASS_METHODS) {
-			return this.classMethods;
-		}
-		if (metric == Metric.CLASS_ACCESSORS) {
-			return this.classAccessors;
-		}
-		if (metric == Metric.CLASS_LCOM) {
-			return this.classLcom;
-		}
-		if (metric == Metric.CLASS_METHODS_NO_PARAMS) {
-			return this.classMethodsNoParams;
-		}
-		if (metric == Metric.CLASS_PUBLIC_FIELDS) {
-			return this.classPublicFields;
-		}
-		if (metric == Metric.CLASS_PRIVATE_FIELDS) {
-			return this.classPrivateFields;
-		}
-		if (metric == Metric.SUBROUTINE_LOC) {
-			return this.subroutineLoc;
-		}
-		if (metric == Metric.SUBROUTINE_PARAMS) {
-			return this.subroutineParams;
-		}
-		if (metric == Metric.SUBROUTINE_AID) {
-			return this.subroutineAid;
-		}
-		throw new IllegalArgumentException();
+		return this.intMetrics.get(metric);
 	}
 
 	private class Collector implements ContentContainerVisitor<Void> {
@@ -128,24 +84,24 @@ public class Metrics {
 
 		@Override
 		public Void visit(model.Class m) {
-			classLoc.add(m.getLoc());
-			classLcom.add(m.getLcom());
-			classSuperclasses.add(m.superclassCount());
-			classMethods.add(m.getDefinedSubroutinesSet().size());
-			classAccessors.add(m.accessorCount());
-			classMethodsNoParams.add(m.subroutinesWithNoParamsCount());
+			getCounter(Metric.CLASS_LOC).add(m.getLoc());
+			getCounter(Metric.CLASS_SUPERCLASSES).add(m.superclassCount());
+			getCounter(Metric.CLASS_METHODS).add(m.getDefinedSubroutinesSet().size());
+			getCounter(Metric.CLASS_ACCESSORS).add(m.accessorCount());
+			getCounter(Metric.CLASS_LCOM).add(m.getLcom());
+			getCounter(Metric.CLASS_METHODS_NO_PARAMS).add(m.subroutinesWithNoParamsCount());
 			Long publicFields = m.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPublic).count();
-			classPublicFields.add(publicFields.intValue());
+			getCounter(Metric.CLASS_PUBLIC_FIELDS).add(publicFields.intValue());
 			Long privateFields = m.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPrivate).count();
-			classPrivateFields.add(privateFields.intValue());
+			getCounter(Metric.CLASS_PRIVATE_FIELDS).add(privateFields.intValue());
 			return null;
 		}
 
 		@Override
 		public Void visit(Subroutine m) {
-			subroutineLoc.add(m.getLoc());
-			subroutineParams.add(m.paramCount());
-			subroutineAid.add(m.getAccessOfImportData());
+			getCounter(Metric.SUBROUTINE_LOC).add(m.getLoc());
+			getCounter(Metric.SUBROUTINE_PARAMS).add(m.paramCount());
+			getCounter(Metric.SUBROUTINE_AID).add(m.getAccessOfImportData());
 			return null;
 		}
 	}

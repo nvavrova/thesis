@@ -20,6 +20,11 @@ public class FeatureEnvyLiShatnawiDetector extends Detector {
 	}
 
 	@Override
+	protected void addRequiredPercentages() {
+		this.addRequiredPercentage(Metric.SUBROUTINE_AID, 90);
+	}
+
+	@Override
 	protected Boolean isPreliminarilyDefective(Subroutine subroutine) {
 		SubroutineType subType = subroutine.getSubroutineType();
 		boolean check = (subType == SubroutineType.INSTANCE_METHOD || subType == SubroutineType.STATIC_METHOD)
