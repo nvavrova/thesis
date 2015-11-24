@@ -22,7 +22,7 @@ public class LocCounter {
 	public Integer count() {
 		try {
 			List<String> lines = this.fileOpener.getLines();
-			this.count(lines);
+			return this.count(lines);
 		}
 		catch (FileOpener.FileSizeLimitExceededException e) {
 			e.printStackTrace();
@@ -33,7 +33,7 @@ public class LocCounter {
 	public Integer count(Integer startLine, Integer endLine) {
 		try {
 			List<String> lines = this.fileOpener.getLines(startLine - 1, endLine);
-			this.count(lines);
+			return this.count(lines);
 		}
 		catch (FileOpener.FileSizeLimitExceededException e) {
 			e.printStackTrace();
