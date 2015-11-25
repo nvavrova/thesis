@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Nik on 02-11-2015
  */
-public class VarDefinitions {
+public class VarDefinitions implements Unlinkable {
 
 	//this is a set instead of a single variable
 	//because of the special situation of defining a class and instance variable at the same time (with the same name)
@@ -83,6 +83,14 @@ public class VarDefinitions {
 	public Set<Variable> getVarsWithName(String name) {
 		assert this.vars.containsKey(name);
 		return this.vars.get(name);
+	}
+
+	@Override
+	public void unlink() {
+		for (Set<Variable> vars : this.vars.values()) {
+			vars.forEach(Variable::unlink);
+		}
+		this.vars.clear();
 	}
 
 	private void add(String alias, Variable var, boolean unrestricted) {

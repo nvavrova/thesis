@@ -1,12 +1,11 @@
 package ast.statement.compound;
 
 import ast.Suite;
+import ast.Visitor;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nik on 24-06-2015
@@ -15,16 +14,16 @@ public class Try extends Statement {
 
 	private final Suite tryBlock;
 	private final List<Except> exceptions;
-	private final Map<Except, Suite> exceptBlocks;
+	private final List<Suite> exceptBodies;
 	private final Suite elseBlock;
 	private final Suite finallyBlock;
 
 	public Try(@NotNull Integer locInfo, @NotNull Suite tryBlock, @NotNull List<Except> exceptions,
-	           @NotNull Map<Except, Suite> exceptBlocks, Suite elseBlock, Suite finallyBlock) {
+	           @NotNull List<Suite> exceptBodies, Suite elseBlock, Suite finallyBlock) {
 		super(locInfo);
 		this.tryBlock = tryBlock;
 		this.exceptions = exceptions;
-		this.exceptBlocks = exceptBlocks;
+		this.exceptBodies = exceptBodies;
 		this.elseBlock = elseBlock;
 		this.finallyBlock = finallyBlock;
 	}
@@ -37,9 +36,8 @@ public class Try extends Statement {
 		return this.exceptions;
 	}
 
-	public Suite getSuite(Except except) {
-		assert (this.exceptBlocks.containsKey(except));
-		return this.exceptBlocks.get(except);
+	public List<Suite> getExceptBodies() {
+		return this.exceptBodies;
 	}
 
 	public Suite getElseBlock() {

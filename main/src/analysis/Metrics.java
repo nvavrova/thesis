@@ -3,6 +3,7 @@ package analysis;
 import model.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +47,7 @@ public class Metrics {
 		this.finishedCollecting = true;
 		for (Metric metric : this.intMetrics.keySet()) {
 			IntMetricVals counter = this.intMetrics.get(metric);
-			counter.sortAndCalculateStats(requiredMetricPercentages.get(metric));
+			counter.sortAndCalculateStats(requiredMetricPercentages.containsKey(metric) ? requiredMetricPercentages.get(metric) : Collections.emptySet());
 		}
 	}
 

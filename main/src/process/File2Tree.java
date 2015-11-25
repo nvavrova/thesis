@@ -6,6 +6,10 @@ import gen.PythonLexer;
 import gen.PythonParser;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.atn.ATNSimulator;
+import org.antlr.v4.runtime.atn.LexerATNSimulator;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import util.FileOpener;
 import util.StringHelper;
 
@@ -21,7 +25,6 @@ public class File2Tree {
 	public static Map<String, Module> getAsts(List<String> filePaths) {
 		Map<String, Module> trees = new HashMap<>();
 		for (String filePath : filePaths) {
-			System.out.println("AST building for: " + filePath);
 			Module tree = File2Tree.parseAndBuildAst(filePath);
 			trees.put(filePath, tree);
 		}
@@ -31,6 +34,7 @@ public class File2Tree {
 	public static ParserRuleContext getParseTree(String fileName) throws Exception {
 		FileOpener fo = new FileOpener(fileName);
 		String contents = fo.getTrimmedContents();
+
 		org.antlr.v4.runtime.CharStream input = new org.antlr.v4.runtime.ANTLRInputStream(contents);
 		PythonLexer lexer = new PythonLexer(input);
 
@@ -38,7 +42,15 @@ public class File2Tree {
 		PythonParser parser = new PythonParser(tokens);
 		parser.setErrorHandler(new BailErrorStrategy());
 
-		return parser.file_input();
+		try {
+			ParserRuleContext context = parser.file_input();
+			File2Tree.unlink(lexer, parser);
+			return context;
+		}
+		catch (Exception ex) {
+			File2Tree.unlink(lexer, parser);
+			throw ex;
+		}
 	}
 
 	private static Module parseAndBuildAst(String fileName) {
@@ -55,5 +67,12 @@ public class File2Tree {
 			System.err.println(errorMsg);
 			return m;
 		}
+	}
+
+	private static void unlink(PythonLexer lexer, PythonParser parser) {
+		ATNSimulator simulator = parser.getInterpreter();
+		simulator.clearDFA();
+		lexer.setInterpreter(new LexerATNSimulator(lexer, lexer.getATN(), lexer.getInterpreter().decisionToDFA, new PredictionContextCache()));
+		parser.setInterpreter(new ParserATNSimulator(parser, parser.getATN(), parser.getInterpreter().decisionToDFA, new PredictionContextCache()));
 	}
 }

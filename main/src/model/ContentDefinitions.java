@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Nik on 31-10-2015
  */
-public abstract class ContentDefinitions {
+public abstract class ContentDefinitions implements Unlinkable {
 
 	protected final Map<String, Class> definedClasses;
 	protected final Map<String, Subroutine> definedSubroutines;
@@ -66,5 +66,12 @@ public abstract class ContentDefinitions {
 
 	protected void addVariableDefinition(String name, Variable var) {
 		this.definedVars.add(name, var);
+	}
+
+	@Override
+	public void unlink() {
+		this.definedClasses.values().forEach(Class::unlink);
+		this.definedSubroutines.values().forEach(Subroutine::unlink);
+		this.definedVars.unlink();
 	}
 }

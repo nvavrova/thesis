@@ -1,11 +1,11 @@
 package ast.expression.nocond.atom.maker;
 
+import ast.Visitor;
 import ast.expression.Expr;
 import ast.expression.compiter.CompFor;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by Nik on 15-06-2015
@@ -13,35 +13,31 @@ import java.util.Map;
 public class DictMaker extends Maker {
 
 	private final CompFor comprehension;
-	private final Map<Expr, Expr> values;
+	private final List<Expr> keys;
+	private final List<Expr> values;
 
-	public DictMaker(@NotNull Integer locInfo, @NotNull CompFor comprehension) {
+	public DictMaker(@NotNull Integer locInfo, CompFor comprehension, @NotNull List<Expr> keys, @NotNull List<Expr> values) {
 		super(locInfo);
 
 		this.comprehension = comprehension;
-		this.values = null;
-	}
-	public DictMaker(@NotNull Integer locInfo, @NotNull Map<Expr, Expr> values) {
-		super(locInfo);
-
+		this.keys = keys;
 		this.values = values;
-		this.comprehension = null;
 	}
 
 	public CompFor getComprehension() {
 		return this.comprehension;
 	}
 
-	public Map<Expr, Expr> getValues() {
+	public List<Expr> getKeys() {
+		return this.keys;
+	}
+
+	public List<Expr> getValues() {
 		return this.values;
 	}
 
 	public Boolean hasComprehension() {
 		return this.comprehension != null;
-	}
-
-	public Boolean hasValues() {
-		return this.values != null;
 	}
 
 	@Override

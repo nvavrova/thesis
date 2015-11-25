@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class CsvCreator {
 
-	protected static String CSV_DELIMITER = ";";
+	protected static final String CSV_DELIMITER = ";";
 	private final Map<String, PrintStream> streams;
 
 	public CsvCreator() {

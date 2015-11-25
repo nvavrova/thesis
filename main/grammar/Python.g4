@@ -40,8 +40,6 @@ tokens { INDENT, DEDENT }
 {
     import java.util.List;
     import java.util.ArrayList;
-    import java.util.Map;
-    import java.util.HashMap;
 }
 
 @lexer::members {
@@ -207,20 +205,21 @@ parameters
 /// typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [','
 ///                ['*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef]]
 ///              |  '*' [tfpdef] (',' tfpdef ['=' test])* [',' '**' tfpdef] | '**' tfpdef)
-typedargslist returns [Map<TfpdefContext, TestContext> regular]
+typedargslist returns [List<TfpdefContext> regular, List<TestContext> regVals]
 @init{
-    $regular = new HashMap<>();
+    $regular = new ArrayList<>();
+    $regVals = new ArrayList<>();
 }
- : a=tfpdef { $regular.put($a.ctx, null); } ( '=' aVal=test { $regular.put($a.ctx, $aVal.ctx); } )?
-   ( ',' b=tfpdef { $regular.put($b.ctx, null); } ( '=' bVal=test { $regular.put($b.ctx, $bVal.ctx); } )? )*
+ : a=tfpdef { $regular.add($a.ctx); $regVals.add(null); } ( '=' aVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($aVal.ctx); } )?
+   ( ',' b=tfpdef { $regular.add($b.ctx); $regVals.add(null); } ( '=' bVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($bVal.ctx); } )? )*
    ( ',' ( '*' positional=tfpdef?
-           ( ',' c=tfpdef { $regular.put($c.ctx, null); } ( '=' cVal=test { $regular.put($c.ctx, $cVal.ctx); } )? )*
+           ( ',' c=tfpdef { $regular.add($c.ctx); $regVals.add(null); } ( '=' cVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($cVal.ctx); } )? )*
            ( ',' '**' keyword=tfpdef )?
          | '**' keyword=tfpdef
          )?
    )?
  | '*' positional=tfpdef?
-   ( ',' d=tfpdef { $regular.put($d.ctx, null); } ( '=' eVal=test { $regular.put($d.ctx, $eVal.ctx); } )? )*
+   ( ',' d=tfpdef { $regular.add($d.ctx); $regVals.add(null); } ( '=' eVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($eVal.ctx); } )? )*
    ( ',' '**' keyword=tfpdef )?
  | '**' keyword=tfpdef
  ;
@@ -233,20 +232,21 @@ tfpdef
 /// varargslist: (vfpdef ['=' test] (',' vfpdef ['=' test])* [','
 ///       ['*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef]]
 ///     |  '*' [vfpdef] (',' vfpdef ['=' test])* [',' '**' vfpdef] | '**' vfpdef)
-varargslist returns [Map<VfpdefContext, TestContext> regular]
+varargslist returns [List<VfpdefContext> regular, List<TestContext> regVals]
 @init {
-    $regular = new HashMap<>();
+    $regular = new ArrayList<>();
+    $regVals = new ArrayList<>();
 }
- : a=vfpdef { $regular.put($a.ctx, null); } ( '=' aVal=test { $regular.put($a.ctx, $aVal.ctx); } )?
-   ( ',' b=vfpdef { $regular.put($b.ctx, null); } ( '=' bVal=test { $regular.put($b.ctx, $bVal.ctx); } )? )*
+ : a=vfpdef { $regular.add($a.ctx); $regVals.add(null); } ( '=' aVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($aVal.ctx); } )?
+   ( ',' b=vfpdef { $regular.add($b.ctx); $regVals.add(null); } ( '=' bVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($bVal.ctx); } )? )*
    ( ',' ( '*' positional=vfpdef?
-           ( ',' c=vfpdef { $regular.put($c.ctx, null); } ( '=' cVal=test { $regular.put($c.ctx, $cVal.ctx); } )? )*
+           ( ',' c=vfpdef { $regular.add($c.ctx); $regVals.add(null); } ( '=' cVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($cVal.ctx); } )? )*
            ( ',' '**' keyword=vfpdef )?
          | '**' keyword=vfpdef
          )?
    )?
  | '*' positional=vfpdef?
-   ( ',' d=vfpdef { $regular.put($d.ctx, null); } ( '=' dVal=test { $regular.put($d.ctx, $dVal.ctx); } )? )*
+   ( ',' d=vfpdef { $regular.add($d.ctx); $regVals.add(null); } ( '=' dVal=test { $regVals.remove($regVals.size() - 1); $regVals.add($dVal.ctx); } )? )*
    ( ',' '**' keyword=vfpdef )?
  | '**' keyword=vfpdef
  ;
@@ -469,13 +469,9 @@ async_stmt
  ;
 
 /// if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
-if_stmt returns [Map<TestContext, SuiteContext> elifVals, List<TestContext> elifConditions]
-@init{
-    $elifVals = new HashMap<TestContext, SuiteContext>();
-    $elifConditions = new ArrayList<TestContext>();
-}
+if_stmt
  : IF ifTest=test ':' ifSuite=suite
-   ( ELIF elifTest=test ':' elifSuite=suite { $elifVals.put($elifTest.ctx, $elifSuite.ctx); $elifConditions.add($elifTest.ctx); } )*
+   ( ELIF test ':' suite )*
    ( ELSE ':' elseSuite=suite )?
  ;
 
@@ -494,12 +490,12 @@ for_stmt
 ///       ['else' ':' suite]
 ///       ['finally' ':' suite] |
 ///      'finally' ':' suite))
-try_stmt returns [Map<Except_clauseContext, SuiteContext> exceptBlocks, List<Except_clauseContext> exceptions]
+try_stmt returns [List<Except_clauseContext> exceptions, List<SuiteContext> exceptBodies]
 @init{
-    $exceptBlocks = new HashMap<>();
     $exceptions = new ArrayList<>();
+    $exceptBodies = new ArrayList<>();
 }
- : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptions.add($exKey.ctx); $exceptBlocks.put($exKey.ctx, $exVal.ctx); } )+
+ : TRY ':' tryBlock=suite ( ( exKey=except_clause ':' exVal=suite { $exceptions.add($exKey.ctx); $exceptBodies.add($exVal.ctx); } )+
                             ( ELSE ':' elseBlock=suite )?
                             ( FINALLY ':' finallyBlock=suite )?
                           | FINALLY ':' finallyBlock=suite
@@ -726,14 +722,13 @@ testlist
 
 /// dictorsetmaker: ( (test ':' test (comp_for | (',' test ':' test)* [','])) |
 ///                   (test (comp_for | (',' test)* [','])) )
-dictorsetmaker returns [List<TestContext> setValues, Map<TestContext, TestContext> dictValues]
+dictorsetmaker returns [List<TestContext> setValues]
 @init{
-    $dictValues = new HashMap<>();
     $setValues = new ArrayList<>();
 }
- : dictVar=test ':' dictExpr=test ( comp_for
-                                  | ( ',' dictKey=test ':' dictVal=test { $dictValues.put($dictKey.ctx, $dictVal.ctx); } )* ','?
-                                  )
+ : test ':' test ( comp_for
+                 | ( ',' test ':' test )* ','?
+                 )
  | setVar=test ( comp_for
                | ( ',' setVal=test { $setValues.add($setVal.ctx); } )* ','?
                )

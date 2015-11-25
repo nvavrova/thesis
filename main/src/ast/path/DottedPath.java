@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class DottedPath extends Path {
 
-	private static final String DELIMITER = ".";
+	private final static String DELIMITER = ".";
 	private List<String> path;
 
 	public DottedPath(@NotNull Integer locInfo, @NotNull List<String> path) {

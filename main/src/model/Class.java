@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
  */
 public class Class extends ContentContainer {
 
-	private final ContentContainer parent;
+	private ContentContainer parent;
 	private final List<String> superclassNames;
 	private final Map<String, Class> superclasses;
 
@@ -21,11 +21,6 @@ public class Class extends ContentContainer {
 		this.superclasses = new HashMap<>();
 
 		this.inheritedVars = new VarDefinitions();
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
 	}
 
 	public Integer getLcom() {
@@ -137,6 +132,14 @@ public class Class extends ContentContainer {
 	}
 
 	@Override
+	public void unlink() {
+		super.unlink();
+		this.parent = null;
+		this.superclasses.clear();
+		this.inheritedVars.unlink();
+	}
+
+	@Override
 	public boolean isInParentLine(ContentContainer container) {
 		if (this.equals(container)) {
 			return true;
@@ -152,5 +155,30 @@ public class Class extends ContentContainer {
 	@Override
 	public <T> T accept(ContentContainerVisitor<T> visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Class)) {
+			return false;
+		}
+
+		Class aClass = (Class) o;
+
+		if (!this.getName().equals(aClass.getName())) {
+			return false;
+		}
+		return this.parent.equals(aClass.parent);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.getName().hashCode();
+		result = 31 * result + this.parent.hashCode();
+		return result;
 	}
 }

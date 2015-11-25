@@ -2,7 +2,6 @@ package ast;
 
 import ast.argument.*;
 import ast.expression.Conditional;
-import ast.expression.Expr;
 import ast.expression.ExprList;
 import ast.expression.Lambda;
 import ast.expression.compiter.CompFor;
@@ -20,7 +19,10 @@ import ast.expression.nocond.atom.numeric.Float;
 import ast.expression.nocond.atom.numeric.Imaginary;
 import ast.expression.nocond.atom.numeric.Int;
 import ast.expression.nocond.atom.numeric.Long;
-import ast.expression.nocond.atom.trailed.*;
+import ast.expression.nocond.atom.trailed.AttributeRef;
+import ast.expression.nocond.atom.trailed.Call;
+import ast.expression.nocond.atom.trailed.ObjectMethodCall;
+import ast.expression.nocond.atom.trailed.Slice;
 import ast.expression.nocond.atom.yield.YieldFrom;
 import ast.expression.nocond.atom.yield.YieldValues;
 import ast.expression.nocond.bitwise.*;
@@ -710,10 +712,8 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(If n) {
-		for (Expr condition : n.getConditions()) {
-			condition.accept(this);
-			n.getBody(condition).accept(this);
-		}
+		n.getConditions().forEach(c -> c.accept(this));
+		n.getBodies().forEach(b -> b.accept(this));
 
 		if (n.hasElseBody()) {
 			n.getElseBody().accept(this);
@@ -721,12 +721,8 @@ public class DefaultVisitor<T> implements Visitor<T> {
 	}
 
 	public void visitChildren(Try n) {
-		for (Except except : n.getExceptions()) {
-			except.accept(this);
-
-			Suite suite = n.getSuite(except);
-			suite.accept(this);
-		}
+		n.getExceptions().forEach(e -> e.accept(this));
+		n.getExceptBodies().forEach(b -> b.accept(this));
 
 		n.getTryBlock().accept(this);
 		if (n.hasElseBlock()) {
@@ -805,12 +801,8 @@ public class DefaultVisitor<T> implements Visitor<T> {
 			n.getComprehension().accept(this);
 		}
 
-		if (n.hasValues()) {
-			for (Expr expr : n.getValues().keySet()) {
-				expr.accept(this);
-				n.getValues().get(expr).accept(this);
-			}
-		}
+		n.getKeys().forEach(k -> k.accept(this));
+		n.getValues().forEach(v -> v.accept(this));
 	}
 
 	public void visitChildren(AttributeRef n) {

@@ -81,6 +81,13 @@ public class Module extends ContentContainer {
 	}
 
 	@Override
+	public void unlink() {
+		super.unlink();
+		this.classImports.clear();
+		this.moduleImports.clear();
+	}
+
+	@Override
 	public void resolveDependencies(Scope scope) {
 	}
 
@@ -97,5 +104,25 @@ public class Module extends ContentContainer {
 	@Override
 	public <T> T accept(ContentContainerVisitor<T> visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Module)) {
+			return false;
+		}
+
+		Module module = (Module) o;
+
+		return this.getFilePath().equals(module.getFilePath());
+
+	}
+
+	@Override
+	public int hashCode() {
+		return this.getFilePath().hashCode();
 	}
 }

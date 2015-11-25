@@ -190,6 +190,15 @@ public abstract class ContentContainer extends ContentDefinitions {
 		return prefix.equals("") ? str : prefix + "." + str;
 	}
 
+	@Override
+	public void unlink() {
+		super.unlink();
+		this.calledSubroutines.clear();
+		this.referencedClasses.clear();
+		this.referencedVars.unlink();
+		this.definedVars.unlink();
+		this.assigns.clear();
+	}
 	public abstract boolean isInParentLine(ContentContainer container);
 	public abstract String getFullPath();
 	public abstract <T> T accept(ContentContainerVisitor<T> visitor);

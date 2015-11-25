@@ -1,15 +1,12 @@
 package ast.statement.compound;
 
 import ast.Suite;
+import ast.Visitor;
 import ast.expression.Expr;
 import ast.statement.Statement;
 import org.antlr.v4.runtime.misc.NotNull;
-import ast.Visitor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nik on 17-06-2015
@@ -17,26 +14,15 @@ import java.util.Map;
 public class If extends Statement {
 
 	private final List<Expr> conditions;
-	private final Map<Expr, Suite> bodies;
+	private final List<Suite> bodies;
 	private final Suite elseBody;
 
-	public If(@NotNull Integer locInfo, @NotNull Expr condition, @NotNull Suite condBody, Suite elseBody) {
+	public If(@NotNull Integer locInfo, @NotNull List<Expr> conditions, @NotNull List<Suite> condBodies, Suite elseBody) {
 		super(locInfo);
 
-		this.conditions = new ArrayList<>();
-		this.bodies = new HashMap<>();
+		this.conditions = conditions;
+		this.bodies = condBodies;
 		this.elseBody = elseBody;
-
-		this.addClause(condition, condBody);
-	}
-
-	public void addElseIf(@NotNull Expr condition, @NotNull Suite condBody) {
-		this.addClause(condition, condBody);
-	}
-
-	private void addClause(@NotNull Expr condition, @NotNull Suite condBody) {
-		this.conditions.add(condition);
-		this.bodies.put(condition, condBody);
 	}
 
 	public List<Expr> getConditions() {
@@ -47,9 +33,8 @@ public class If extends Statement {
 		return this.elseBody;
 	}
 
-	public Suite getBody(Expr condition) {
-		assert (this.bodies.containsKey(condition));
-		return this.bodies.get(condition);
+	public List<Suite> getBodies() {
+		return this.bodies;
 	}
 
 	public Boolean hasElseBody() {

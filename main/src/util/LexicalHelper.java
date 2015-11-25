@@ -7,10 +7,10 @@ import java.util.List;
  * Created by Nik on 01-07-2015
  */
 public class LexicalHelper {
-	public final static String SELF_KEYWORD = "self";
+	public static final String SELF_KEYWORD = "self";
 
-	private final static String[] CONTROLLER_NAMES = {"Manage", "Process", "Control", "Handle", "System"}; //TODO
-	private final static String[] PROCEDURAL_NAMES = {"Make", "Create", "Exec", "Compute"}; //TODO
+	private static final String[] CONTROLLER_NAMES = {"Manage", "Process", "Control", "Handle", "System"}; //TODO
+	private static final String[] PROCEDURAL_NAMES = {"Make", "Create", "Exec", "Compute"}; //TODO
 
 	public static List<String> getControllerNames() {
 		return Arrays.asList(CONTROLLER_NAMES);

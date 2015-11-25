@@ -28,7 +28,9 @@ import ast.expression.nocond.atom.yield.YieldFrom;
 import ast.expression.nocond.atom.yield.YieldValues;
 import ast.expression.nocond.bitwise.Shift;
 import ast.expression.nocond.bitwise.Xor;
-import ast.expression.nocond.logical.*;
+import ast.expression.nocond.logical.Binary;
+import ast.expression.nocond.logical.Comparison;
+import ast.expression.nocond.logical.Not;
 import ast.expression.nocond.trailer.*;
 import ast.param.*;
 import ast.path.DottedPath;
@@ -201,9 +203,15 @@ public class AstBuilder {
 			//		                     )?
 			//		| '*' tfpdef? ( ',' tfpdef ( '=' test )? )* ( ',' '**' tfpdef )?
 			//		| '**' tfpdef
-			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
-			upcasted.putAll(ctx.regular);
-			List<Param> regular = this.getParameters(upcasted);
+			List<Param> regular = new ArrayList<>();
+			for (int i = 0; i < ctx.regular.size(); i++) {
+				Param param = (Param) ctx.regular.get(i).accept(this);
+				PythonParser.TestContext value = ctx.regVals.get(i);
+				if (value != null) {
+					param.setDefaultVal((Expr) value.accept(this));
+				}
+				regular.add(param);
+			}
 
 			Param positional = ctx.positional != null ? (Param) ctx.positional.accept(this) : null;
 			Param keyword = ctx.keyword != null ? (Param) ctx.keyword.accept(this) : null;
@@ -229,9 +237,15 @@ public class AstBuilder {
 			//		                     )?
 			//		| '*' vfpdef? ( ',' vfpdef ( '=' test )? )* ( ',' '**' vfpdef )?
 			//		| '**' vfpdef
-			Map<ParserRuleContext, PythonParser.TestContext> upcasted = new HashMap<>();
-			upcasted.putAll(ctx.regular);
-			List<Param> regular = this.getParameters(upcasted);
+			List<Param> regular = new ArrayList<>();
+			for (int i = 0; i < ctx.regular.size(); i++) {
+				Param param = (Param) ctx.regular.get(i).accept(this);
+				PythonParser.TestContext value = ctx.regVals.get(i);
+				if (value != null) {
+					param.setDefaultVal((Expr) value.accept(this));
+				}
+				regular.add(param);
+			}
 
 			Param positional = ctx.positional != null ? (Param) ctx.positional.accept(this) : null;
 			Param keyword = ctx.keyword != null ? (Param) ctx.keyword.accept(this) : null;
@@ -663,18 +677,16 @@ public class AstBuilder {
 		@Override
 		public AstNode visitIf_stmt(@NotNull PythonParser.If_stmtContext ctx) {
 			//      IF test ':' suite ( ELIF test ':' suite )* ( ELSE ':' suite )?
-			Expr ifCond = (Expr) ctx.ifTest.accept(this);
-			Suite stmts = this.process(ctx.ifSuite);
-			Suite elseStmts = this.processOptional(ctx.elseSuite);
-
-			If ifStatement = new If(this.getLocInfo(ctx), ifCond, stmts, elseStmts);
-
-			for (PythonParser.TestContext elifCondition : ctx.elifConditions) {
-				PythonParser.SuiteContext elifVal = ctx.elifVals.get(elifCondition);
-				ifStatement.addElseIf((Expr) elifCondition.accept(this), this.process(elifVal));
+			List<Expr> conditions = new ArrayList<>();
+			List<Suite> bodies = new ArrayList<>();
+			for (int i = 0; i < ctx.test().size(); i++) {
+				Expr condition = (Expr) ctx.test().get(i).accept(this);
+				Suite body = (Suite) ctx.suite().get(i).accept(this);
+				conditions.add(condition);
+				bodies.add(body);
 			}
-
-			return ifStatement;
+			Suite elseBody = this.processOptional(ctx.elseSuite);
+			return new If(this.getLocInfo(ctx), conditions, bodies, elseBody);
 		}
 
 		@Override
@@ -708,17 +720,17 @@ public class AstBuilder {
 			Suite tryBlock = this.process(ctx.tryBlock);
 			Suite elseBlock = this.processOptional(ctx.elseBlock);
 			Suite finallyBlock = this.processOptional(ctx.finallyBlock);
-			Map<Except, Suite> exceptBlocks = new HashMap<>();
 			List<Except> exceptions = new ArrayList<>();
+			List<Suite> exceptBodies = new ArrayList<>();
 
-			for (PythonParser.Except_clauseContext c : ctx.exceptions) {
-				Suite block = this.process(ctx.exceptBlocks.get(c));
-				Except except = (Except) c.accept(this);
+			for (int i = 0; i < ctx.exceptions.size(); i++) {
+				Except except = (Except) ctx.exceptions.get(i).accept(this);
+				Suite exceptBody = this.process(ctx.exceptBodies.get(i));
 				exceptions.add(except);
-				exceptBlocks.put(except, block);
+				exceptBodies.add(exceptBody);
 			}
 
-			return new Try(this.getLocInfo(ctx), tryBlock, exceptions, exceptBlocks, elseBlock, finallyBlock);
+			return new Try(this.getLocInfo(ctx), tryBlock, exceptions, exceptBodies, elseBlock, finallyBlock);
 		}
 
 		@Override
@@ -1127,17 +1139,8 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitDictorsetmaker(@NotNull PythonParser.DictorsetmakerContext ctx) {
-			//		dictVar=test ':' dictExpr=test ( comp_for | ( ',' dictKey=test ':' dictVal=test )* ','? )
+			//		test ':' test ( comp_for | ( ',' test ':' test )* ','? )
 			//		| setVar=test ( comp_for | ( ',' setVal=test )* ','? )
-			if (ctx.dictVar != null) {
-				if (ctx.comp_for() != null) {
-					return new DictMaker(this.getLocInfo(ctx), (CompFor) ctx.comp_for().accept(this));
-				}
-				Map<Expr, Expr> values = ctx.dictValues.keySet().stream()
-						.collect(Collectors.toMap(k -> (Expr) k.accept(this), v -> (Expr) v.accept(this)));
-				return new DictMaker(this.getLocInfo(ctx), values);
-			}
-
 			if (ctx.setVar != null) {
 				if (ctx.comp_for() != null) {
 					return new SetMaker(this.getLocInfo(ctx), (CompFor) ctx.comp_for().accept(this));
@@ -1147,7 +1150,19 @@ public class AstBuilder {
 						.collect(Collectors.toList());
 				return new SetMaker(this.getLocInfo(ctx), values);
 			}
-			throw new IllegalArgumentException("Unknown context");
+
+			List<Expr> keys = new ArrayList<>();
+			List<Expr> values = new ArrayList<>();
+			for (int i = 0; i < ctx.test().size(); i++) {
+				if (i % 2 == 0) {
+					keys.add((Expr) ctx.test().get(i).accept(this));
+				}
+				else {
+					values.add((Expr) ctx.test().get(i).accept(this));
+				}
+			}
+			CompFor compFor = ctx.comp_for() == null ? null : (CompFor) ctx.comp_for().accept(this);
+			return new DictMaker(this.getLocInfo(ctx), compFor, keys, values);
 		}
 
 		@Override
@@ -1356,35 +1371,10 @@ public class AstBuilder {
 			return this.locCounter.count(startLine, stopLine);
 		}
 
-		private Identifier getIdentifier(TerminalNode name) {
-			return new Identifier(this.getLocInfo(name), name.getText());
-		}
-
-		private List<Param> getParameters(Map<ParserRuleContext, PythonParser.TestContext> params) {
-			Map<Param, Expr> paramMap = this.extractParams(params);
-			List<Param> result = new ArrayList<>();
-			for (Param p : paramMap.keySet()) {
-				this.setParamDefaultValue(p, paramMap.get(p));
-				result.add(p);
-			}
-			return result;
-		}
-
 		private void setParamDefaultValue(Param simpleParam, Expr defaultVal) {
 			if (defaultVal != null) {
 				simpleParam.setDefaultVal(defaultVal);
 			}
-		}
-
-		private Map<Param, Expr> extractParams(Map<ParserRuleContext, PythonParser.TestContext> params) {
-			Map<Param, Expr> parameters = new HashMap<>();
-			for (ParserRuleContext key : params.keySet()) {
-				Param keyNode = (Param) key.accept(this);
-				PythonParser.TestContext value = params.get(key);
-				Expr valueNode = value == null ? null : (Expr) value.accept(this);
-				parameters.put(keyNode, valueNode);
-			}
-			return parameters;
 		}
 
 		private Suite processOptional(PythonParser.SuiteContext node) {

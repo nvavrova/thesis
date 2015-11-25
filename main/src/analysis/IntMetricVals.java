@@ -147,6 +147,8 @@ public class IntMetricVals {
 		BufferedReader br = new BufferedReader(inStrReader);
 		this.values = br.lines().map(Integer::parseInt).collect(Collectors.toList());
 		br.close();
+		inStrReader.close();
+		fis.close();
 
 		try {
 			Files.delete(Paths.get(this.valuesFileName));

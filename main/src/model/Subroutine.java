@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
  * Created by Nik on 11-07-2015
  */
 public class Subroutine extends ContentContainer {
+
 	private final SubroutineType subroutineType;
-	private final ContentContainer parent;
+	private ContentContainer parent;
 	private final Boolean isAccessor;
 	private final List<String> params;
 
@@ -69,6 +70,12 @@ public class Subroutine extends ContentContainer {
 	}
 
 	@Override
+	public void unlink() {
+		super.unlink();
+		this.parent = null;
+	}
+
+	@Override
 	public boolean isInParentLine(ContentContainer container) {
 		if (this.equals(container)) {
 			return true;
@@ -85,5 +92,34 @@ public class Subroutine extends ContentContainer {
 	@Override
 	public <T> T accept(ContentContainerVisitor<T> visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Subroutine)) {
+			return false;
+		}
+
+		Subroutine that = (Subroutine) o;
+
+		if (!this.getName().equals(that.getName())) {
+			return false;
+		}
+		if (this.getSubroutineType() != that.getSubroutineType()) {
+			return false;
+		}
+		return this.parent.equals(that.parent);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.getName().hashCode();
+		result = 31 * result + this.getSubroutineType().hashCode();
+		result = 31 * result + this.parent.hashCode();
+		return result;
 	}
 }

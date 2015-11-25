@@ -3,9 +3,9 @@ package model;
 /**
  * Created by Nik on 26-10-2015
  */
-public class Variable {
+public class Variable implements Unlinkable {
 
-	private final ContentContainer parent;
+	private ContentContainer parent;
 	private final String name;
 	private final VarType varType;
 
@@ -38,4 +38,39 @@ public class Variable {
 	public boolean definedInParentOf(ContentContainer container) {
 		return container.isInParentLine(this.parent);
 	}
+
+	public void unlink() {
+		this.parent = null;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Variable)) {
+			return false;
+		}
+
+		Variable variable = (Variable) o;
+
+		if (!this.parent.equals(variable.parent)) {
+			return false;
+		}
+		if (!this.getName().equals(variable.getName())) {
+			return false;
+		}
+		return this.getVarType() == variable.getVarType();
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.parent.hashCode();
+		result = 31 * result + this.getName().hashCode();
+		result = 31 * result + this.getVarType().hashCode();
+		return result;
+	}
+
+
 }

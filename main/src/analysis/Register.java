@@ -36,6 +36,7 @@ public class Register {
 		}
 		this.detectorsAdded = true; //don't allow any additional detectors
 		project.getModules().forEach(m -> this.check(project.getPath(), m));
+		project.unlink();
 	}
 
 	private void check(String projectPath, ContentContainer contentContainer) {

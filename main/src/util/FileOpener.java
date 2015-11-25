@@ -62,6 +62,9 @@ public class FileOpener {
 			List<String> res = br.lines().collect(Collectors.toList());
 
 			if (res.size() > LINE_LIMIT) {
+				fis.close();
+				inStrReader.close();
+				br.close();
 				throw new FileSizeLimitExceededException("File \"" + this.filePath + "\" too large (" + res.size() + " lines)");
 			}
 

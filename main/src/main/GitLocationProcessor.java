@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 11-11-2015
- * <p>
+ *
  * Takes path to the CSV file in format "project_disk_location,project_git_link"
  */
 public class GitLocationProcessor {
@@ -41,12 +41,10 @@ public class GitLocationProcessor {
 		}
 	}
 
-	public boolean hasLink(String diskLocation) {
-		return this.links.containsKey(diskLocation);
-	}
-
 	public String getLink(String diskLocation) {
-		assert this.links.containsKey(diskLocation);
+		if (!this.links.containsKey(diskLocation)) {
+			return "";
+		}
 		return this.links.get(diskLocation);
 	}
 

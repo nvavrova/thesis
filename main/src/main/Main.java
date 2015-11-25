@@ -55,13 +55,14 @@ public class Main {
 				Project project = createProject(file);
 				register.check(project);
 			}
+			System.out.println ("Memory stats: " + Runtime.getRuntime().totalMemory() / 1024);
 		}
 
 		CsvCreator csvCreator = new CsvCreator();
 		csvCreator.createStream(CSV_NAME, "Project", "Url", "Location", "Defect");
 		Map<String, Set<DesignDefect>> designDefects = register.finish();
 		for (String projectLocation : designDefects.keySet()) {
-			String projectUrl = gitLocs != null && gitLocs.hasLink(projectLocation) ? gitLocs.getLink(projectLocation) : "";
+			String projectUrl = gitLocs != null ? gitLocs.getLink(projectLocation) : "";
 			for (DesignDefect dd : designDefects.get(projectLocation)) {
 				csvCreator.addLine(CSV_NAME, projectLocation, projectUrl, dd.getFullPath(), dd.getDefect());
 			}

@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
  */
 public class GitHub {
 
-	private final static String GITHUB_API_BASE_URL = "https://api.github.com";
-	private final static String TOKEN_FILENAME = "token.txt";
-	private final static String ENCODING = "UTF-8";
+	private static final String GITHUB_API_BASE_URL = "https://api.github.com";
+	private static final String TOKEN_FILENAME = "token.txt";
+	private static final String ENCODING = "UTF-8";
 
 	public static String get(String url) {
 		return get(url, new HashMap<>()); //not an empty collection, b/c of adding auth token later!
@@ -28,8 +28,11 @@ public class GitHub {
 		File tokenFile = new File(TOKEN_FILENAME);
 		if (tokenFile.exists()) {
 			try {
-				BufferedReader br = new BufferedReader(new FileReader(tokenFile));
+				FileReader fr = new FileReader(tokenFile);
+				BufferedReader br = new BufferedReader(fr);
 				params.put("access_token", br.readLine());
+				br.close();
+				fr.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();
