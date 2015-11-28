@@ -1,11 +1,9 @@
 package analysis.detector;
 
 import analysis.Metric;
+import analysis.storage.PrimitiveIntMap;
 import model.Subroutine;
 import model.SubroutineType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Nik on 09-11-2015
@@ -13,15 +11,16 @@ import java.util.Map;
 public class FeatureEnvyLiShatnawiDetector extends Detector {
 	//AID > 4 and AID in top 10% and ALD < 3 and referenced classes < 3
 
-	private final Map<String, Integer> subroutineAids;
-
-	public FeatureEnvyLiShatnawiDetector() {
-		this.subroutineAids = new HashMap<>();
-	}
+	private final static String AIDS = "AIDS";
 
 	@Override
 	protected void addRequiredPercentages() {
 		this.addRequiredPercentage(Metric.SUBROUTINE_AID, 90);
+	}
+
+	@Override
+	public void addDataStores() {
+		this.addDataStore(AIDS, new PrimitiveIntMap("FeatureEnvyLiShatnawi_AIDS"));
 	}
 
 	@Override
@@ -32,7 +31,7 @@ public class FeatureEnvyLiShatnawiDetector extends Detector {
 				&& subroutine.getReferencedClassesSet().size() < 3;
 
 		if (check) {
-			this.subroutineAids.put(subroutine.getFullPath(), subroutine.getAccessOfImportData());
+			this.getPrimitiveMapStore(AIDS).add(subroutine.getFullPath(), subroutine.getAccessOfImportData());
 		}
 
 		return check;
@@ -40,7 +39,7 @@ public class FeatureEnvyLiShatnawiDetector extends Detector {
 
 	@Override
 	protected Boolean confirmDefect(String fullPath) {
-		return this.metrics.isInTop(Metric.SUBROUTINE_AID, 10, this.subroutineAids.get(fullPath));
+		return this.metrics.isInTop(Metric.SUBROUTINE_AID, 10, this.getPrimitiveMapStore(AIDS).get(fullPath));
 	}
 
 	@Override

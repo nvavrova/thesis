@@ -1,11 +1,8 @@
-package main;
+package process;
 
 import util.StringHelper;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +31,15 @@ public class GitLocationProcessor {
 
 				List<String> lines = br.lines().collect(Collectors.toList());
 				lines.forEach(l -> this.processLine(l));
+
+				fis.close();
+				inStrReader.close();
+				br.close();
 			}
 			catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

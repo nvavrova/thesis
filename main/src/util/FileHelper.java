@@ -19,7 +19,12 @@ public class FileHelper {
 	}
 
 	public static String getLogName(String type, String extension) {
-		File folder = new File("logs");
+		return getLogName(type, extension, "logs");
+
+	}
+
+	public static String getLogName(String type, String extension, String folderName) {
+		File folder = new File(folderName);
 		if (!folder.exists()) {
 			folder.mkdir();
 		}
@@ -27,7 +32,7 @@ public class FileHelper {
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-SSS");
 		String date = dateFormat.format(now);
-		return "logs/" + date + "_" + type + "." + extension;
+		return folderName + "/" + date + "_" + type + "." + extension;
 	}
 
 	public static List<String> getPythonFilePaths(List<String> paths) {

@@ -1,12 +1,12 @@
 package main;
 
-import analysis.DesignDefect;
 import analysis.Register;
 import analysis.detector.*;
 import ast.Module;
 import model.ModelBuilder;
 import model.Project;
 import process.File2Tree;
+import process.GitLocationProcessor;
 import util.FileHelper;
 
 import java.io.File;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Main {
 
@@ -47,27 +46,20 @@ public class Main {
 			gitLocs.readData();
 		}
 
-//		Project project = createProject(new File(args[0]));
-//		register.check(project);
 		File projectsFolder = new File(args[0]);
 		for (File file : projectsFolder.listFiles()) {
 			if (file.isDirectory()) {
+				System.out.print(((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024/1024));
 				Project project = createProject(file);
 				register.check(project);
+				System.gc();
+				System.out.println(" -> " + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + "\t\t" + file.getAbsolutePath());
 			}
-			System.out.println ("Memory stats: " + Runtime.getRuntime().totalMemory() / 1024);
 		}
 
 		CsvCreator csvCreator = new CsvCreator();
 		csvCreator.createStream(CSV_NAME, "Project", "Url", "Location", "Defect");
-		Map<String, Set<DesignDefect>> designDefects = register.finish();
-		for (String projectLocation : designDefects.keySet()) {
-			String projectUrl = gitLocs != null ? gitLocs.getLink(projectLocation) : "";
-			for (DesignDefect dd : designDefects.get(projectLocation)) {
-				csvCreator.addLine(CSV_NAME, projectLocation, projectUrl, dd.getFullPath(), dd.getDefect());
-			}
-		}
-		csvCreator.close();
+		register.finish(gitLocs, csvCreator);
 	}
 
 	private static Project createProject(File projectFolder) {

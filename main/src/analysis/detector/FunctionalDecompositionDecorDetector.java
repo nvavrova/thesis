@@ -1,13 +1,12 @@
 package analysis.detector;
 
 import analysis.Metric;
+import analysis.storage.SetIntMap;
 import model.Class;
 import model.Variable;
 import util.LexicalHelper;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -15,25 +14,30 @@ import java.util.Set;
  */
 public class FunctionalDecompositionDecorDetector extends Detector {
 
-	private final Map<String, Set<Integer>> nrRelatedClassPrivateFields;
+	private final static int RCPF_LIMIT = 2;
 
-	public FunctionalDecompositionDecorDetector() {
-		this.nrRelatedClassPrivateFields = new HashMap<>();
+	private final static String RCPF = "RCPF";
+
+	@Override
+	public void addDataStores() {
+		this.addDataStore(RCPF, new SetIntMap("FunctionalDecompositionDecor_RCPF"));
 	}
 
 	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
-		boolean check = this.hasProceduralName(cls.getName()) && this.noInheritance(cls);
+
+		Set<Integer> relatedPrivateVars = new HashSet<>();
+		cls.getReferencedClassesSet().stream().filter(rc -> this.hasOneMethod(rc)).forEach(rc -> {
+			Long privateVars = rc.getDefinedVarsInclParentsVars().getAsSet().stream()
+					.filter(Variable::isPrivate)
+					.count();
+			relatedPrivateVars.add(privateVars.intValue());
+		});
+
+		boolean check = this.hasProceduralName(cls.getName()) && this.noInheritance(cls) && relatedPrivateVars.size() >= RCPF_LIMIT;
 
 		if (check) {
-			Set<Integer> relatedPrivateVars = new HashSet<>();
-			cls.getReferencedClassesSet().stream().filter(rc -> this.hasOneMethod(rc)).forEach(rc -> {
-				Long privateVars = rc.getDefinedVarsInclParentsVars().getAsSet().stream()
-						.filter(Variable::isPrivate)
-						.count();
-				relatedPrivateVars.add(privateVars.intValue());
-			});
-			this.nrRelatedClassPrivateFields.put(cls.getFullPath(), relatedPrivateVars);
+			relatedPrivateVars.forEach(v -> this.getSetMapStore(RCPF).add(cls.getFullPath(), v));
 		}
 
 		return check;
@@ -41,7 +45,7 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 
 	@Override
 	protected Boolean confirmDefect(String fullPath) {
-		return this.relatedClassesWithOneMethodAndLotOfPrivateFields(fullPath) >= 2;
+		return this.relatedClassesWithOneMethodAndLotOfPrivateFields(fullPath) >= RCPF_LIMIT;
 	}
 
 	@Override
@@ -62,7 +66,7 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 	}
 
 	private Integer relatedClassesWithOneMethodAndLotOfPrivateFields(String fullClsPath) {
-		Long count = this.nrRelatedClassPrivateFields.get(fullClsPath).stream()
+		Long count = this.getSetMapStore(RCPF).get(fullClsPath).stream()
 				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_PRIVATE_FIELDS, v))
 				.count();
 		return count.intValue();

@@ -1,19 +1,18 @@
 package analysis.detector;
 
 import analysis.Metric;
-
-import java.util.HashMap;
-import java.util.Map;
+import analysis.storage.PrimitiveIntMap;
 
 /**
  * Created by Nik on 07-11-2015
  */
 public class SwissArmyKnifeDecorDetector extends Detector {
 
-	private final Map<String, Integer> parents;
+	private final static String PARENTS = "PARENTS";
 
-	public SwissArmyKnifeDecorDetector() {
-		this.parents = new HashMap<>();
+	@Override
+	public void addDataStores() {
+		this.addDataStore(PARENTS, new PrimitiveIntMap("SwissArmyKnifeDecor_PARENTS"));
 	}
 
 	@Override
@@ -21,7 +20,7 @@ public class SwissArmyKnifeDecorDetector extends Detector {
 		boolean check = cls.superclassCount() > 1;
 
 		if (check) {
-			this.parents.put(cls.getFullPath(), cls.superclassCount());
+			this.getPrimitiveMapStore(PARENTS).add(cls.getFullPath(), cls.superclassCount());
 		}
 
 		return check;
@@ -38,7 +37,7 @@ public class SwissArmyKnifeDecorDetector extends Detector {
 	}
 
 	private boolean hasTooManyParents(String fullClsPath) {
-		return this.metrics.isExtremeOutlier(Metric.CLASS_SUPERCLASSES, this.parents.get(fullClsPath));
+		return this.metrics.isExtremeOutlier(Metric.CLASS_SUPERCLASSES, this.getPrimitiveMapStore(PARENTS).get(fullClsPath));
 //		return this.metrics.isInTop(Metric.CLASS_SUPERCLASSES, 10, this.parents.get(fullClsPath));
 	}
 

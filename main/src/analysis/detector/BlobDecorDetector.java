@@ -1,12 +1,12 @@
 package analysis.detector;
 
 import analysis.Metric;
+import analysis.storage.PrimitiveIntMap;
+import analysis.storage.SetIntMap;
 import model.Class;
 import model.Subroutine;
 import util.LexicalHelper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,15 +15,11 @@ import java.util.stream.Collectors;
  */
 public class BlobDecorDetector extends Detector {
 
-	private final Map<String, Set<Integer>> relatedAccessorCounts;
-	private final Map<String, Integer> loc;
-	private final Map<String, Integer> lcom;
+	private final static int RAC_COUNT = 3;
 
-	public BlobDecorDetector() {
-		this.relatedAccessorCounts = new HashMap<>();
-		this.loc = new HashMap<>();
-		this.lcom = new HashMap<>();
-	}
+	private final static String RAC = "Related Accessor Counts";
+	private final static String LOC = "LOC";
+	private final static String LCOM = "LCOM";
 
 	@Override
 	protected void addRequiredPercentages() {
@@ -31,17 +27,25 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	@Override
+	public void addDataStores() {
+		this.addDataStore(RAC, new SetIntMap("BlobDecor_RAC"));
+		this.addDataStore(LOC, new PrimitiveIntMap("BlobDecor_LOC"));
+		this.addDataStore(LCOM, new PrimitiveIntMap("BlobDecor_LCOM"));
+	}
+
+	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
 
-		boolean seemsDefective = this.hasControllerName(cls.getName()) || this.hasControllerMethods(cls);
+		Set<Integer> relatedAccessorCounts = cls.getReferencedClassesSet().stream()
+				.map(Class::accessorCount)
+				.collect(Collectors.toSet());
+
+		boolean seemsDefective = (this.hasControllerName(cls.getName()) || this.hasControllerMethods(cls)) && relatedAccessorCounts.size() >= RAC_COUNT;
 
 		if (seemsDefective) {
-			Set<Integer> relatedAccessorCounts = cls.getReferencedClassesSet().stream()
-					.map(Class::accessorCount)
-					.collect(Collectors.toSet());
-			this.relatedAccessorCounts.put(cls.getFullPath(), relatedAccessorCounts);
-			this.loc.put(cls.getFullPath(), cls.getLoc());
-			this.lcom.put(cls.getFullPath(), cls.getLcom());
+			relatedAccessorCounts.forEach(v -> this.getSetMapStore(RAC).add(cls.getFullPath(), v));
+			this.getPrimitiveMapStore(LOC).add(cls.getFullPath(), cls.getLoc());
+			this.getPrimitiveMapStore(LCOM).add(cls.getFullPath(), cls.getLcom());
 		}
 
 		return seemsDefective;
@@ -49,7 +53,7 @@ public class BlobDecorDetector extends Detector {
 
 	@Override
 	protected Boolean confirmDefect(String clsFullPath) {
-		return (this.isLargeClass(clsFullPath) || this.hasLowCohesion(clsFullPath)) && this.relatedDataClassesCount(clsFullPath) > 2;
+		return (this.isLargeClass(clsFullPath) || this.hasLowCohesion(clsFullPath)) && this.relatedDataClassesCount(clsFullPath) >= RAC_COUNT;
 	}
 
 	@Override
@@ -75,17 +79,17 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	private boolean isLargeClass(String clsFullPath) {
-		return this.metrics.isMildOutlier(Metric.CLASS_LOC, this.loc.get(clsFullPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_LOC, this.getPrimitiveMapStore(LOC).get(clsFullPath));
 //		return this.metrics.isInTop(Metric.CLASS_LOC, 15, this.loc.get(clsFullPath));
 	}
 
 	private boolean hasLowCohesion(String clsFullPath) {
-		return this.metrics.isMildOutlier(Metric.CLASS_LCOM, this.lcom.get(clsFullPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_LCOM, this.getPrimitiveMapStore(LCOM).get(clsFullPath));
 //		return this.metrics.isInTop(Metric.CLASS_LCOM, 15, this.lcom.get(clsFullPath));
 	}
 
 	private long relatedDataClassesCount(String clsFullPath) {
-		return this.relatedAccessorCounts.get(clsFullPath).stream()
+		return this.getSetMapStore(RAC).get(clsFullPath).stream()
 //				.filter(v -> this.metrics.isMildOutlier(Metric.CLASS_ACCESSORS, v))
 				.filter(v -> this.metrics.isInTop(Metric.CLASS_ACCESSORS, 15, v))
 				.count();

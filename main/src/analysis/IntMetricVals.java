@@ -1,5 +1,7 @@
 package analysis;
 
+import util.FileHelper;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -30,7 +32,7 @@ public class IntMetricVals {
 		this.sorted = false;
 		this.values = new ArrayList<>();
 
-		this.valuesFileName = UUID.randomUUID().toString();
+		this.valuesFileName = FileHelper.getLogName(UUID.randomUUID().toString(), "data", "test-data\\collected_data");
 		try {
 			this.valueStream = new PrintStream(new FileOutputStream(this.valuesFileName));
 		}
@@ -82,17 +84,6 @@ public class IntMetricVals {
 		}
 		Double iqr = this.q3 - this.q1;
 		return val < this.q1 - iqrMultiplicand * iqr || val > this.q3 + iqrMultiplicand * iqr;
-	}
-
-	public boolean atLeast2StdDevFromAvg(Integer val) {
-		if (!this.sorted) {
-			throw new IllegalStateException();
-		}
-		return this.nrOfStandardDeviationsFromAvg(val) >= 2;
-	}
-
-	private Double nrOfStandardDeviationsFromAvg(Integer val) {
-		return Math.abs((this.average - val) / this.standardDeviation);
 	}
 
 	public void sortAndCalculateStats(Set<Integer> requiredPercentages) throws IOException {

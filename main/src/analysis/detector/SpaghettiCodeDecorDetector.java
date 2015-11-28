@@ -1,13 +1,13 @@
 package analysis.detector;
 
 import analysis.Metric;
+import analysis.storage.ListMap;
+import analysis.storage.PrimitiveIntMap;
 import model.Class;
 import model.Subroutine;
 import util.LexicalHelper;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -15,13 +15,8 @@ import java.util.stream.Collectors;
  */
 public class SpaghettiCodeDecorDetector extends Detector {
 
-	private final Map<String, List<Integer>> methodSizes;
-	private final Map<String, Integer> nrMethodsWithNoParams;
-
-	public SpaghettiCodeDecorDetector() {
-		this.methodSizes = new HashMap<>();
-		this.nrMethodsWithNoParams = new HashMap<>();
-	}
+	private final static String MLOCS = "MLOCS";
+	private final static String MNOPARAM = "MNOPARAM";
 
 	@Override
 	protected void addRequiredPercentages() {
@@ -30,15 +25,22 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	}
 
 	@Override
+	public void addDataStores() {
+		this.addDataStore(MLOCS, new ListMap("SpaghettiCodeDecor_MLOCS"));
+		this.addDataStore(MNOPARAM, new PrimitiveIntMap("SpaghettiCodeDecor_MNOPARAM"));
+	}
+
+	@Override
 	protected Boolean isPreliminarilyDefective(model.Class cls) {
-		boolean check = this.noInheritance(cls) && this.hasProceduralName(cls.getName()) && this.usesGlobals(cls);
+		List<Integer> subroutinesLoc = cls.getDefinedSubroutinesSet().stream()
+				.map(Subroutine::getLoc)
+				.collect(Collectors.toList());
+
+		boolean check = this.noInheritance(cls) && this.hasProceduralName(cls.getName()) && this.usesGlobals(cls) && subroutinesLoc.size() > 0;
 
 		if (check) {
-			List<Integer> subroutinesLoc = cls.getDefinedSubroutinesSet().stream()
-					.map(Subroutine::getLoc)
-					.collect(Collectors.toList());
-			this.methodSizes.put(cls.getFullPath(), subroutinesLoc);
-			this.nrMethodsWithNoParams.put(cls.getFullPath(), cls.subroutinesWithNoParamsCount());
+			subroutinesLoc.forEach(v -> this.getListMapStore(MLOCS).add(cls.getFullPath(), v));
+			this.getPrimitiveMapStore(MNOPARAM).add(cls.getFullPath(), cls.subroutinesWithNoParamsCount());
 		}
 
 		return check;
@@ -67,7 +69,7 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	}
 
 	private boolean hasLongMethod(String fullClassPath) {
-		for (Integer mSize : this.methodSizes.get(fullClassPath)) {
+		for (Integer mSize : this.getListMapStore(MLOCS).get(fullClassPath)) {
 //			if (this.metrics.isMildOutlier(Metric.SUBROUTINE_LOC, mSize)) {
 			if (this.metrics.isInTop(Metric.SUBROUTINE_LOC, 15, mSize)) {
 				return true;
@@ -78,7 +80,7 @@ public class SpaghettiCodeDecorDetector extends Detector {
 
 	private boolean hasTooManyMethodsWithNoParams(String fullClassPath) {
 //		return this.metrics.isMildOutlier(Metric.CLASS_METHODS_NO_PARAMS, this.nrMethodsWithNoParams.get(fullClassPath));
-		return this.metrics.isInTop(Metric.CLASS_METHODS_NO_PARAMS, 15, this.nrMethodsWithNoParams.get(fullClassPath));
+		return this.metrics.isInTop(Metric.CLASS_METHODS_NO_PARAMS, 15, this.getPrimitiveMapStore(MNOPARAM).get(fullClassPath));
 	}
 
 }

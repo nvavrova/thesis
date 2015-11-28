@@ -1,31 +1,30 @@
 package analysis.detector;
 
 import analysis.Metric;
+import analysis.storage.PrimitiveIntMap;
 import model.Subroutine;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Nik on 10-11-2015
  */
 public class LongMethodDetector extends Detector {
 
-	private final Map<String,Integer> subroutineLoc;
+	private final String LOC = "LOC";
 
-	public LongMethodDetector() {
-		this.subroutineLoc = new HashMap<>();
+	@Override
+	public void addDataStores() {
+		this.addDataStore(LOC, new PrimitiveIntMap("LongMethod_LOC"));
 	}
 
 	@Override
 	protected Boolean isPreliminarilyDefective(Subroutine subroutine) {
-		this.subroutineLoc.put(subroutine.getFullPath(), subroutine.getLoc());
+		this.getPrimitiveMapStore(LOC).add(subroutine.getFullPath(), subroutine.getLoc());
 		return true;
 	}
 
 	@Override
 	protected Boolean confirmDefect(String fullPath) {
-		return this.metrics.isExtremeOutlier(Metric.SUBROUTINE_LOC, this.subroutineLoc.get(fullPath));
+		return this.metrics.isExtremeOutlier(Metric.SUBROUTINE_LOC, this.getPrimitiveMapStore(LOC).get(fullPath));
 	}
 
 	@Override

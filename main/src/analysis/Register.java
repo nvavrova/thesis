@@ -1,9 +1,12 @@
 package analysis;
 
 import analysis.detector.Detector;
+import main.CsvCreator;
 import model.ContentContainer;
 import model.Project;
+import process.GitLocationProcessor;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -11,6 +14,9 @@ import java.util.*;
  * Created by Nik on 04-11-2015
  */
 public class Register {
+
+	private static final String CSV_NAME = "RESULTS";
+
 	private final List<Detector> detectors;
 	private final Metrics metrics;
 	private boolean detectorsAdded;
@@ -30,11 +36,16 @@ public class Register {
 		this.detectors.add(detector);
 	}
 
-	public void check(Project project) {
+	public void check(Project project) throws FileNotFoundException {
 		if (this.finished) {
 			throw new IllegalStateException();
 		}
-		this.detectorsAdded = true; //don't allow any additional detectors
+		if (!this.detectorsAdded) {
+			this.detectorsAdded = true; //don't allow any additional detectors
+			for (Detector d : this.detectors) {
+				d.openDataStores();
+			}
+		}
 		project.getModules().forEach(m -> this.check(project.getPath(), m));
 		project.unlink();
 	}
@@ -45,22 +56,23 @@ public class Register {
 		contentContainer.getChildren().forEach(c -> this.check(projectPath, c));
 	}
 
-	public Map<String, Set<DesignDefect>> finish() throws IOException {
+	public void finish(GitLocationProcessor gitLocs, CsvCreator csvCreator) throws IOException {
 		this.finished = true; //don't allow any additional checking
 		Map<Metric, Set<Integer>> reqMetrics = aggregateRequiredMetrics();
 		this.metrics.terminateCollecting(reqMetrics);
 
-		Map<String, Set<DesignDefect>> results = new HashMap<>();
 		for (Detector detector : this.detectors) {
+			detector.deserializeData();
 			Map<String, Set<DesignDefect>> detectorResults = detector.finish();
-			for (String project : detectorResults.keySet()) {
-				if (!results.containsKey(project)) {
-					results.put(project, new HashSet<>());
+			detector.removeData();
+
+			for (String projectLocation : detectorResults.keySet()) {
+				String projectUrl = gitLocs != null ? gitLocs.getLink(projectLocation) : "";
+				for (DesignDefect dd : detectorResults.get(projectLocation)) {
+					csvCreator.addLine(CSV_NAME, projectLocation, projectUrl, dd.getFullPath(), dd.getDefect());
 				}
-				results.get(project).addAll(detectorResults.get(project));
 			}
 		}
-		return results;
 	}
 
 	private Map<Metric, Set<Integer>> aggregateRequiredMetrics() {

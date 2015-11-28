@@ -3,20 +3,23 @@ package analysis.detector;
 import analysis.DesignDefect;
 import analysis.Metric;
 import analysis.Metrics;
+import analysis.storage.*;
 import model.Class;
 import model.*;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Nik on 04-11-2015
  */
 public abstract class Detector {
 
-	private Map<String, Set<DesignDefect>> defects;
+	private SetStrMap defects;
+
+	private Map<String, analysis.storage.Map> dataStores;
 
 	private final Map<Metric, Set<Integer>> requiredPercentages;
 
@@ -25,10 +28,12 @@ public abstract class Detector {
 	private boolean finished;
 
 	public Detector() {
-		this.defects = new HashMap<>();
+		this.defects = new SetStrMap(this.getName() + "_suspected_defects_per_project");
+		this.dataStores = new HashMap<>();
 		this.requiredPercentages = new HashMap<>();
 		this.addRequiredPercentages();
 		this.preliminaryVisitor = new PreliminaryVisitor();
+		this.addDataStores();
 	}
 
 	public void addMetrics(Metrics metrics) {
@@ -46,22 +51,20 @@ public abstract class Detector {
 	private void processChecked(String projectPath, ContentContainer contentContainer) {
 		Boolean defective = this.preliminaryVisitor.checkForDefect(contentContainer);
 		if (defective) {
-			if (!this.defects.containsKey(projectPath)) {
-				this.defects.put(projectPath, new HashSet<>());
-			}
-			this.defects.get(projectPath).add(new DesignDefect(contentContainer.getFullPath(), this.getName()));
+			this.defects.add(projectPath, contentContainer.getFullPath());
 		}
 	}
 
-	public Map<String, Set<DesignDefect>> finish() {
+	public Map<String, Set<DesignDefect>> finish() throws IOException {
+		this.defects.deserialize();
 		Map<String, Set<DesignDefect>> result = new HashMap<>();
 		for (String projectPath : this.defects.keySet()) {
-			for (DesignDefect designDefect : this.defects.get(projectPath)) {
-				if (this.confirmDefect(designDefect.getFullPath())) {
+			for (String fullPath : this.defects.get(projectPath)) {
+				if (this.confirmDefect(fullPath)) {
 					if (!result.containsKey(projectPath)) {
 						result.put(projectPath, new HashSet<>());
 					}
-					result.get(projectPath).add(designDefect);
+					result.get(projectPath).add(new DesignDefect(fullPath, this.getName()));
 				}
 			}
 		}
@@ -79,6 +82,42 @@ public abstract class Detector {
 			this.requiredPercentages.put(metric, new HashSet<>());
 		}
 		this.requiredPercentages.get(metric).add(percentage);
+	}
+
+	public abstract void addDataStores();
+
+	protected void addDataStore(String name, analysis.storage.Map dataStore) {
+		this.dataStores.put(name, dataStore);
+	}
+
+	protected PrimitiveIntMap getPrimitiveMapStore(String name) {
+		return (PrimitiveIntMap) this.dataStores.get(name);
+	}
+
+	protected SetIntMap getSetMapStore(String name) {
+		return (SetIntMap) this.dataStores.get(name);
+	}
+
+	protected ListMap getListMapStore(String name) {
+		return (ListMap) this.dataStores.get(name);
+	}
+
+	public void openDataStores() throws FileNotFoundException {
+		this.defects.createDataStore();
+		for (analysis.storage.Map m : this.dataStores.values()) {
+			m.createDataStore();
+		}
+	}
+	public void removeData() {
+		this.defects.clean();
+		this.dataStores.values().forEach(analysis.storage.Map::clean);
+
+	}
+	public void deserializeData() throws IOException {
+		for (analysis.storage.Map m : this.dataStores.values()) {
+			m.deserialize();
+		}
+
 	}
 
 	//override these where necessary

@@ -20,7 +20,7 @@ public class CsvCreator {
 		this.streams = new HashMap<>();
 	}
 
-	protected void createStream(String streamId, String... headers) throws FileNotFoundException {
+	public void createStream(String streamId, String... headers) throws FileNotFoundException {
 		PrintStream stream = new PrintStream(new FileOutputStream(FileHelper.getLogName(streamId + "_stats", "csv")));
 		List<String> headerParts = new ArrayList<>();
 		for (String header : headers) {
