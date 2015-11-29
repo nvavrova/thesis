@@ -55,15 +55,11 @@ public class FileOpener {
 			throw new FileSizeLimitExceededException("File \"" + this.filePath + "\" too large (" + f.length() + " bytes)");
 		}
 		try {
-			FileInputStream fis = new FileInputStream(this.filePath);
-			InputStreamReader inStrReader = new InputStreamReader(fis);
-			BufferedReader br = new BufferedReader(inStrReader);
+			BufferedReader br = new BufferedReader(new FileReader(this.filePath));
 
 			List<String> res = br.lines().collect(Collectors.toList());
 
 			if (res.size() > LINE_LIMIT) {
-				fis.close();
-				inStrReader.close();
 				br.close();
 				throw new FileSizeLimitExceededException("File \"" + this.filePath + "\" too large (" + res.size() + " lines)");
 			}
@@ -73,8 +69,6 @@ public class FileOpener {
 				res.set(0, res.get(0).substring(3));
 			}
 
-			fis.close();
-			inStrReader.close();
 			br.close();
 
 			this.lines = res;

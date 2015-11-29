@@ -7,6 +7,7 @@ import model.Class;
 import model.Subroutine;
 import util.LexicalHelper;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,9 +18,13 @@ public class BlobDecorDetector extends Detector {
 
 	private final static int RAC_COUNT = 3;
 
-	private final static String RAC = "Related Accessor Counts";
+	private final static String RAC = "RelAccessors";
 	private final static String LOC = "LOC";
 	private final static String LCOM = "LCOM";
+
+	public BlobDecorDetector() throws IOException {
+		super();
+	}
 
 	@Override
 	protected void addRequiredPercentages() {
@@ -27,10 +32,10 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	@Override
-	public void addDataStores() {
-		this.addDataStore(RAC, new SetIntMap("BlobDecor_RAC"));
-		this.addDataStore(LOC, new PrimitiveIntMap("BlobDecor_LOC"));
-		this.addDataStore(LCOM, new PrimitiveIntMap("BlobDecor_LCOM"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(RAC, new SetIntMap(this.getStoreFilePath(RAC)));
+		this.addDataStore(LOC, new PrimitiveIntMap(this.getStoreFilePath(LOC)));
+		this.addDataStore(LCOM, new PrimitiveIntMap(this.getStoreFilePath(LCOM)));
 	}
 
 	@Override

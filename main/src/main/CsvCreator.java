@@ -1,10 +1,11 @@
 package main;
 
 import util.FileHelper;
+import util.Settings;
 import util.StringHelper;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -15,13 +16,17 @@ public class CsvCreator {
 
 	protected static final String CSV_DELIMITER = ";";
 	private final Map<String, PrintStream> streams;
+	private final String folder;
 
-	public CsvCreator() {
+	public CsvCreator(String folder) {
 		this.streams = new HashMap<>();
+		this.folder = folder;
 	}
 
-	public void createStream(String streamId, String... headers) throws FileNotFoundException {
-		PrintStream stream = new PrintStream(new FileOutputStream(FileHelper.getLogName(streamId + "_stats", "csv")));
+	public void createStream(String streamId, String... headers) throws IOException {
+		Properties config = Settings.getConfig();
+
+		PrintStream stream = new PrintStream(new FileOutputStream(FileHelper.stampedFileName(this.folder, streamId + "_stats", "csv")));
 		List<String> headerParts = new ArrayList<>();
 		for (String header : headers) {
 			headerParts.add(header);

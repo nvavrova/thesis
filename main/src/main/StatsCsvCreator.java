@@ -7,11 +7,11 @@ import process.File2Tree;
 import process.GitLocationProcessor;
 import util.FileHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nik on 24-11-2015
@@ -24,36 +24,44 @@ public class StatsCsvCreator extends CsvCreator {
 	private static final String MODULE_STREAM_NAME = "module";
 	private static final String PROJECT_STREAM_NAME = "project";
 
-	public StatsCsvCreator(List<File> projectFolders, String gitLocationsFile) {
+	public StatsCsvCreator(String folder, List<File> projectFolders, String gitLocationsFile) {
+		super(folder);
 		this.projectFolders = projectFolders;
 		this.gitLocs = new GitLocationProcessor(gitLocationsFile);
 		this.gitLocs.readData();
 	}
 
-	public void createStatsCsv() throws FileNotFoundException {
+	public void createStatsCsv() throws IOException {
 		this.createClassStream();
 		this.createModuleStream();
 		this.createProjectStream();
+
+		BufferedReader br = new BufferedReader(new FileReader("filtered-projects.txt"));
+		List<String> projects = br.lines().collect(Collectors.toList());
+		br.close();
+
 		for (File f : this.projectFolders) {
-			System.out.print(((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024/1024));
-			this.createStatsCsv(f);
-			System.gc();
-			System.out.println(" -> " + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024/1024) + "\t\t" + f.getAbsolutePath());
+			if (projects.contains(f.getAbsolutePath())) {
+				System.out.print(((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024/1024));
+				this.createStatsCsv(f);
+				System.gc();
+				System.out.println(" -> " + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1024/1024) + "\t\t" + f.getAbsolutePath());
+			}
 		}
 	}
 
-	private void createClassStream() throws FileNotFoundException {
+	private void createClassStream() throws IOException {
 		this.createStream(CLASS_STREAM_NAME, "project", "module", "class name", "# of private variables",
 				"# of protected variables", "# of public variables", "# of accessors", "LCOM", "LOC", "# of parents",
 				"# of methods with no params", "# of used globals", "# of defined globals", "# of methods",
 				"total method AID", "total method ALD", "average method AID", "average method ALD");
 	}
 
-	private void createModuleStream() throws FileNotFoundException {
+	private void createModuleStream() throws IOException {
 		this.createStream(MODULE_STREAM_NAME, "project", "git link", "module", "parses", "LOC", "# of classes");
 	}
 
-	private void createProjectStream() throws FileNotFoundException {
+	private void createProjectStream() throws IOException {
 		this.createStream(PROJECT_STREAM_NAME, "project", "git link", "modules", "LOC", "classes", "parse ratio");
 	}
 

@@ -1,10 +1,9 @@
 package analysis;
 
 import util.FileHelper;
+import util.Settings;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,7 +11,12 @@ import java.util.stream.Collectors;
  * Created by Nik on 09-11-2015
  */
 public class IntMetricVals {
+	private final static String METRIC_VALS_EXTENSION = "metrics";
+
+	private final boolean existing;
+
 	private boolean sorted;
+	private boolean insufficientValues;
 
 	private final String valuesFileName;
 
@@ -28,31 +32,40 @@ public class IntMetricVals {
 	private Double q1;
 	private Double q3;
 
-	public IntMetricVals() {
+	public IntMetricVals(String type) throws IOException {
+		Properties metricsConfig = Settings.getMetricsConfig();
+		boolean exists = metricsConfig.containsKey(type);
+		String folder = Settings.getConfig().getProperty("locations.data.output");
+		this.valuesFileName = exists ? metricsConfig.getProperty(type) : FileHelper.stampedFileName(folder, type, METRIC_VALS_EXTENSION);
+
+		File file = new File(this.valuesFileName);
+		this.existing = file.exists();
+		if (!this.existing) {
+			try {
+				this.valueStream = new PrintStream(new FileOutputStream(this.valuesFileName));
+			}
+			catch (FileNotFoundException e) {
+				System.err.println("Cannot create metrics file. Switched to using a list for storage.");
+				e.printStackTrace();
+			}
+		}
 		this.sorted = false;
+		this.insufficientValues = false;
 		this.values = new ArrayList<>();
-
-		this.valuesFileName = FileHelper.getLogName(UUID.randomUUID().toString(), "data", "test-data\\collected_data");
-		try {
-			this.valueStream = new PrintStream(new FileOutputStream(this.valuesFileName));
-		}
-		catch (FileNotFoundException e) {
-			System.err.println("Cannot create metrics file. Switched to using a list for storage.");
-			e.printStackTrace();
-		}
-
 		this.percentageLimits = new HashMap<>();
 	}
 
 	public void add(Integer item) {
-		if (this.sorted) {
-			throw new IllegalStateException();
-		}
-		if (this.valueStream != null) {
-			this.valueStream.println(item);
-		}
-		else {
-			this.values.add(item);
+		if (!this.existing) {
+			if (this.sorted) {
+				throw new IllegalStateException();
+			}
+			if (this.valueStream != null) {
+				this.valueStream.println(item);
+			}
+			else {
+				this.values.add(item);
+			}
 		}
 	}
 
@@ -60,12 +73,18 @@ public class IntMetricVals {
 		if (!this.sorted) {
 			throw new IllegalStateException();
 		}
+		if (this.insufficientValues) {
+			return false;
+		}
 		return value >= this.percentageLimits.get(100 - percentage);
 	}
 
 	public boolean isInBottom(Integer percentage, Integer value) {
 		if (!this.sorted) {
 			throw new IllegalStateException();
+		}
+		if (this.insufficientValues) {
+			return false;
 		}
 		return value <= this.percentageLimits.get(percentage);
 	}
@@ -82,6 +101,9 @@ public class IntMetricVals {
 		if (!this.sorted) {
 			throw new IllegalStateException();
 		}
+		if (this.insufficientValues) {
+			return false;
+		}
 		Double iqr = this.q3 - this.q1;
 		return val < this.q1 - iqrMultiplicand * iqr || val > this.q3 + iqrMultiplicand * iqr;
 	}
@@ -92,10 +114,15 @@ public class IntMetricVals {
 		}
 		this.sorted = true;
 
-		if (this.valueStream != null) {
+		if (this.valueStream != null || existing) {
 			this.loadValuesAndHandleFile();
 		}
 		Collections.sort(this.values);
+
+		if (this.values.size() == 0) {
+			this.insufficientValues = true;
+			return;
+		}
 
 		this.amountOfValues = this.values.size();
 		this.sum = 0;
@@ -131,22 +158,13 @@ public class IntMetricVals {
 	}
 
 	private void loadValuesAndHandleFile() throws IOException {
-		this.valueStream.close();
+		if (!this.existing) {
+			this.valueStream.close();
+		}
 
-		FileInputStream fis = new FileInputStream(this.valuesFileName);
-		InputStreamReader inStrReader = new InputStreamReader(fis);
-		BufferedReader br = new BufferedReader(inStrReader);
+		BufferedReader br = new BufferedReader(new FileReader(this.valuesFileName));
 		this.values = br.lines().map(Integer::parseInt).collect(Collectors.toList());
 		br.close();
-		inStrReader.close();
-		fis.close();
-
-		try {
-			Files.delete(Paths.get(this.valuesFileName));
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private Double median(List<Integer> sortedVals) {

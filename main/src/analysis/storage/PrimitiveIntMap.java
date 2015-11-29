@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class PrimitiveIntMap extends Map<Integer> {
 
-	public PrimitiveIntMap(String type) {
+	public PrimitiveIntMap(String type) throws IOException {
 		super(type);
 	}
 

@@ -3,6 +3,8 @@ package analysis.detector;
 import analysis.Metric;
 import analysis.storage.PrimitiveIntMap;
 
+import java.io.IOException;
+
 /**
  * Created by Nik on 07-11-2015
  */
@@ -10,9 +12,13 @@ public class SwissArmyKnifeDecorDetector extends Detector {
 
 	private final static String PARENTS = "PARENTS";
 
+	public SwissArmyKnifeDecorDetector() throws IOException {
+		super();
+	}
+
 	@Override
-	public void addDataStores() {
-		this.addDataStore(PARENTS, new PrimitiveIntMap("SwissArmyKnifeDecor_PARENTS"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(PARENTS, new PrimitiveIntMap(this.getStoreFilePath(PARENTS)));
 	}
 
 	@Override

@@ -3,14 +3,12 @@ package mining;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import util.FileHelper;
+import util.Settings;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Nik on 29-07-2015
@@ -22,12 +20,13 @@ public class Miner {
 	private final String bugLabel;
 	private Bugs bugs;
 
-	public static void main(String[] args) throws FileNotFoundException {
-		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("out")));
-		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("err")));
+	public static void main(String[] args) throws IOException {
+		Properties config = Settings.getConfig();
+
+		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.stampedFileName(config.getProperty("locations.log.out"), "out", "log")));
+		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.stampedFileName(config.getProperty("locations.log.error"), "err", "log")));
 		System.setOut(out);
 		System.setErr(err);
-
 //		for (ProjectEntity pe : DataHandler.loadProjects()){
 //			Miner miner = new Miner(pe.getOwner(), pe.getRepo(), pe.getBugLabel());
 //			Bugs bugs = miner.mine();

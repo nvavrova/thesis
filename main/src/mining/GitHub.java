@@ -28,11 +28,9 @@ public class GitHub {
 		File tokenFile = new File(TOKEN_FILENAME);
 		if (tokenFile.exists()) {
 			try {
-				FileReader fr = new FileReader(tokenFile);
-				BufferedReader br = new BufferedReader(fr);
+				BufferedReader br = new BufferedReader(new FileReader(tokenFile));
 				params.put("access_token", br.readLine());
 				br.close();
-				fr.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();

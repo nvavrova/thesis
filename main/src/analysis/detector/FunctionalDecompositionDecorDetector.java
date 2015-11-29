@@ -6,6 +6,7 @@ import model.Class;
 import model.Variable;
 import util.LexicalHelper;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,9 +19,12 @@ public class FunctionalDecompositionDecorDetector extends Detector {
 
 	private final static String RCPF = "RCPF";
 
+	public FunctionalDecompositionDecorDetector() throws IOException {
+	}
+
 	@Override
-	public void addDataStores() {
-		this.addDataStore(RCPF, new SetIntMap("FunctionalDecompositionDecor_RCPF"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(RCPF, new SetIntMap(this.getStoreFilePath(RCPF)));
 	}
 
 	@Override

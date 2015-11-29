@@ -1,8 +1,9 @@
 package analysis.storage;
 
-import util.FileHelper;
+import util.StringHelper;
 
 import java.io.*;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,15 +15,22 @@ public abstract class Map<T> {
 
 	protected java.util.Map<String, T> map;
 
-	private final String fileName;
+	private final Boolean existing;
+
+	private final String filePath;
 	private PrintStream stream;
+	private BufferedReader reader;
 
-	public Map(String type) {
-		this.fileName = FileHelper.getLogName(type, "data", "test-data\\collected_data");
-	}
+	protected String currentKey;
+	protected String currentVal;
 
-	public void createDataStore() throws FileNotFoundException {
-		this.stream = new PrintStream(new FileOutputStream(this.fileName));
+	public Map(String filePath) throws IOException {
+		this.filePath = filePath;
+		File file = new File(this.filePath);
+		this.existing = file.exists();
+		if (!this.existing) {
+			this.stream = new PrintStream(new FileOutputStream(this.filePath));
+		}
 	}
 
 	public void add(String key, Integer element) {
@@ -30,11 +38,13 @@ public abstract class Map<T> {
 	}
 
 	public void add(String key, String element) {
-		if (this.stream == null) {
-			throw new IllegalStateException("The stream has not been initialized");
+		if (!this.existing) {
+			if (this.stream == null) {
+				throw new IllegalStateException("The stream has not been initialized");
+			}
+			String line = key + DELIMITER + element;
+			this.stream.println(line);
 		}
-		String line = key + DELIMITER + element;
-		this.stream.println(line);
 	}
 
 	public Set<String> keySet() {
@@ -46,17 +56,37 @@ public abstract class Map<T> {
 	}
 
 	public void deserialize() throws IOException {
-		this.stream.close();
+	this.deserialize(true);
+	}
 
-		FileInputStream fis = new FileInputStream(this.fileName);
-		InputStreamReader inStrReader = new InputStreamReader(fis);
-		BufferedReader br = new BufferedReader(inStrReader);
+	public void deserialize(Boolean all) throws IOException {
+		if (!this.existing) {
+			this.stream.close();
+		}
 
-		this.deserialize(br);
+		this.reader = new BufferedReader(new FileReader(this.filePath));
+		if (all) {
+			this.deserialize(reader);
+			reader.close();
+		}
+	}
 
-		br.close();
-		inStrReader.close();
-		fis.close();
+	public String getNextKey() throws IOException {
+		String line = this.reader.readLine();
+		if (line == null) {
+			this.currentKey = null;
+			this.currentVal = null;
+		}
+		else {
+			List<String> parts = StringHelper.explode(line, DELIMITER);
+			this.currentKey = parts.get(0);
+			this.currentVal = parts.get(1);
+		}
+		return this.currentKey;
+	}
+
+	public String getNextVal() {
+		return this.currentVal;
 	}
 
 	public void clean() {

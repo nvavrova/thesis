@@ -14,25 +14,29 @@ public class FileHelper {
 
 	public static final String PYTHON_EXTENSION = ".py";
 
-	public static String getLogName(String type) {
-		return getLogName(type, "log");
-	}
-
-	public static String getLogName(String type, String extension) {
-		return getLogName(type, extension, "logs");
-
-	}
-
-	public static String getLogName(String type, String extension, String folderName) {
-		File folder = new File(folderName);
-		if (!folder.exists()) {
-			folder.mkdir();
+	public static void createLocation(String path) {
+		File file = new File(path);
+		if (!file.isDirectory()) {
+			createLocation(file.getParent());
 		}
+		if (file.isDirectory() && !file.exists()) {
+			createLocation(file.getParent());
+			file.mkdir();
+		}
+	}
 
+	public static String stampedFileName(String fileName, String extension) {
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-SSS");
 		String date = dateFormat.format(now);
-		return folderName + "/" + date + "_" + type + "." + extension;
+		return date + "_" + fileName + "." + extension;
+	}
+
+	public static String stampedFileName(String directory, String fileName, String extension) {
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-SSS");
+		String date = dateFormat.format(now);
+		return directory + "/" + date + "_" + fileName + "." + extension;
 	}
 
 	public static List<String> getPythonFilePaths(List<String> paths) {

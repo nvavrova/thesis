@@ -25,15 +25,11 @@ public class GitLocationProcessor {
 	public void readData() {
 		if (this.links.keySet().size() == 0) {
 			try {
-				FileInputStream fis = new FileInputStream(this.fileName);
-				InputStreamReader inStrReader = new InputStreamReader(fis);
-				BufferedReader br = new BufferedReader(inStrReader);
+				BufferedReader br = new BufferedReader(new FileReader(this.fileName));
 
 				List<String> lines = br.lines().collect(Collectors.toList());
 				lines.forEach(l -> this.processLine(l));
 
-				fis.close();
-				inStrReader.close();
 				br.close();
 			}
 			catch (FileNotFoundException e) {

@@ -1,5 +1,6 @@
 package scraper;
 import util.FileHelper;
+import util.Settings;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,14 +21,17 @@ public class Main {
 	// "https://pypi.python.org/pypi?:action=browse&show=all&c=587"
 	// "https://pypi.python.org/pypi?:action=browse&show=all&c=607"
 	public static void main(String[] args) throws IOException {
-		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.getLogName("ERROR")));
-		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.getLogName("OUT")));
-		PrintStream allLinks = new PrintStream(new FileOutputStream(FileHelper.getLogName("all_links", "txt")));
-		PrintStream databaseScript = new PrintStream(new FileOutputStream(FileHelper.getLogName("git_locations", "csv")));
-		PrintStream cloneScript = new PrintStream(new FileOutputStream(FileHelper.getLogName("get_data", "sh")));
 
+		Properties config = Settings.getConfig();
+
+		PrintStream out = new PrintStream(new FileOutputStream(FileHelper.stampedFileName(config.getProperty("locations.log.out"), "out", "log")));
+		PrintStream err = new PrintStream(new FileOutputStream(FileHelper.stampedFileName(config.getProperty("locations.log.error"), "err", "log")));
 		System.setOut(out);
 		System.setErr(err);
+
+		PrintStream allLinks = new PrintStream(new FileOutputStream(FileHelper.stampedFileName("all_links", "txt")));
+		PrintStream databaseScript = new PrintStream(new FileOutputStream(FileHelper.stampedFileName("git_locations", "csv")));
+		PrintStream cloneScript = new PrintStream(new FileOutputStream(FileHelper.stampedFileName("get_data", "sh")));
 
 		List<String> versionUrls = Arrays.asList(args);
 		versionUrls.remove(0); //remove token

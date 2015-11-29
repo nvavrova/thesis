@@ -1,25 +1,31 @@
 package analysis.detector;
 
-import analysis.DesignDefect;
 import analysis.Metric;
 import analysis.Metrics;
-import analysis.storage.*;
+import analysis.storage.ListMap;
+import analysis.storage.PrimitiveIntMap;
+import analysis.storage.SetIntMap;
+import analysis.storage.SetStrMap;
+import main.CsvCreator;
 import model.Class;
 import model.*;
+import process.GitLocationProcessor;
+import util.FileHelper;
+import util.Settings;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.Map;
 
 /**
  * Created by Nik on 04-11-2015
  */
 public abstract class Detector {
 
+	private static final String DATA_STORES_EXTENSION = "data";
+
 	private SetStrMap defects;
 
-	private Map<String, analysis.storage.Map> dataStores;
+	protected Map<String, analysis.storage.Map> dataStores;
 
 	private final Map<Metric, Set<Integer>> requiredPercentages;
 
@@ -27,8 +33,9 @@ public abstract class Detector {
 	private final PreliminaryVisitor preliminaryVisitor;
 	private boolean finished;
 
-	public Detector() {
-		this.defects = new SetStrMap(this.getName() + "_suspected_defects_per_project");
+	public Detector() throws IOException {
+		String fileName = this.getSuspectFilePath();
+		this.defects = new SetStrMap(fileName);
 		this.dataStores = new HashMap<>();
 		this.requiredPercentages = new HashMap<>();
 		this.addRequiredPercentages();
@@ -55,27 +62,25 @@ public abstract class Detector {
 		}
 	}
 
-	public Map<String, Set<DesignDefect>> finish() throws IOException {
-		this.defects.deserialize();
-		Map<String, Set<DesignDefect>> result = new HashMap<>();
-		for (String projectPath : this.defects.keySet()) {
-			for (String fullPath : this.defects.get(projectPath)) {
-				if (this.confirmDefect(fullPath)) {
-					if (!result.containsKey(projectPath)) {
-						result.put(projectPath, new HashSet<>());
-					}
-					result.get(projectPath).add(new DesignDefect(fullPath, this.getName()));
-				}
+	public void finish(GitLocationProcessor gitLocs, CsvCreator csvCreator, String csvName) throws IOException {
+		this.defects.deserialize(false);
+		String projectPath = this.defects.getNextKey();
+		while (projectPath != null) {
+			String fullPath = this.defects.getNextVal();
+			if (this.confirmDefect(fullPath)) {
+				String projectUrl = gitLocs != null ? gitLocs.getLink(projectPath) : "";
+				csvCreator.addLine(csvName, projectPath, projectUrl, fullPath, this.getName());
 			}
+			projectPath = this.defects.getNextKey();
 		}
-		return result;
 	}
 
 	public Map<Metric, Set<Integer>> getRequiredPercentages() {
 		return this.requiredPercentages;
 	}
 
-	protected void addRequiredPercentages() {}
+	protected void addRequiredPercentages() {
+	}
 
 	protected void addRequiredPercentage(Metric metric, Integer percentage) {
 		if (!this.requiredPercentages.containsKey(metric)) {
@@ -84,7 +89,7 @@ public abstract class Detector {
 		this.requiredPercentages.get(metric).add(percentage);
 	}
 
-	public abstract void addDataStores();
+	public abstract void addDataStores() throws IOException;
 
 	protected void addDataStore(String name, analysis.storage.Map dataStore) {
 		this.dataStores.put(name, dataStore);
@@ -102,17 +107,12 @@ public abstract class Detector {
 		return (ListMap) this.dataStores.get(name);
 	}
 
-	public void openDataStores() throws FileNotFoundException {
-		this.defects.createDataStore();
-		for (analysis.storage.Map m : this.dataStores.values()) {
-			m.createDataStore();
-		}
-	}
 	public void removeData() {
 		this.defects.clean();
 		this.dataStores.values().forEach(analysis.storage.Map::clean);
 
 	}
+
 	public void deserializeData() throws IOException {
 		for (analysis.storage.Map m : this.dataStores.values()) {
 			m.deserialize();
@@ -120,17 +120,36 @@ public abstract class Detector {
 
 	}
 
+	protected String getSuspectFilePath() throws IOException {
+		Properties suspectConfig = Settings.getSuspectConfig();
+		boolean exists = suspectConfig.containsKey(this.getName());
+		String folder = Settings.getConfig().getProperty("locations.data.output");
+		return exists ? suspectConfig.getProperty(this.getName()) : FileHelper.stampedFileName(folder, this.getName(), DATA_STORES_EXTENSION);
+	}
+
+	protected String getStoreFilePath(String type) throws IOException {
+		Properties mapsConfig = Settings.getMapsConfig();
+		String fullName = this.getName() + "_" + type;
+		boolean exists = mapsConfig.containsKey(fullName);
+		String folder = Settings.getConfig().getProperty("locations.data.output");
+		return exists ? mapsConfig.getProperty(fullName) : FileHelper.stampedFileName(folder, type, DATA_STORES_EXTENSION);
+	}
+
 	//override these where necessary
 	protected Boolean isPreliminarilyDefective(Module module) {
 		return false;
 	}
+
 	protected Boolean isPreliminarilyDefective(Class cls) {
 		return false;
 	}
+
 	protected Boolean isPreliminarilyDefective(Subroutine subroutine) {
 		return false;
 	}
+
 	protected abstract Boolean confirmDefect(String fullPath);
+
 	protected abstract String getName();
 
 	private class PreliminaryVisitor implements ContentContainerVisitor<Boolean> {

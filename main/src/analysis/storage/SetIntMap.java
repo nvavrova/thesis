@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class SetIntMap extends Map<Set<Integer>> {
 
-	public SetIntMap(String type) {
+	public SetIntMap(String type) throws IOException {
 		super(type);
 	}
 

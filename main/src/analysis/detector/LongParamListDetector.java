@@ -4,6 +4,8 @@ import analysis.Metric;
 import analysis.storage.PrimitiveIntMap;
 import model.Subroutine;
 
+import java.io.IOException;
+
 /**
  * Created by Nik on 10-11-2015
  */
@@ -11,9 +13,13 @@ public class LongParamListDetector extends Detector {
 
 	private final static String PARAMS = "PARAMS";
 
+	public LongParamListDetector() throws IOException {
+		super();
+	}
+
 	@Override
-	public void addDataStores() {
-		this.addDataStore(PARAMS, new PrimitiveIntMap("LongParamList_PARAMS"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(PARAMS, new PrimitiveIntMap(this.getStoreFilePath(PARAMS)));
 	}
 
 	@Override

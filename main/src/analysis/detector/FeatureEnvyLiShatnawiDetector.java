@@ -5,6 +5,8 @@ import analysis.storage.PrimitiveIntMap;
 import model.Subroutine;
 import model.SubroutineType;
 
+import java.io.IOException;
+
 /**
  * Created by Nik on 09-11-2015
  */
@@ -13,14 +15,18 @@ public class FeatureEnvyLiShatnawiDetector extends Detector {
 
 	private final static String AIDS = "AIDS";
 
+	public FeatureEnvyLiShatnawiDetector() throws IOException {
+		super();
+	}
+
 	@Override
 	protected void addRequiredPercentages() {
 		this.addRequiredPercentage(Metric.SUBROUTINE_AID, 90);
 	}
 
 	@Override
-	public void addDataStores() {
-		this.addDataStore(AIDS, new PrimitiveIntMap("FeatureEnvyLiShatnawi_AIDS"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(AIDS, new PrimitiveIntMap(this.getStoreFilePath(AIDS)));
 	}
 
 	@Override

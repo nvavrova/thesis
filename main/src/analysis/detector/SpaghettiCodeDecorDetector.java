@@ -7,6 +7,7 @@ import model.Class;
 import model.Subroutine;
 import util.LexicalHelper;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,10 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	private final static String MLOCS = "MLOCS";
 	private final static String MNOPARAM = "MNOPARAM";
 
+	public SpaghettiCodeDecorDetector() throws IOException {
+		super();
+	}
+
 	@Override
 	protected void addRequiredPercentages() {
 		this.addRequiredPercentage(Metric.SUBROUTINE_LOC, 85);
@@ -25,9 +30,9 @@ public class SpaghettiCodeDecorDetector extends Detector {
 	}
 
 	@Override
-	public void addDataStores() {
-		this.addDataStore(MLOCS, new ListMap("SpaghettiCodeDecor_MLOCS"));
-		this.addDataStore(MNOPARAM, new PrimitiveIntMap("SpaghettiCodeDecor_MNOPARAM"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(MLOCS, new ListMap(this.getStoreFilePath(MLOCS)));
+		this.addDataStore(MNOPARAM, new PrimitiveIntMap(this.getStoreFilePath(MNOPARAM)));
 	}
 
 	@Override

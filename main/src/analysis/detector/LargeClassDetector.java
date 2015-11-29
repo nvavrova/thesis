@@ -4,6 +4,8 @@ import analysis.Metric;
 import analysis.storage.PrimitiveIntMap;
 import model.Class;
 
+import java.io.IOException;
+
 /**
  * Created by Nik on 10-11-2015
  */
@@ -11,9 +13,13 @@ public class LargeClassDetector extends Detector {
 
 	private final static String LOC = "LOC";
 
+	public LargeClassDetector() throws IOException {
+		super();
+	}
+
 	@Override
-	public void addDataStores() {
-		this.addDataStore(LOC, new PrimitiveIntMap("LargeClass_LOC"));
+	public void addDataStores() throws IOException {
+		this.addDataStore(LOC, new PrimitiveIntMap(this.getStoreFilePath(LOC)));
 	}
 
 	@Override

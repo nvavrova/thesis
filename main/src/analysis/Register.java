@@ -22,7 +22,7 @@ public class Register {
 	private boolean detectorsAdded;
 	private boolean finished;
 
-	public Register() {
+	public Register() throws IOException {
 		this.detectors = new ArrayList<>();
 		this.metrics = new Metrics();
 		this.detectorsAdded = false;
@@ -42,9 +42,6 @@ public class Register {
 		}
 		if (!this.detectorsAdded) {
 			this.detectorsAdded = true; //don't allow any additional detectors
-			for (Detector d : this.detectors) {
-				d.openDataStores();
-			}
 		}
 		project.getModules().forEach(m -> this.check(project.getPath(), m));
 		project.unlink();
@@ -63,15 +60,8 @@ public class Register {
 
 		for (Detector detector : this.detectors) {
 			detector.deserializeData();
-			Map<String, Set<DesignDefect>> detectorResults = detector.finish();
+			detector.finish(gitLocs, csvCreator, CSV_NAME);
 			detector.removeData();
-
-			for (String projectLocation : detectorResults.keySet()) {
-				String projectUrl = gitLocs != null ? gitLocs.getLink(projectLocation) : "";
-				for (DesignDefect dd : detectorResults.get(projectLocation)) {
-					csvCreator.addLine(CSV_NAME, projectLocation, projectUrl, dd.getFullPath(), dd.getDefect());
-				}
-			}
 		}
 	}
 

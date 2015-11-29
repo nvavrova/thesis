@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class SetStrMap extends Map<Set<String>> {
 
-	public SetStrMap(String type) {
+	public SetStrMap(String type) throws IOException {
 		super(type);
 	}
 

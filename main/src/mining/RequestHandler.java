@@ -58,15 +58,13 @@ public class RequestHandler {
 	}
 
 	private static String processInput(InputStream inputStream) throws IOException {
-		InputStreamReader isr = new InputStreamReader(inputStream);
-		BufferedReader rd = new BufferedReader(isr);
+		BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
 		StringBuilder response = new StringBuilder();
 		String line;
 		while ((line = rd.readLine()) != null) {
 			response.append(line);
 		}
 		rd.close();
-		isr.close();
 		return response.toString();
 	}
 }

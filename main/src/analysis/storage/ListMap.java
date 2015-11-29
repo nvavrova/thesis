@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ListMap extends Map<List<Integer>> {
 
-	public ListMap(String type) {
+	public ListMap(String type) throws IOException {
 		super(type);
 	}
 

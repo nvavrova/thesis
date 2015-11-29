@@ -18,22 +18,22 @@ public class Metrics {
 
 	private final Map<Metric, IntMetricVals> intMetrics;
 
-	public Metrics() {
+	public Metrics() throws IOException {
 		this.collector = new Collector();
 		this.finishedCollecting = false;
 
 		this.intMetrics = new HashMap<>();
-		this.intMetrics.put(Metric.CLASS_LOC, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_SUPERCLASSES, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_METHODS, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_ACCESSORS, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_LCOM, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_METHODS_NO_PARAMS, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_PUBLIC_FIELDS, new IntMetricVals());
-		this.intMetrics.put(Metric.CLASS_PRIVATE_FIELDS, new IntMetricVals());
-		this.intMetrics.put(Metric.SUBROUTINE_LOC, new IntMetricVals());
-		this.intMetrics.put(Metric.SUBROUTINE_PARAMS, new IntMetricVals());
-		this.intMetrics.put(Metric.SUBROUTINE_AID, new IntMetricVals());
+		this.intMetrics.put(Metric.CLASS_LOC, new IntMetricVals(Metric.CLASS_LOC.toString()));
+		this.intMetrics.put(Metric.CLASS_SUPERCLASSES, new IntMetricVals(Metric.CLASS_SUPERCLASSES.toString()));
+		this.intMetrics.put(Metric.CLASS_METHODS, new IntMetricVals(Metric.CLASS_METHODS.toString()));
+		this.intMetrics.put(Metric.CLASS_ACCESSORS, new IntMetricVals(Metric.CLASS_ACCESSORS.toString()));
+		this.intMetrics.put(Metric.CLASS_LCOM, new IntMetricVals(Metric.CLASS_LCOM.toString()));
+		this.intMetrics.put(Metric.CLASS_METHODS_NO_PARAMS, new IntMetricVals(Metric.CLASS_METHODS_NO_PARAMS.toString()));
+		this.intMetrics.put(Metric.CLASS_PUBLIC_FIELDS, new IntMetricVals(Metric.CLASS_PUBLIC_FIELDS.toString()));
+		this.intMetrics.put(Metric.CLASS_PRIVATE_FIELDS, new IntMetricVals(Metric.CLASS_PRIVATE_FIELDS.toString()));
+		this.intMetrics.put(Metric.SUBROUTINE_LOC, new IntMetricVals(Metric.SUBROUTINE_LOC.toString()));
+		this.intMetrics.put(Metric.SUBROUTINE_PARAMS, new IntMetricVals(Metric.SUBROUTINE_PARAMS.toString()));
+		this.intMetrics.put(Metric.SUBROUTINE_AID, new IntMetricVals(Metric.SUBROUTINE_AID.toString()));
 	}
 
 	public void register(ContentContainer contentContainer) {
