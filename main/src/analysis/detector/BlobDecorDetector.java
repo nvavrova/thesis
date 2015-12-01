@@ -19,7 +19,7 @@ public class BlobDecorDetector extends Detector {
 	private final static int RAC_COUNT = 3;
 
 	private final static String RAC = "RelAccessors";
-	private final static String LOC = "LOC";
+	private final static String METVARS = "MetVars";
 	private final static String LCOM = "LCOM";
 
 	public BlobDecorDetector() throws IOException {
@@ -34,12 +34,12 @@ public class BlobDecorDetector extends Detector {
 	@Override
 	public void addDataStores() throws IOException {
 		this.addDataStore(RAC, new SetIntMap(this.getStoreFilePath(RAC)));
-		this.addDataStore(LOC, new PrimitiveIntMap(this.getStoreFilePath(LOC)));
+		this.addDataStore(METVARS, new PrimitiveIntMap(this.getStoreFilePath(METVARS)));
 		this.addDataStore(LCOM, new PrimitiveIntMap(this.getStoreFilePath(LCOM)));
 	}
 
 	@Override
-	protected Boolean isPreliminarilyDefective(model.Class cls) {
+	protected Boolean isPreliminarilyDefective(Class cls) {
 
 		Set<Integer> relatedAccessorCounts = cls.getReferencedClassesSet().stream()
 				.map(Class::accessorCount)
@@ -49,7 +49,7 @@ public class BlobDecorDetector extends Detector {
 
 		if (seemsDefective) {
 			relatedAccessorCounts.forEach(v -> this.getSetMapStore(RAC).add(cls.getFullPath(), v));
-			this.getPrimitiveMapStore(LOC).add(cls.getFullPath(), cls.getLoc());
+			this.getPrimitiveMapStore(METVARS).add(cls.getFullPath(), cls.getDefinedSubroutinesSet().size() + cls.getDefinedVarsInclParentsVars().getAsSet().size());
 			this.getPrimitiveMapStore(LCOM).add(cls.getFullPath(), cls.getLcom());
 		}
 
@@ -84,7 +84,7 @@ public class BlobDecorDetector extends Detector {
 	}
 
 	private boolean isLargeClass(String clsFullPath) {
-		return this.metrics.isMildOutlier(Metric.CLASS_LOC, this.getPrimitiveMapStore(LOC).get(clsFullPath));
+		return this.metrics.isMildOutlier(Metric.CLASS_METHODS_AND_VARS, this.getPrimitiveMapStore(METVARS).get(clsFullPath));
 //		return this.metrics.isInTop(Metric.CLASS_LOC, 15, this.loc.get(clsFullPath));
 	}
 

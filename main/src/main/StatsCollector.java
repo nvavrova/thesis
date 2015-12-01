@@ -28,7 +28,7 @@ public class StatsCollector {
 
 		File sourceFolder = new File(config.getProperty("locations.data.input"));
 		List<File> subfolders = FileHelper.getSubfolders(sourceFolder);
-		StatsCsvCreator statsCsvCreator = new StatsCsvCreator(config.getProperty("locations.data.results"), subfolders, config.getProperty("locations.data.input.disklocations"));
+		StatsCsvCreator statsCsvCreator = new StatsCsvCreator(subfolders, config);
 		statsCsvCreator.createStatsCsv();
 		statsCsvCreator.close();
 	}

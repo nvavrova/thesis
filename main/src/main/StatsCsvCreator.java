@@ -7,10 +7,14 @@ import process.File2Tree;
 import process.GitLocationProcessor;
 import util.FileHelper;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -19,15 +23,17 @@ import java.util.stream.Collectors;
 public class StatsCsvCreator extends CsvCreator {
 	private final List<File> projectFolders;
 	private final GitLocationProcessor gitLocs;
+	private final String filterFile;
 
 	private static final String CLASS_STREAM_NAME = "class";
 	private static final String MODULE_STREAM_NAME = "module";
 	private static final String PROJECT_STREAM_NAME = "project";
 
-	public StatsCsvCreator(String folder, List<File> projectFolders, String gitLocationsFile) {
-		super(folder);
+	public StatsCsvCreator(List<File> projectFolders, Properties config) {
+		super(config.getProperty("locations.data.results"));
+		this.filterFile = config.getProperty("locations.data.input.filter");
 		this.projectFolders = projectFolders;
-		this.gitLocs = new GitLocationProcessor(gitLocationsFile);
+		this.gitLocs = new GitLocationProcessor(config.getProperty("locations.data.input.disklocations"));
 		this.gitLocs.readData();
 	}
 
@@ -36,7 +42,7 @@ public class StatsCsvCreator extends CsvCreator {
 		this.createModuleStream();
 		this.createProjectStream();
 
-		BufferedReader br = new BufferedReader(new FileReader("filtered-projects.txt"));
+		BufferedReader br = new BufferedReader(new FileReader(this.filterFile));
 		List<String> projects = br.lines().collect(Collectors.toList());
 		br.close();
 

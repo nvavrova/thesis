@@ -26,6 +26,7 @@ public class Metrics {
 		this.intMetrics.put(Metric.CLASS_LOC, new IntMetricVals(Metric.CLASS_LOC.toString()));
 		this.intMetrics.put(Metric.CLASS_SUPERCLASSES, new IntMetricVals(Metric.CLASS_SUPERCLASSES.toString()));
 		this.intMetrics.put(Metric.CLASS_METHODS, new IntMetricVals(Metric.CLASS_METHODS.toString()));
+		this.intMetrics.put(Metric.CLASS_METHODS_AND_VARS, new IntMetricVals(Metric.CLASS_METHODS_AND_VARS.toString()));
 		this.intMetrics.put(Metric.CLASS_ACCESSORS, new IntMetricVals(Metric.CLASS_ACCESSORS.toString()));
 		this.intMetrics.put(Metric.CLASS_LCOM, new IntMetricVals(Metric.CLASS_LCOM.toString()));
 		this.intMetrics.put(Metric.CLASS_METHODS_NO_PARAMS, new IntMetricVals(Metric.CLASS_METHODS_NO_PARAMS.toString()));
@@ -88,6 +89,7 @@ public class Metrics {
 			getCounter(Metric.CLASS_LOC).add(m.getLoc());
 			getCounter(Metric.CLASS_SUPERCLASSES).add(m.superclassCount());
 			getCounter(Metric.CLASS_METHODS).add(m.getDefinedSubroutinesSet().size());
+			getCounter(Metric.CLASS_METHODS_AND_VARS).add(m.getDefinedSubroutinesSet().size() + m.getDefinedVarsInclParentsVars().getAsSet().size());
 			getCounter(Metric.CLASS_ACCESSORS).add(m.accessorCount());
 			getCounter(Metric.CLASS_LCOM).add(m.getLcom());
 			getCounter(Metric.CLASS_METHODS_NO_PARAMS).add(m.subroutinesWithNoParamsCount());

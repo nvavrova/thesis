@@ -29,7 +29,7 @@ public class DataClassDetector extends Detector {
 	protected Boolean isPreliminarilyDefective(Class cls) {
 		Integer accessors = cls.accessorCount();
 		Long publicFields = cls.getDefinedVarsInclParentsVars().getAsSet().stream().filter(Variable::isPublic).count();
-		boolean check = accessors > 1 || publicFields > 1;
+		boolean check = accessors > 0 || publicFields > 0;
 
 		if (check) {
 			this.getPrimitiveMapStore(ACCESS).add(cls.getFullPath(), accessors);

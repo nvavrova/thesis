@@ -79,6 +79,9 @@ public class Main {
 		register.add(new SpaghettiCodeDecorDetector());
 		register.add(new SwissArmyKnifeDecorDetector());
 		register.add(new FeatureEnvyLiShatnawiDetector());
+		register.add(new LargeClassDecorDetector());
+		register.add(new DataClassDecorDetector());
+		register.add(new DataClassDetector());
 	}
 
 	private static void createLocations(Properties config) {
