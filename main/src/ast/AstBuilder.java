@@ -745,11 +745,10 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitWith_item(@NotNull PythonParser.With_itemContext ctx) {
-			//      test ( (AS | NAME) expr )?
+			//      test ( AS expr )?
 			Expr item = (Expr) ctx.test().accept(this);
-			Identifier name = ctx.name() == null ? null : (Identifier) ctx.name().accept(this);
 			Expr alias = ctx.expr() == null ? null : (Expr) ctx.expr().accept(this);
-			return new WithItem(this.getLocInfo(ctx), item, name, alias);
+			return new WithItem(this.getLocInfo(ctx), item, alias);
 		}
 
 		@Override
@@ -1227,7 +1226,7 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitComp_for(@NotNull PythonParser.Comp_forContext ctx) {
-			//      FOR exprlist IN test_nocond ((',' test_nocond)+ ','?)? comp_iter?
+			//      FOR exprlist IN test_nocond ( ( ',' test_nocond )+ ','? )? comp_iter?
 
 			ExprList targets = (ExprList) ctx.exprlist().accept(this);
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
@@ -1239,16 +1238,11 @@ public class AstBuilder {
 
 		@Override
 		public AstNode visitComp_if(@NotNull PythonParser.Comp_ifContext ctx) {
-			//      IF test_nocond comp_iter? | IF test comp_iter?
+			//      IF test_nocond comp_iter?
 			CompIter iter = ctx.comp_iter() == null ? null : (CompIter) ctx.comp_iter().accept(this);
 
 			if (ctx.test_nocond() != null) {
 				Expr expr = (Expr) ctx.test_nocond().accept(this);
-				return new CompIf(this.getLocInfo(ctx), iter, expr);
-			}
-
-			if (ctx.test() != null) {
-				Expr expr = (Expr) ctx.test().accept(this);
 				return new CompIf(this.getLocInfo(ctx), iter, expr);
 			}
 

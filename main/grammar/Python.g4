@@ -2,6 +2,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2014 by Bart Kiers
+ * Copyright (c) 2015 by Nikola Vavrova
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,11 +28,23 @@
  * Project      : Python3-parser; an ANTLR4 grammar for Python 3
  *                https://github.com/bkiers/Python-parser
  * Developed by : Bart Kiers, bart@big-o.nl
+ *
+ *
+ * NOTE: This is an adjusted version of Bart's grammar.
+ *       It was modified to support parsing of any version of Python between 2.5 and 3.5.
+ *       It was tested on approximately 40 million lines of code, consisting of various versions.
+ * Modified by: Nikola Vavrova
  */
 grammar Python;
 
 // All comments that start with "///" are copy-pasted from
 // The Python Language Reference: https://docs.python.org/3.3/reference/grammar.html
+
+// All comments that start with "// 2.6:" are copy-pasted from
+// The Python Language Reference: https://docs.python.org/2.6/reference/grammar.html
+
+// All comments that start with "// 3.5:" are copy-pasted from
+// The Python Language Reference: https://docs.python.org/3.5/reference/grammar.html
 
 tokens { INDENT, DEDENT }
 
@@ -173,10 +186,15 @@ decorators
  ;
 
 /// decorated: decorators (classdef | funcdef)
+// 3.5: decorated: decorators (classdef | funcdef | async_funcdef)
 decorated
  : decorators ( classdef | funcdef | async_funcdef )
  ;
 
+// NOTE: this parse rule was introduced because of the keyword inconsistency between different versions of Python
+// print and exec are keywords in Python 2.x, but not in Python 3.x
+// nonlocal is a keyword in Python 3.x, but not in Python 2.x
+// async and await are keywords in Python 3.5
 name
  : NAME
  | PRINT
@@ -186,7 +204,7 @@ name
  | AWAIT
  ;
 
-
+// 3.5: async_funcdef: ASYNC funcdef
 async_funcdef
  : ASYNC funcdef
  ;
@@ -197,6 +215,7 @@ funcdef
  ;
 
 /// parameters: '(' [typedargslist] ')'
+// 2.6: parameters: '(' [varargslist] ')'
 parameters
  : '(' typedargslist ')'
  | '(' varargslist? ')'
@@ -251,11 +270,14 @@ varargslist returns [List<VfpdefContext> regular, List<TestContext> regVals]
  | '**' keyword=vfpdef
  ;
 
+/// vfpdef: NAME
+// 2.6: fpdef: NAME | '(' fplist ')'
 vfpdef
  : name
  | '(' vfplist ')'
  ;
 
+// 2.6: fplist: fpdef (',' fpdef)* [',']
 vfplist
  : vfpdef (',' vfpdef)* (',')?
  ;
@@ -273,6 +295,8 @@ simple_stmt
 
 /// small_stmt: (expr_stmt | del_stmt | pass_stmt | flow_stmt |
 ///              import_stmt | global_stmt | nonlocal_stmt | assert_stmt)
+// 2.6: small_stmt: (expr_stmt | print_stmt  | del_stmt | pass_stmt | flow_stmt |
+// 2.6:                     import_stmt | global_stmt | exec_stmt | assert_stmt)
 small_stmt
  : expr_stmt
  | print_stmt
@@ -320,10 +344,11 @@ augassign
  | op='//='
  ;
 
+// 2.6: print_stmt: 'print' ( [ test (',' test)* [','] ] |
+// 2.6:                      '>>' test [ (',' test)+ [','] ] )
 print_stmt
  : PRINT ( ( test (',' test)* ','? )?
          | '>>' test ( (',' test)+ ','? )?
-//         | '(' arglist? ')'
          )
  ;
 
@@ -367,6 +392,7 @@ yield_stmt
  ;
 
 /// raise_stmt: 'raise' [test ['from' test]]
+// 2.6: raise_stmt: 'raise' [test [',' test [',' test]]]
 raise_stmt
  : RAISE ( type=test ( FROM source=test | ',' value=test (',' trace=test)? )? )?
  ;
@@ -442,6 +468,7 @@ nonlocal_stmt returns [List<String> names]
  : NONLOCAL firstName=name { $names.add($name.text); } ( ',' otherName=name { $names.add($otherName.text); } )*
  ;
 
+// 2.6: exec_stmt: 'exec' expr ['in' test [',' test]]
 exec_stmt
  : EXEC expr (IN vars=test (',' localVars=test)? )?
  ;
@@ -452,6 +479,7 @@ assert_stmt
  ;
 
 /// compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated
+// 3.5: compound_stmt: if_stmt | while_stmt | for_stmt | try_stmt | with_stmt | funcdef | classdef | decorated | async_stmt
 compound_stmt
  : if_stmt
  | while_stmt
@@ -464,6 +492,7 @@ compound_stmt
  | async_stmt
  ;
 
+// 3.5: async_stmt: ASYNC (funcdef | with_stmt | for_stmt)
 async_stmt
  : ASYNC (funcdef | with_stmt | for_stmt)
  ;
@@ -509,12 +538,12 @@ with_stmt
 
 /// with_item: test ['as' expr]
 with_item
- : test ( (AS | name) expr )?
+ : test ( AS expr )?
  ;
 
 /// # NB compile.c makes sure that the default except clause is last
 /// except_clause: 'except' [test ['as' NAME]]
-// : EXCEPT ( test ( AS NAME )? )?
+// 2.6: except_clause: 'except' [test [('as' | ',') test]]
 except_clause
  : EXCEPT ( type=test ( ( AS | ',' ) exName=test )? )?
  ;
@@ -653,6 +682,8 @@ factor
  ;
 
 /// power: atom trailer* ['**' factor]
+// 3.5: power: atom_expr ['**' factor]
+// 3.5: atom_expr: [AWAIT] atom trailer*
 power
  : AWAIT? atom trailer* ( '**' factor )?
  ;
@@ -661,6 +692,11 @@ power
 ///        '[' [testlist_comp] ']' |
 ///        '{' [dictorsetmaker] '}' |
 ///        NAME | NUMBER | STRING+ | '...' | 'None' | 'True' | 'False')
+// 2.6: atom: ('(' [yield_expr|testlist_comp] ')' |
+// 2.6:               '[' [listmaker] ']' |
+// 2.6:               '{' [dictorsetmaker] '}' |
+// 2.6:               '`' testlist1 '`' |
+// 2.6:               NAME | NUMBER | STRING+)
 atom
  : '(' ( yield_expr | testlist_comp )? ')'
  | '[' testlist_comp? ']'
@@ -676,6 +712,7 @@ atom
  ;
 
 /// testlist_comp: test ( comp_for | (',' test)* [','] )
+// 3.5: testlist_comp: (test|star_expr) ( comp_for | (',' (test|star_expr))* [','] )
 testlist_comp returns [List<ParserRuleContext> vals]
 @init{
     $vals = new ArrayList<>();
@@ -699,6 +736,7 @@ subscriptlist
  ;
 
 /// subscript: test | [test] ':' [test] [sliceop]
+// 2.6: subscript: '.' '.' '.' | test | [test] ':' [test] [sliceop]
 subscript
  : '.' '.' '.'
  | index=test
@@ -742,6 +780,7 @@ classdef
 /// arglist: (argument ',')* (argument [',']
 ///                          |'*' test (',' argument)* [',' '**' test]
 ///                          |'**' test)
+// 3.5: arglist: argument (',' argument)*  [',']
 arglist
  : argument (',' argument)* ','?
  ;
@@ -749,6 +788,10 @@ arglist
 /// # The reason that keywords are test nodes instead of NAME is that using NAME
 /// # results in an ambiguity. ast.c makes sure it's a NAME.
 /// argument: test [comp_for] | test '=' test  # Really [keyword '='] test
+// 3.5: argument: ( test [comp_for] |
+// 3.5:                 test '=' test |
+// 3.5:                 '**' test |
+// 3.5:                 '*' test )
 argument
  : value=test condition=comp_for?
  | argName=test '=' value=test
@@ -763,14 +806,15 @@ comp_iter
  ;
 
 /// comp_for: 'for' exprlist 'in' or_test [comp_iter]
+// NOTE: changes for Python 2.5 backwards compatiblity added for comp_for
+// derived from https://docs.python.org/2.7/reference/grammar.html
 comp_for
- : FOR exprlist IN test_nocond ((',' test_nocond)+ ','?)? comp_iter?
+ : FOR exprlist IN test_nocond ( ( ',' test_nocond )+ ','? )? comp_iter?
  ;
 
 /// comp_if: 'if' test_nocond [comp_iter]
 comp_if
  : IF test_nocond comp_iter?
- | IF test comp_iter?
  ;
 
 /// yield_expr: 'yield' [testlist]

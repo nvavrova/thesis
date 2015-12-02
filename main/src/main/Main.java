@@ -26,7 +26,6 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 
 		Properties config = Settings.getConfig();
-
 		createLocations(config);
 
 		boolean filtered = config.containsKey("locations.data.input.filter");

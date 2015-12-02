@@ -752,9 +752,6 @@ public class DefaultVisitor<T> implements Visitor<T> {
 		if (n.hasAlias()) {
 			n.getAlias().accept(this);
 		}
-		if (n.hasName()) {
-			n.getName().accept(this);
-		}
 	}
 
 	public void visitChildren(Comparison n) {
